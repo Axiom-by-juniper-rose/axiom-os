@@ -1,5 +1,6 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
+import { Analytics } from '@vercel/analytics/react';
 import './index.css';
 // @ts-ignore - AxiomOS_v17.jsx is not typed
 import App from './AxiomOS_v17.jsx';
@@ -23,6 +24,7 @@ try {
     <StrictMode>
       <DebugErrorBoundary>
         <ActiveApp />
+        <Analytics />
       </DebugErrorBoundary>
     </StrictMode>,
   );
