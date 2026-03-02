@@ -290,9 +290,9 @@ const TIER_CONFIG = {
 const TIER_NAMES = { free: "Free", pro: "Pro", pro_plus: "Pro+", enterprise: "Enterprise" };
 const TIER_PRICES = { free: 0, pro: 29, pro_plus: 99, enterprise: 499 };
 const TIER_PRICE_IDS = {
-  pro: _ENV.VITE_STRIPE_PRO_PRICE_ID || "price_PRO_REPLACE_ME",
-  pro_plus: _ENV.VITE_STRIPE_PRO_PLUS_PRICE_ID || "price_PRO_PLUS_REPLACE_ME",
-  enterprise: _ENV.VITE_STRIPE_ENTERPRISE_PRICE_ID || "price_ENTERPRISE_REPLACE_ME",
+  pro: _ENV.VITE_STRIPE_PRO_PRICE_ID || "price_1T6CbrIXCHwjUw9LoHzI5csk",
+  pro_plus: _ENV.VITE_STRIPE_PRO_PLUS_PRICE_ID || "price_1T6CbtIXCHwjUw9LAPBaPM4y",
+  enterprise: _ENV.VITE_STRIPE_ENTERPRISE_PRICE_ID || "price_1T6CbqIXCHwjUw9LsqExucPa",
 };
 
 function TierProvider({ children }) {
