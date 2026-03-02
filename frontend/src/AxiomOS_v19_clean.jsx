@@ -4016,8 +4016,8 @@ function BillingPlans() {
               </div>
             </div>
           ))}
-          {!TIER_CONFIG[tier]?.features.exports && <div><div style={S.lbl}>Exports</div><div style={{ fontSize: 14, color: C.dim, fontWeight: 600 }}>🔒 Upgrade to Pro</div></div>}
-          {!TIER_CONFIG[tier]?.features.ai_agents && <div><div style={S.lbl}>AI Agents</div><div style={{ fontSize: 14, color: C.dim, fontWeight: 600 }}>🔒 Upgrade to Pro</div></div>}
+          <div><div style={S.lbl}>Exports</div><div style={{ fontSize: 14, color: TIER_CONFIG[tier]?.features.exports ? C.green : C.dim, fontWeight: 600 }}>{TIER_CONFIG[tier]?.features.exports ? "✓ Unlocked" : "🔒 Upgrade to Pro"}</div></div>
+          <div><div style={S.lbl}>AI Agents</div><div style={{ fontSize: 14, color: TIER_CONFIG[tier]?.features.ai_agents ? C.green : C.dim, fontWeight: 600 }}>{TIER_CONFIG[tier]?.features.ai_agents ? "✓ Unlocked" : "🔒 Upgrade to Pro"}</div></div>
         </div>
       </Card>
       <Card title="Subscription">
