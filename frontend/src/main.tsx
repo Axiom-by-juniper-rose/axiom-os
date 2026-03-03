@@ -15,7 +15,7 @@ if (!rootElement) {
 
 console.log('Mounting React Application...');
 
-const USE_V1_ARCHITECTURE = false; // Toggle this to true to boot the new modular V1
+const USE_V1_ARCHITECTURE = true; // V1 modular architecture — all features live
 
 const ActiveApp = USE_V1_ARCHITECTURE ? AppV1 : App;
 

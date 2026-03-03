@@ -3,18 +3,20 @@
  */
 
 // Production: reads VITE_ env vars baked by Vercel at build time
-// Fallback to localStorage for self-hosted / dev mode
 export const SUPA_URL =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) ||
-    "https://ubdhpacoqmlxudcvhyuu.supabase.co";
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) || "";
 
 export const SUPA_KEY =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) ||
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InViZGhwYWNvcW1seHVkY3ZoeXV1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NjAzNDIsImV4cCI6MjA4NzAzNjM0Mn0.2qZBBWis2GUarglN6Lv2OuHpkfdQTkV25m20p3bjOwQ";
+    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) || "";
 
-export const IS_PROD_CONFIGURED = !!(
-    typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL
-);
+if (!SUPA_URL || !SUPA_KEY) {
+    console.warn(
+        "[Axiom] VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY is not set. " +
+        "Set these in .env.local for development or Vercel Project Settings for production."
+    );
+}
+
+export const IS_PROD_CONFIGURED = !!(SUPA_URL && SUPA_KEY);
 
 class SupabaseClient {
     url: string = SUPA_URL;
