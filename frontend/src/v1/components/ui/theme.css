@@ -51,6 +51,45 @@ body.light-mode {
     overflow: hidden;
 }
 
+/* Utility stacks & flex */
+.axiom-stack-32 { display: flex; flex-direction: column; gap: 32px; }
+.axiom-stack-16 { display: flex; flex-direction: column; gap: 16px; }
+.axiom-flex-gap-12 { display: flex; align-items: center; gap: 12px; }
+.axiom-flex-gap-8  { display: flex; align-items: center; gap: 8px; }
+.axiom-footer {
+    padding: 16px 0;
+    border-top: 1px solid var(--c-border);
+    margin-top: 8px;
+}
+.axiom-text-11-dim { font-size: 11px; color: var(--c-dim); }
+
+/* Input aliases — axiom-input is used in components, axiom-inp in CSS */
+.axiom-input {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border2);
+    border-radius: 3px;
+    color: var(--c-text);
+    font-size: 13px;
+    padding: 6px 9px;
+    width: 100%;
+    font-family: inherit;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.axiom-select {
+    background: var(--c-bg);
+    border: 1px solid var(--c-border2);
+    border-radius: 3px;
+    color: var(--c-text);
+    font-size: 13px;
+    padding: 6px 9px;
+    width: 100%;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+}
+
 .axiom-btn {
     padding: 7px 14px;
     border-radius: 3px;
@@ -367,23 +406,26 @@ body.light-mode {
 .axiom-sidebar-item {
     display: block;
     padding: 10px 12px;
-    color: var(--c-dim);
+    color: var(--c-sub);
     text-decoration: none;
-    font-size: 13px;
-    border-radius: 6px;
-    margin-bottom: 2px;
-    transition: all 0.2s;
+    font-size: 12px;
+    border-radius: 4px;
+    margin-bottom: 1px;
+    transition: all 0.15s;
     cursor: pointer;
+    font-weight: 400;
 }
 
 .axiom-sidebar-item:hover {
-    background: var(--c-bg2);
+    background: var(--c-bg3);
     color: var(--c-text);
 }
 
 .axiom-sidebar-item.active {
-    background: var(--c-bg3);
+    background: color-mix(in srgb, var(--c-gold) 8%, var(--c-bg3));
     color: var(--c-gold);
+    font-weight: 600;
+    border-left: 2px solid var(--c-gold);
 }
 
 .axiom-main {
