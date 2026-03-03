@@ -7,6 +7,7 @@ import { useProject } from "../../context/ProjectContext";
 import { supa } from "../../lib/supabase";
 import { fmt } from "../../lib/utils";
 import { useLS } from "../../hooks/useLS";
+import { OMIngestor } from "./OMIngestor";
 import {
     BarChart, Bar, ResponsiveContainer, XAxis, YAxis, Tooltip, Legend, CartesianGrid
 } from "recharts";
@@ -50,6 +51,7 @@ export function Deals() {
     ]);
     const [nd, setNd] = useState({ name: "", address: "", stage: "sourcing", value: "", profit: "", lots: "", type: "SFR Subdivision", assignee: "", notes: "" });
     const [showForm, setShowForm] = useState(false);
+    const [showOMIngestor, setShowOMIngestor] = useState(false);
     const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
     const [syncing, setSyncing] = useState(false);
     const loadedRef = useRef(false);
@@ -182,7 +184,30 @@ export function Deals() {
                             <span style={{ fontSize: 10, color: "var(--c-gold)", fontWeight: 700, letterSpacing: 1, textTransform: "uppercase" }}>Deal limit reached ({deals.length}/{dealLimit})</span>
                             <Button variant="gold" label="Upgrade for Unlimited →" onClick={() => { const el = document.querySelector('[data-nav="billing"]') as HTMLElement; if (el) el.click(); }} style={{ padding: "4px 10px", fontSize: 9 }} />
                         </div>
-                    ) : !showForm ? <Button variant="gold" label="+ Add Deal" onClick={() => setShowForm(true)} /> : (
+                    ) : !showForm && !showOMIngestor ? (
+                        <div style={{ display: "flex", gap: 12 }}>
+                            <Button variant="gold" label="+ Add Deal (Manual)" onClick={() => setShowForm(true)} />
+                            <Button label="📄 Upload OM (Auto-Parse)" onClick={() => setShowOMIngestor(true)} style={{ background: "color-mix(in srgb, var(--c-blue) 25%, transparent)", color: "var(--c-blue)", borderColor: "color-mix(in srgb, var(--c-blue) 40%, transparent)" }} />
+                        </div>
+                    ) : showOMIngestor ? (
+                        <OMIngestor
+                            onCancel={() => setShowOMIngestor(false)}
+                            onComplete={(parsedData) => {
+                                setNd({
+                                    ...nd,
+                                    name: parsedData.name || "",
+                                    address: parsedData.address || "",
+                                    type: parsedData.asset_type || "SFR Subdivision",
+                                    value: parsedData.purchase_price ? parsedData.purchase_price.toString() : "",
+                                    profit: parsedData.noi ? parsedData.noi.toString() : "",
+                                    lots: parsedData.units_or_sqft ? parsedData.units_or_sqft.toString() : "",
+                                    notes: (parsedData.description || "") + "\n\n" + (parsedData.rent_roll_summary || "") + "\n\n" + (parsedData.financials_summary || "")
+                                });
+                                setShowOMIngestor(false);
+                                setShowForm(true); // Switch to manual form for review
+                            }}
+                        />
+                    ) : (
                         <Card title="New Deal">
                             <div className="axiom-grid-3">
                                 <Field label="Project Name"><input className="axiom-input" value={nd.name} onChange={e => setNd({ ...nd, name: e.target.value })} title="Project Name" /></Field>

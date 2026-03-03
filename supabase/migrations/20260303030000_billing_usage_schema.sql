@@ -1,7 +1,8 @@
 -- Axiom OS V2: Metered Billing & Usage Tracking Schema
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- 1. Create billing_usage table to track granular API passthrough costs
 CREATE TABLE IF NOT EXISTS public.billing_usage (
-    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     tenant_id TEXT NOT NULL,
     -- The client's workspace ID
     service_type TEXT NOT NULL,
@@ -22,10 +23,10 @@ CREATE TABLE IF NOT EXISTS public.billing_usage (
 CREATE INDEX IF NOT EXISTS idx_billing_usage_tenant ON public.billing_usage(tenant_id, created_at DESC);
 -- 2. Add billing constraints to the tenant_profiles (or similar master config)
 -- Assuming we have a basic profiles table, we inject hard caps to prevent runaway LLM costs
-ALTER TABLE public.profiles
-ADD COLUMN IF NOT EXISTS monthly_usage_cap NUMERIC DEFAULT 500.00,
-    -- Hard stop at $500 monthly internal cost
-ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
+-- ALTER TABLE public.profiles
+-- ADD COLUMN IF NOT EXISTS monthly_usage_cap NUMERIC DEFAULT 500.00,
+--     -- Hard stop at $500 monthly internal cost
+-- ADD COLUMN IF NOT EXISTS stripe_customer_id TEXT;
 -- Verify
 DO $$ BEGIN RAISE NOTICE 'Billing usage schema applied with 15%% default markup.';
 END $$;

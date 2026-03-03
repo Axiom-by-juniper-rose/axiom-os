@@ -28,12 +28,17 @@ Deno.serve(async (req) => {
     // Format: { type: "INSERT", table: "projects", record: { id, address, ... } }
     const payload = await req.json();
 
-    if (payload.type !== "INSERT" || payload.table !== "projects") {
+    if (payload.type !== "INSERT" || !["projects", "deals"].includes(payload.table)) {
       return new Response(JSON.stringify({ status: "ignored" }), { headers: corsHeaders });
     }
 
-    const project = payload.record;
-    logTrace("agent_dispatched", { correlation_id: correlationId, project_id: project.id, address: project.address });
+    const record = payload.record;
+    // Map deals schema (location, project_name) to standard expected address/name constraints
+    const address = payload.table === "deals" ? record.location : record.address;
+    const name = payload.table === "deals" ? record.project_name : record.name;
+    const projectId = record.id;
+
+    logTrace("agent_dispatched", { correlation_id: correlationId, id: projectId, address, table: payload.table });
 
     const supa = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY);
 
@@ -48,7 +53,7 @@ Deno.serve(async (req) => {
         "Authorization": `Bearer ${SUPABASE_SERVICE_KEY}`,
         "x-correlation-id": correlationId
       },
-      body: JSON.stringify({ address: project.address, limit: 3 })
+      body: JSON.stringify({ address, limit: 3 })
     });
     const compsData = await compsRes.json();
 
@@ -56,7 +61,7 @@ Deno.serve(async (req) => {
     logTrace("generating_ic_memo", { correlation_id: correlationId });
     const systemPrompt = `You are a real estate acquisitions director. A new deal just hit the pipeline. 
 Write a highly concise 3-paragraph Investment Committee memo draft characterizing the asset based on the provided comps.
-Asset: ${project.address}, ${project.city}, ${project.state}
+Asset: ${address}
 Comps: ${JSON.stringify(compsData.comps ?? [])}`;
 
     const llmRes = await fetch(`${FUNCTION_URL}/llm-proxy`, {
@@ -80,8 +85,8 @@ Comps: ${JSON.stringify(compsData.comps ?? [])}`;
     // 3. Save draft to the Intelligence store
     logTrace("saving_memo", { correlation_id: correlationId });
     await supa.from("notes").insert({
-      project_id: project.id,
-      title: `[AUTOGEN] Initial IC Memo: ${project.name}`,
+      project_id: projectId, // This column references projects table id technically, but since it's just a text ID, it can hold UUIDs.
+      title: `[AUTOGEN] Initial IC Memo: ${name || "Unknown"}`,
       content: llmData.content || "Agent failed to generate context.",
       tags: ["agent", "underwriting", "memo"]
     });
