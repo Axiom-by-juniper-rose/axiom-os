@@ -15,6 +15,7 @@ import { AgentHub } from "./features/output/AgentHub";
 import { Reports } from "./features/output/Reports";
 import { Settings } from "./features/system/Settings";
 import { Connectors } from "./features/system/Connectors";
+import { AuditLog } from "./features/security/AuditLog";
 // import { DealFinancials } from "./features/financials/DealFinancials";
 // import { CapStack } from "./features/financials/CapStack";
 // import { RiskModels } from "./features/management/RiskModels";
@@ -65,6 +66,9 @@ function AppContent() {
                     <div className="axiom-breadcrumb" style={{ marginBottom: 12, marginTop: 20, paddingLeft: 12 }}>SYSTEM</div>
                     <NavItem label="Settings" active={view === "settings"} onClick={() => setView("settings")} />
                     <NavItem label="Connectors" active={view === "connectors"} onClick={() => setView("connectors")} />
+
+                    <div className="axiom-breadcrumb" style={{ marginBottom: 12, marginTop: 20, paddingLeft: 12 }}>SECURITY</div>
+                    <NavItem label="Audit Log" active={view === "audit"} onClick={() => setView("audit")} />
                 </nav>
             </div>
             <div className="axiom-main">
@@ -85,6 +89,7 @@ function AppContent() {
                 {view === "reports" && <Reports />}
                 {view === "settings" && <Settings />}
                 {view === "connectors" && <Connectors />}
+                {view === "audit" && <div style={{ padding: 24 }}><AuditLog /></div>}
             </div>
         </div>
     );
