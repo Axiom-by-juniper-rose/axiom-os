@@ -353,8 +353,13 @@ body.light-mode {
     cursor: pointer;
     font-size: 13px;
     font-weight: 600;
+    color: var(--c-dim);
     transition: all 0.2s;
     border-bottom: 2px solid transparent;
+}
+
+.axiom-tab-item:hover {
+    color: var(--c-sub);
 }
 
 .axiom-tab-item.active {
