@@ -112,7 +112,7 @@ export function Dashboard({ projectId }: Props) {
 
             {/* KPI row */}
             <div className="axiom-grid-4">
-                <KPI label="Total Lots" value={fmt.num(fin.totalLots)} />
+                <KPI label="Total Lots" value={fmt.num(fin.totalLots)} color="var(--c-gold)" />
                 <KPI label="Project Revenue" value={fmt.M(snap.revenue)} color="var(--c-green)" />
                 <KPI label="Net Profit" value={fmt.M(snap.profit)} color={snap.profit >= 0 ? "var(--c-green)" : "var(--c-red)"} />
                 <KPI label="Levered IRR" value={fmt.pct(snap.irr)} color="var(--c-blue)" />
