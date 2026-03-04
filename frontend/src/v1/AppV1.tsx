@@ -43,6 +43,7 @@ import { AuthGate, OnboardingWizard } from "./components/auth/AuthGate";
 import { supa } from "./lib/supabase";
 import { useAuth } from "./context/AuthContext";
 import { useProject } from "./context/ProjectContext";
+import { DataExplorerModal } from "./components/ui/components";
 import "./components/ui/theme.css";
 
 // ─── NAV STRUCTURE (matches V20 groups) ──────────────────────
@@ -320,7 +321,7 @@ function renderView(view: string, activeProjectId: string) {
 function AppContent() {
     const [view, setView] = useState("dashboard");
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-    const { activeProjectId } = useProject() as any;
+    const { activeProjectId, chartSel, setChartSel } = useProject() as any;
 
     const sidebarWidth = sidebarCollapsed ? 54 : 220;
 
@@ -401,10 +402,13 @@ function AppContent() {
             {/* ─── MAIN CONTENT ─────────────────────────────── */}
             <div style={{ flex: 1, display: "flex", flexDirection: "column", minWidth: 0 }}>
                 <TopNav title={NAV_GROUPS.flatMap(g => g.items).find(i => i.id === view)?.label?.replace("⬡ ", "")?.toUpperCase() || "COMMAND CENTER"} setView={setView} />
-                <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px" }}>
+                <div style={{ flex: 1, overflowY: "auto", padding: "24px 32px", position: "relative" }}>
                     {renderView(view, activeProjectId || "default")}
                 </div>
             </div>
+
+            {/* Global Modals */}
+            {chartSel && <DataExplorerModal data={chartSel} onClose={() => setChartSel(null)} />}
         </div>
     );
 }
