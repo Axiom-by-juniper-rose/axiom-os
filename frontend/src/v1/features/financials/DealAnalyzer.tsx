@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 export function DealAnalyzer() {
-    const { project, fin } = useProject() as any;
+    const { project, fin, setChartSel } = useProject() as any;
     const [engineData, setEngineData] = useState<Record<string, any> | null>(null);
 
     useEffect(() => {
@@ -79,7 +79,7 @@ export function DealAnalyzer() {
                 <Card title="Deal Readiness Score">
                     <div style={{ height: 300 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analysis.radarData}>
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={analysis.radarData} onClick={e => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                                 <PolarGrid stroke="var(--c-border)" />
                                 <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--c-dim)", fontSize: 11 }} />
                                 <PolarRadiusAxis angle={30} domain={[0, 100]} tick={false} axisLine={false} />
@@ -114,14 +114,14 @@ export function DealAnalyzer() {
                                 <Progress value={analysis.scoreF} color={analysis.scoreF >= 75 ? "var(--c-green)" : "var(--c-gold)"} />
                             </div>
                             <div>
-                                <div className="axiom-flex-between-dim-11" style={{ marginBottom: 5 }}>
+                                <div className="axiom-flex-between" style={{ marginBottom: 5, fontSize: 11, color: "var(--c-muted)" }}>
                                     <span>Entitlement Progress</span>
                                     <span>{analysis.entitlementScore}%</span>
                                 </div>
                                 <Progress value={analysis.entitlementScore} color={analysis.entitlementScore >= 75 ? "var(--c-green)" : "var(--c-gold)"} />
                             </div>
                             <div>
-                                <div className="axiom-flex-between-dim-11" style={{ marginBottom: 5 }}>
+                                <div className="axiom-flex-between" style={{ marginBottom: 5, fontSize: 11, color: "var(--c-muted)" }}>
                                     <span>Environmental Safety</span>
                                     <span>{analysis.environmentalScore}%</span>
                                 </div>

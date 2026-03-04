@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useProjectState } from "../../hooks/useProjectState";
 import { Card, KPI, Button, Badge } from "../../components/ui/components";
+import { useProject } from "../../context/ProjectContext";
 import { fmt } from "../../lib/utils";
 import { DEFAULT_FIN, DEFAULT_RISKS, DEFAULT_PERMITS } from "../../lib/defaults";
 import { buildMonthlyCashFlows, calcIRR } from "../../lib/math";
@@ -19,6 +20,7 @@ const GRID_STROKE = "rgba(255,255,255,0.05)";
 
 export function Dashboard({ projectId }: Props) {
     const { project, updateProject, syncError } = useProjectState(projectId);
+    const { setChartSel } = useProject() as any;
     const [selectedSlice, setSelectedSlice] = useState<string | null>(null);
 
     const fin = project.financials ?? DEFAULT_FIN;
@@ -126,7 +128,7 @@ export function Dashboard({ projectId }: Props) {
             <div className="axiom-grid-2">
                 <Card title="Monthly Cash Flow — 24 Month View">
                     <ResponsiveContainer width="100%" height={200}>
-                        <AreaChart data={snap.cashFlowData} style={{ cursor: "pointer" }}>
+                        <AreaChart data={snap.cashFlowData} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: "pointer" }}>
                             <defs>
                                 <linearGradient id="cfGrad" x1="0" y1="0" x2="0" y2="1">
                                     <stop offset="5%" stopColor="#D4A843" stopOpacity={0.25} />
@@ -157,7 +159,7 @@ export function Dashboard({ projectId }: Props) {
                                     cx="50%" cy="50%"
                                     innerRadius={50} outerRadius={75}
                                     dataKey="value"
-                                    onClick={(e) => setSelectedSlice(e.name)}
+                                    onClick={(e) => { if (e && e.name) setSelectedSlice(e.name); setChartSel(e); }}
                                     style={{ cursor: "pointer" }}
                                 >
                                     {snap.costBreakdown.map((_, i) => (
@@ -187,7 +189,7 @@ export function Dashboard({ projectId }: Props) {
             <div className="axiom-grid-2">
                 <Card title="Scenario Analysis — Profit Comparison">
                     <ResponsiveContainer width="100%" height={180}>
-                        <BarChart data={snap.scenarios} style={{ cursor: "pointer" }}>
+                        <BarChart data={snap.scenarios} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: "pointer" }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
                             <XAxis dataKey="name" tick={AXIS_STYLE} />
                             <YAxis tick={AXIS_STYLE} tickFormatter={v => `$${v}K`} />
@@ -206,7 +208,7 @@ export function Dashboard({ projectId }: Props) {
                     {riskSeverity.length > 0 ? (
                         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
                             <ResponsiveContainer width={140} height={160}>
-                                <PieChart>
+                                <PieChart onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                                     <Pie data={riskSeverity} cx="50%" cy="50%" outerRadius={65} dataKey="value">
                                         {riskSeverity.map((item, i) => (
                                             <Cell key={i} fill={item.color} />

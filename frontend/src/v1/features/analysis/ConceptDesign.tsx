@@ -1,5 +1,6 @@
-import { useProjectState } from "../../hooks/useProjectState";
 import { Card, KPI, Field, Button } from "../../components/ui/components";
+import { useProjectState } from "../../hooks/useProjectState";
+import { useProject } from "../../context/ProjectContext";
 import { Agent } from "../agents/Agent";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { fmt } from "../../lib/utils";
@@ -9,6 +10,7 @@ interface Props { projectId: string; }
 
 export function ConceptDesign({ projectId }: Props) {
     const { project, updateProject } = useProjectState(projectId);
+    const { setChartSel } = useProject() as any;
     const fin: any = project.financials ?? {};
     const setFin = (next: any) => updateProject({ financials: next });
 
@@ -60,7 +62,7 @@ export function ConceptDesign({ projectId }: Props) {
                 <Card title="Land Use Mix">
                     <div style={{ height: 200 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <PieChart>
+                            <PieChart onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                                 <Pie data={pieD} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={({ name, value }) => `${name} ${value}%`}>
                                     {pieD.map((d, i) => <Cell key={i} fill={d.fill} />)}
                                 </Pie>

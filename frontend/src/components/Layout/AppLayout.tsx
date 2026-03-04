@@ -4,9 +4,12 @@ import { useAuth } from '../../hooks/useAuth';
 import { LayoutDashboard, Trello, Calculator, Database, LogOut, CreditCard, User, Brain } from 'lucide-react';
 import { Gating } from '../../lib/gating';
 import { CopilotWidget } from '../Copilot/CopilotWidget';
+import { useProject } from '../../v1/context/ProjectContext';
+import { DataExplorerModal } from '../../v1/components/ui/components';
 
 export const AppLayout: React.FC = () => {
     const { profile, signOut } = useAuth();
+    const { chartSel, setChartSel } = useProject() as any;
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -119,6 +122,7 @@ export const AppLayout: React.FC = () => {
                 <Outlet />
             </main>
             <CopilotWidget />
+            {chartSel && <DataExplorerModal data={chartSel} onClose={() => setChartSel(null)} />}
         </div>
     );
 };

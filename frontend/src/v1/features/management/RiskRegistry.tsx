@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useProjectState } from "../../hooks/useProjectState";
+import { useProject } from "../../context/ProjectContext";
 import { Card, KPI, Badge } from "../../components/ui/components";
 import { DEFAULT_RISKS } from "../../lib/defaults";
 import {
@@ -12,6 +13,7 @@ interface Props { projectId: string; }
 
 export function RiskRegistry({ projectId }: Props) {
     const { project, updateProject } = useProjectState(projectId);
+    const { setChartSel } = useProject() as any;
     const risks: any[] = project.risks ?? DEFAULT_RISKS;
 
     const [nr, setNr] = useState({
@@ -79,7 +81,7 @@ export function RiskRegistry({ projectId }: Props) {
                 <Card title="Risk Severity Matrix">
                     <div style={{ height: 250 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData}>
+                            <RadarChart cx="50%" cy="50%" outerRadius="80%" data={radarData} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                                 <PolarGrid stroke="var(--c-border)" />
                                 <PolarAngleAxis dataKey="subject" tick={{ fill: "var(--c-dim)", fontSize: 10 }} />
                                 <Radar name="Risk" dataKey="A" stroke="var(--c-gold)" fill="var(--c-gold)" fillOpacity={0.5} />
@@ -91,7 +93,7 @@ export function RiskRegistry({ projectId }: Props) {
                 <Card title="Risk by Category">
                     <div style={{ height: 250 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={catData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }}>
+                            <BarChart data={catData} margin={{ top: 20, right: 0, left: -20, bottom: 0 }} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--c-border)" vertical={false} />
                                 <XAxis dataKey="name" tick={{ fill: "var(--c-dim)", fontSize: 10 }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fill: "var(--c-dim)", fontSize: 10 }} axisLine={false} tickLine={false} />

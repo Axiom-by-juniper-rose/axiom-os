@@ -11,7 +11,7 @@ import {
 } from "recharts";
 
 export function ProForma() {
-    const { project, fin, setFin, loan, equity } = useProject() as any;
+    const { project, fin, setFin, loan, equity, setChartSel } = useProject() as any;
 
     const u = (k: string) => (e: any) => setFin({ ...fin, [k]: parseFloat(e.target.value) || 0 });
 
@@ -121,7 +121,7 @@ export function ProForma() {
                     <Card title="Waterfall Analysis ($M)">
                         <div style={{ height: 260 }}>
                             <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={waterfallData}>
+                                <BarChart data={waterfallData} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                                     <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
                                     <XAxis dataKey="name" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                                     <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={v => `$${v}M`} />
@@ -140,7 +140,7 @@ export function ProForma() {
                 <Card title="Cash Flow Projection">
                     <div style={{ height: 300 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <AreaChart data={cfChartData}>
+                            <AreaChart data={cfChartData} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                                 <defs>
                                     <linearGradient id="pfCfGrad" x1="0" y1="0" x2="0" y2="1">
                                         <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.25} />

@@ -120,3 +120,31 @@ export function CSVImportButton({ onImport }: { onImport: (data: any[]) => void 
         </>
     );
 }
+export function DataExplorerModal({ data, onClose }: { data: any, onClose: () => void }) {
+    if (!data) return null;
+    const pd = data.payload || data;
+    return (
+        <div className="axiom-modal-overlay" onClick={onClose}>
+            <div className="axiom-modal-content axiom-animate-scale-in" onClick={e => e.stopPropagation()}>
+                <div className="axiom-modal-header" style={{ marginBottom: 20 }}>
+                    <div className="axiom-label">DATA INSPECTOR</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: "var(--c-gold)", marginTop: 4 }}>
+                        {pd.name || pd.subject || pd.label || "Datapoint Details"}
+                    </div>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px 20px" }}>
+                    {Object.entries(pd).map(([k, v]) => {
+                        if (typeof v === "object" || k === "fill") return null;
+                        return (
+                            <div key={k} style={{ borderBottom: "1px solid var(--c-border)", padding: "8px 0" }}>
+                                <div style={{ fontSize: 9, color: "var(--c-dim)", textTransform: "uppercase", letterSpacing: 1 }}>{k.replace(/_/g, " ")}</div>
+                                <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 500, marginTop: 2 }}>{String(v)}</div>
+                            </div>
+                        );
+                    })}
+                </div>
+                <Button variant="gold" className="w-full" style={{ marginTop: 30 }} onClick={onClose}>Close Inspector</Button>
+            </div>
+        </div>
+    );
+}

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Card, Field, Badge, Button } from "../../components/ui/components";
 import { Tabs } from "../../components/ui/layout";
 import { Agent } from "../agents/Agent";
+import { useProject } from "../../context/ProjectContext";
 import { useLS } from "../../hooks/useLS";
 import { CHART_TT_BAR, AXIS_TICK, GRID_STROKE } from "../../lib/chartTheme";
 import { supa } from "../../lib/supabase";
@@ -32,6 +33,7 @@ const LIVE_METRICS = [
 ];
 
 export function DataIntel() {
+    const { setChartSel } = useProject() as any;
     const [records, setRecords] = useLS("axiom_intel", [
         { id: 1, type: "Zoning Change", title: "Rezoning Application - 500 Elm St", source: "City Planning Portal", date: "2025-02-15", relevance: "High", summary: "Adjacent parcel rezoning from C-2 to R-3 could increase density allowance for subject.", linked: true },
         { id: 2, type: "Market Report", title: "Q4 2024 Land Sales Report - Sacramento MSA", source: "CoStar Analytics", date: "2025-01-20", relevance: "Medium", summary: "Finished lot prices up 8% YoY. Absorption rates steady at 3.2 lots/month for SFR.", linked: true },
@@ -159,7 +161,7 @@ export function DataIntel() {
             <div>
                 <Card title="Intel by Category">
                     <ResponsiveContainer width="100%" height={200}>
-                        <BarChart data={chartData}>
+                        <BarChart data={chartData} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                             <CartesianGrid strokeDasharray="3 6" stroke={GRID_STROKE} vertical={false} />
                             <XAxis dataKey="name" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                             <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} allowDecimals={false} />

@@ -94,7 +94,8 @@ export interface ProjectContextType {
     allProjects: any[]; setAllProjects: any;
     createProject: (n: string, s: string, a: string) => Promise<void>;
     switchProject: (id: string) => void;
-    setChartSel?: any;
+    chartSel: any;
+    setChartSel: any;
 }
 
 const ProjectCtx = createContext<ProjectContextType | null>(null);
@@ -113,6 +114,7 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
     const [equity, setEquity] = useLS("axiom_equity", { gpPct: 10, lpPct: 90, prefReturn: 8, promotePct: 20, equityMultipleTarget: 2.0, irrTarget: 18 });
     const [comps, setComps] = useLS("axiom_comps", DEFAULT_COMPS);
     const [allProjects, setAllProjects] = useState<any[]>([]);
+    const [chartSel, setChartSel] = useState<any>(null);
 
     const createProject = async (name: string, _state: string, _address: string) => {
         const tempId = "proj_" + Date.now();
@@ -188,6 +190,6 @@ export function ProjectProvider({ children }: { children: React.ReactNode }) {
         return () => clearTimeout(timer);
     }, [project, fin, risks, permits, comps, ddChecks, events, loan, equity, auth?.activeProjectId]);
 
-    const value = { project, setProject, fin, setFin, risks, setRisks, permits, setPermits, ddChecks, setDdChecks, events, setEvents, loan, setLoan, equity, setEquity, comps, setComps, allProjects, setAllProjects, createProject, switchProject };
+    const value = { project, setProject, fin, setFin, risks, setRisks, permits, setPermits, ddChecks, setDdChecks, events, setEvents, loan, setLoan, equity, setEquity, comps, setComps, allProjects, setAllProjects, createProject, switchProject, chartSel, setChartSel };
     return <ProjectCtx.Provider value={value}>{children}</ProjectCtx.Provider>;
 }

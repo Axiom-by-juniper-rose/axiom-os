@@ -408,7 +408,7 @@ const DD_CATS = [
 const ALL_DD = DD_CATS.flatMap(c => c.items);
 
 function Dashboard() {
-  const { fin, risks, ddChecks, permits, project } = usePrj();
+  const { fin, risks, ddChecks, permits, project, setChartSel, viewMode, setViewMode } = usePrj();
   const hard = fin.totalLots * fin.hardCostPerLot, soft = hard * fin.softCostPct / 100;
   const fees = fin.planningFees + (fin.permitFeePerLot + fin.schoolFee + fin.impactFeePerLot) * fin.totalLots;
   const cont = (hard + soft) * fin.contingencyPct / 100;
@@ -441,7 +441,7 @@ function Dashboard() {
     { sub: "Financial", val: finS }, { sub: "Due Diligence", val: ddS },
     { sub: "Risk", val: riskS }, { sub: "Permits", val: permS }, { sub: "Market", val: 68 },
   ];
-  const { viewMode, setViewMode } = usePrj();
+
   const layout = viewMode === "Metric" ? "Metrics" : viewMode === "Minimalistic" ? "Compact" : "Standard";
 
   return (
@@ -863,7 +863,7 @@ function Infrastructure() {
 }
 
 function ConceptDesign() {
-  const { fin, setFin } = usePrj();
+  const { fin, setFin, setChartSel } = usePrj();
   const [cfg, setCfg] = useLS("axiom_yield", { grossAcres: 10, netAcres: 7.5, smallLotAvg: 4200, largeLotAvg: 8500, smallLotPct: 60, pudUnits: 0, streetPct: 15, openSpacePct: 15, utilityPct: 5 });
   const cy = k => e => setCfg({ ...cfg, [k]: parseFloat(e.target.value) || 0 });
   const devSF = cfg.netAcres * 43560 * (1 - (cfg.streetPct + cfg.openSpacePct + cfg.utilityPct) / 100);
@@ -964,6 +964,7 @@ function ConceptDesign() {
 }
 
 function MarketIntelligence() {
+  const { setChartSel } = usePrj();
   const [comps, setComps] = useLS("axiom_comps", [
     { id: 1, name: "Sunset Ridge Estates", address: "456 Ridge Rd", lots: 42, lotSF: 6500, saleDate: "2024-08", pricePerLot: 185000, pricePerSF: 28.46, status: "Sold", adj: 0, notes: "" },
     { id: 2, name: "Hawk Valley Sub.", address: "789 Valley Dr", lots: 28, lotSF: 4200, saleDate: "2024-11", pricePerLot: 142000, pricePerSF: 33.81, status: "Sold", adj: 0, notes: "" },
@@ -1080,7 +1081,7 @@ function MarketIntelligence() {
 }
 
 function FinancialEngine() {
-  const { fin, setFin } = usePrj();
+  const { fin, setFin, setChartSel } = usePrj();
   const u = k => e => setFin({ ...fin, [k]: parseFloat(e.target.value) || 0 });
   const hard = fin.totalLots * fin.hardCostPerLot, soft = hard * fin.softCostPct / 100;
   const fees = fin.planningFees + (fin.permitFeePerLot + fin.schoolFee + fin.impactFeePerLot) * fin.totalLots;
@@ -1142,7 +1143,7 @@ function FinancialEngine() {
             </Card>
             <Card title="Waterfall ($ Millions)">
               <ResponsiveContainer width="100%" height={210}>
-                <BarChart data={waterfall}>
+                <BarChart data={waterfall} onClick={e => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                   <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} />
                   <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 9 }} />
                   <YAxis stroke={C.dim} tick={{ fontSize: 9 }} tickFormatter={v => `$${v.toFixed(1)}M`} />
@@ -1413,7 +1414,7 @@ function ProcessControl() {
 }
 
 function RiskCommand() {
-  const { risks, setRisks } = usePrj();
+  const { risks, setRisks, setChartSel } = usePrj();
   const [nr, setNr] = useState({ cat: "Market", risk: "", likelihood: "Medium", impact: "Medium", severity: "Medium", mitigation: "", status: "Open" });
   const sev = (l, i) => { const s = { Low: 1, Medium: 2, High: 3, Critical: 4 }; return s[l] * s[i] >= 8 ? "Critical" : s[l] * s[i] >= 4 ? "High" : s[l] * s[i] >= 2 ? "Medium" : "Low"; };
   const addRisk = () => { if (!nr.risk) return; setRisks([...risks, { ...nr, id: Date.now(), severity: sev(nr.likelihood, nr.impact) }]); setNr({ cat: "Market", risk: "", likelihood: "Medium", impact: "Medium", severity: "Medium", mitigation: "", status: "Open" }); };
@@ -1468,7 +1469,7 @@ function RiskCommand() {
       <div>
         <Card title="Risk by Category (Open Risks)">
           <ResponsiveContainer width="100%" height={220}>
-            <RadarChart data={matrixData}>
+            <RadarChart data={matrixData} onClick={e => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
               <PolarGrid stroke={C.border} strokeOpacity={0.4} />
               <PolarAngleAxis dataKey="subject" tick={{ fill: C.muted, fontSize: 12, fontFamily: 'Inter,sans-serif' }} />
               <PolarRadiusAxis tick={false} axisLine={false} />
@@ -1758,6 +1759,7 @@ function Contacts() {
 }
 
 function DealPipeline() {
+  const { setChartSel } = usePrj();
   const STAGES = ["sourcing", "screening", "due_diligence", "committee", "closing", "asset_mgmt"];
   const SL = { sourcing: "Sourcing", screening: "Screening", due_diligence: "Due Diligence", committee: "Committee", closing: "Closing", asset_mgmt: "Asset Mgmt" };
   const SCOL = { sourcing: C.blue, screening: C.teal, due_diligence: C.amber, committee: C.purple, closing: C.gold, asset_mgmt: C.green };
@@ -1881,7 +1883,7 @@ function DealPipeline() {
           </Card>
           <Card title="Value by Stage ($M)">
             <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={pipeData}>
+              <BarChart data={pipeData} onClick={e => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
                 <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} />
                 <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 9 }} />
                 <YAxis stroke={C.dim} tick={{ fontSize: 12, fontFamily: 'Inter,sans-serif', fill: C.muted }} tickFormatter={v => `$${v.toFixed(1)}M`} />
@@ -1900,6 +1902,7 @@ function DealPipeline() {
 }
 
 function DealAnalyzer() {
+  const { setChartSel } = usePrj();
   const [deal, setDeal] = useLS("axiom_analyze_deal", { name: "Sunset Ridge Estates", address: "456 Ridge Rd", lots: 42, type: "SFR Subdivision", landCost: 3000000, hardCostPerLot: 65000, salesPrice: 185000, absorption: 3, entitlementStatus: "Under Review", ceqa: "MND", floodZone: "X", phase1: "Clean", soilType: "Sandy Loam" });
   const du = k => e => setDeal({ ...deal, [k]: e.target.value });
   const hard = deal.lots * deal.hardCostPerLot;
@@ -4619,7 +4622,7 @@ export default function App() {
   const ctx = {
     project, setProject, fin, setFin, risks, setRisks,
     permits, setPermits, ddChecks, setDdChecks, vendors, setVendors,
-    viewMode, setViewMode, zoom, setZoom
+    viewMode, setViewMode, zoom, setZoom, chartSel, setChartSel
   };
   const ZoomControls = () => (
     <div style={{ display: "flex", alignItems: "center", gap: 4, background: C.bg2, padding: "2px 4px", borderRadius: 4, border: `1px solid ${C.border}` }}>
