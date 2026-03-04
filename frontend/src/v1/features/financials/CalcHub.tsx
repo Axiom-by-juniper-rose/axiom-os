@@ -13,21 +13,22 @@ export function CalcHub() {
     ];
 
     return (
-        <div className="axiom-grid-240-1" style={{ gap: 20 }}>
-            <div className="axiom-stack-10">
+        <div className="axiom-stack-20">
+            <div className="axiom-tabs-nav">
                 {calcs.map(c => (
                     <div
                         key={c.id}
                         onClick={() => setActive(c.id)}
-                        className={`axiom-menu-item ${active === c.id ? "active" : ""}`}
+                        className={`axiom-tab-item ${active === c.id ? "active" : ""}`}
+                        title={c.desc}
+                        style={{ cursor: "pointer" }}
                     >
-                        <div className="axiom-text-13-bold">{c.label}</div>
-                        <div className="axiom-text-10-dim" style={{ marginTop: 4 }}>{c.desc}</div>
+                        {c.label}
                     </div>
                 ))}
             </div>
 
-            <div className="axiom-flex-1">
+            <div className="axiom-animate-fade">
                 {active === "mortgage" && <MortgageCalc />}
                 {active === "roi" && <ROICalc />}
                 {active === "caprate" && <CapRateCalc />}
@@ -74,7 +75,7 @@ function MortgageCalc() {
             </div>
             <div className="axiom-grid-2">
                 <div className="axiom-kpi-highlight">
-                    <div className="axiom-text-10-dim-ls1" style={{ marginBottom: 5 }}>MONTHLY PAYMENT</div>
+                    <div style={{ fontSize: 10, color: "var(--c-sub)", letterSpacing: "1px", marginBottom: 5 }}>MONTHLY PAYMENT</div>
                     <div className="axiom-text-32-bold-gold">{fmt.usd(Math.round(pmt))}</div>
                 </div>
                 <div className="axiom-stack-10">

@@ -6,6 +6,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart, Pie, Cell, RadarChart, Radar, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
 } from "recharts";
+import { callLLM, MODELS } from "../v1/lib/api";
 
 const C = {
   gold: "var(--c-gold)", gold2: "var(--c-gold2)", bg: "var(--c-bg)", bg2: "var(--c-bg2)", bg3: "var(--c-bg3)",
@@ -88,8 +89,8 @@ const PremiereStyles = () => (
   <style>{`
     :root {
       --c-gold: #D4A843; --c-gold2: #E8C76A; --c-bg: #0D0F13; --c-bg2: #0A0C10; --c-bg3: #111318;
-      --c-bg4: #1A1E2A; --c-border: #1E2330; --c-border2: #2D3748; --c-dim: #6B7280;
-      --c-text: #E2E8F0; --c-muted: #8892A4; --c-sub: #C4CDD8;
+      --c-bg4: #1A1E2A; --c-border: #1E2330; --c-border2: #2D3748; --c-dim: #94A3B8;
+      --c-text: #F8FAFC; --c-muted: #CBD5E1; --c-sub: #E2E8F0;
       --c-green: #22C55E; --c-blue: #3B82F6; --c-purple: #8B5CF6;
       --c-red: #EF4444; --c-amber: #F59E0B; --c-teal: #10B981;
     }
@@ -186,51 +187,7 @@ const downloadText = (text, filename) => {
   URL.revokeObjectURL(url);
 };
 
-const MODELS = [
-  { id: "claude-sonnet-4-20250514", label: "Claude Sonnet 4", provider: "anthropic" },
-  { id: "claude-opus-4-20250514", label: "Claude Opus 4", provider: "anthropic" },
-  { id: "claude-3-5-haiku-20241022", label: "Claude Haiku 3.5", provider: "anthropic" },
-  { id: "gpt-4o", label: "GPT-4o", provider: "openai" },
-  { id: "gpt-4o-mini", label: "GPT-4o Mini", provider: "openai" },
-  { id: "llama-3.3-70b-versatile", label: "Llama 3.3 70B (free)", provider: "groq" },
-  { id: "mixtral-8x7b-32768", label: "Mixtral 8x7B (free)", provider: "groq" },
-  { id: "gemma2-9b-it", label: "Gemma 2 9B (free)", provider: "groq" },
-  { id: "meta-llama/Llama-3.3-70B-Instruct-Turbo", label: "Llama 3.3 70B (Together)", provider: "together" },
-  { id: "mistralai/Mixtral-8x7B-Instruct-v0.1", label: "Mixtral 8x7B (Together)", provider: "together" },
-];
-const ENDPOINTS = {
-  anthropic: "https://api.anthropic.com/v1/messages",
-  openai: "https://api.openai.com/v1/chat/completions",
-  groq: "https://api.groq.com/openai/v1/chat/completions",
-  together: "https://api.together.xyz/v1/chat/completions",
-};
-async function callLLM(messages, system = "", modelId = "claude-sonnet-4-20250514") {
-  const m = MODELS.find(x => x.id === modelId) || MODELS[0];
-  const keys = JSON.parse(localStorage.getItem("axiom_api_keys") || "{}");
-  const defaultSys = "You are an expert real estate development analyst and feasibility consultant. Be concise, precise, and actionable.";
-  try {
-    if (m.provider === "anthropic") {
-      const r = await fetch(ENDPOINTS.anthropic, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-api-key": keys.anthropic || "", "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
-        body: JSON.stringify({ model: m.id, max_tokens: 1200, system: system || defaultSys, messages }),
-      });
-      const d = await r.json();
-      return d.content?.map(b => b.text || "").join("\n") || d.error?.message || "No response.";
-    } else {
-      const providerKey = m.provider === "openai" ? keys.openai : m.provider === "groq" ? keys.groq : keys.together;
-      const sysMsg = { role: "system", content: system || defaultSys };
-      const r = await fetch(ENDPOINTS[m.provider], {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${providerKey || ""}` },
-        body: JSON.stringify({ model: m.id, max_tokens: 1200, messages: [sysMsg, ...messages] }),
-      });
-      const d = await r.json();
-      return d.choices?.[0]?.message?.content || d.error?.message || "No response.";
-    }
-  } catch (e) { return "API error: " + e.message; }
-}
-const callClaude = callLLM;
+
 
 const Ctx = createContext(null);
 const usePrj = () => useContext(Ctx);
@@ -308,7 +265,7 @@ function Agent({ id, system, placeholder }) {
         {msgs.map((m, i) => (
           <div key={i} style={S.bub(m.role)}>
             <div style={{ fontSize: 9, color: C.dim, letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>{m.role === "user" ? "You" : `· ${id}`}</div>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 13, lineHeight: 1.5 }}>{m.content}</pre>
+            <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 13, lineHeight: 1.5, color: "var(--c-text)" }}>{m.content}</pre>
           </div>
         ))}
         {busy && <div style={{ ...S.bub("assistant"), color: C.gold, fontSize: 12 }}>· Processing...</div>}
@@ -475,7 +432,7 @@ function Dashboard() {
                   <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} />
                   <XAxis dataKey="y" stroke={C.dim} tick={{ fontSize: 12, fontFamily: 'Inter,sans-serif', fill: C.muted }} />
                   <YAxis stroke={C.dim} tick={{ fontSize: 12, fontFamily: 'Inter,sans-serif', fill: C.muted }} tickFormatter={v => `$${v.toFixed(1)}M`} />
-                  <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`$${v.toFixed(2)}M`, "Cash Flow"]} />
+                  <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`$${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`, "Cash Flow"]} />
                   <Area type="monotone" dataKey="v" stroke={C.gold} fill="url(#areaGold)" strokeWidth={2.5} dot={{ fill: C.gold, r: 4, strokeWidth: 2, stroke: C.bg3 }} activeDot={{ r: 6, fill: C.gold, stroke: C.bg, strokeWidth: 2 }} />
                 </AreaChart>
               </ResponsiveContainer>
@@ -501,7 +458,7 @@ function Dashboard() {
               <Pie data={costPie} cx="50%" cy="50%" outerRadius={75} innerRadius={45} dataKey="value" label={({ name, value }) => `${name} ${value}%`} labelLine={false} style={{ fontSize: 9 }}>
                 {costPie.map((_, i) => <Cell key={i} fill={PP[i]} />)}
               </Pie>
-              <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`${v}%`]} />
+              <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`${v}%`]} />
             </PieChart>
           </ResponsiveContainer>
         </Card>
@@ -901,7 +858,7 @@ function ConceptDesign() {
                 <Pie data={pieD} cx="50%" cy="50%" outerRadius={90} dataKey="value" label={({ name, value }) => `${name} ${Number(value).toFixed(0)}%`} style={{ fontSize: 9 }}>
                   {pieD.map((d, i) => <Cell key={i} fill={d.fill} />)}
                 </Pie>
-                <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`${Number(v).toFixed(1)}%`]} />
+                <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`${Number(v).toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`]} />
               </PieChart>
             </ResponsiveContainer>
           </Card>
@@ -1058,7 +1015,7 @@ function MarketIntelligence() {
               <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} vertical={false} />
               <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 13, fontFamily: 'Inter,sans-serif', fill: C.muted }} />
               <YAxis stroke={C.dim} tick={{ fontSize: 13, fontFamily: 'Inter,sans-serif', fill: C.muted }} tickFormatter={v => fmt.k(v)} />
-              <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ fill: C.bg4 }} formatter={v => [fmt.usd(v)]} />
+              <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ fill: C.bg4 }} formatter={v => [fmt.usd(v)]} />
               <Bar dataKey="raw" name="Raw $/Lot" fill={C.dim} radius={[2, 2, 0, 0]} />
               <Bar dataKey="adj" name="Adj $/Lot" fill={C.gold} radius={[2, 2, 0, 0]} />
             </BarChart>
@@ -1129,8 +1086,8 @@ function FinancialEngine() {
               <div style={{ background: C.bg, border: `1px solid ${C.border}`, borderRadius: 4, padding: 14, marginTop: 10 }}>
                 {[["Land Cost", fin.landCost + fin.closingCosts, ""], ["Hard Cost", hard, ""], ["Soft Cost", soft, ""], ["Contingency", cont, ""], ["Fees Total", fees, ""], ["Total Cost", totalCost, C.gold], ["Gross Revenue", revenue, C.green], ["Commission", -comm, ""], ["Reserves", -reserves, ""], ["Net Profit", profit, profit >= 0 ? C.green : C.red], ["Cost / Lot", totalCost / (fin.totalLots || 1), ""], ["Revenue / Lot", revenue / (fin.totalLots || 1), ""]].map(([l, v, c]) => (
                   <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #0F1117" }}>
-                    <span style={{ fontSize: 10, color: c ? C.text : C.dim, fontWeight: c ? 600 : 400 }}>{l}</span>
-                    <span style={{ fontSize: 12, fontWeight: c ? 700 : 400, color: c || C.sub }}>{fmt.usd(v)}</span>
+                    <span style={{ fontSize: 10, color: c ? C.text : "var(--c-sub)", fontWeight: c ? 600 : 400 }}>{l}</span>
+                    <span style={{ fontSize: 12, fontWeight: c ? 700 : 400, color: c || C.text }}>{fmt.usd(v)}</span>
                   </div>
                 ))}
                 <div style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: "1px solid #0F1117" }}>
@@ -1145,7 +1102,7 @@ function FinancialEngine() {
                   <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} />
                   <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 9 }} />
                   <YAxis stroke={C.dim} tick={{ fontSize: 9 }} tickFormatter={v => `$${v.toFixed(1)}M`} />
-                  <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`$${Math.abs(v).toFixed(2)}M`]} />
+                  <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`$${Number(Math.abs(v)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`]} />
                   <Bar dataKey="value" radius={[2, 2, 0, 0]}>{waterfall.map((d, i) => <Cell key={i} fill={d.fill} />)}</Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -1481,7 +1438,7 @@ function RiskCommand() {
               <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} vertical={false} />
               <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 13, fontFamily: 'Inter,sans-serif', fill: C.muted }} />
               <YAxis stroke={C.dim} tick={{ fontSize: 13, fontFamily: 'Inter,sans-serif', fill: C.muted }} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ fill: C.bg4 }} />
+              <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ fill: C.bg4 }} />
               <Bar dataKey="count" radius={[3, 3, 0, 0]} className="chart-node">{["Critical", "High", "Medium", "Low"].map((s, i) => <Cell key={i} fill={RC[s]} onClick={() => setChartSel({ type: "Severity", level: s, count: risks.filter(r => r.severity === s).length })} />)}</Bar>
             </BarChart>
           </ResponsiveContainer>
@@ -1873,7 +1830,7 @@ function DealPipeline() {
                 <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} vertical={false} />
                 <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 11, fontFamily: 'Inter,sans-serif', fill: C.muted }} />
                 <YAxis stroke={C.dim} tick={{ fontSize: 11, fontFamily: 'Inter,sans-serif', fill: C.muted }} allowDecimals={false} />
-                <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)" }} cursor={{ fill: C.bg4 }} />
+                <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)" }} cursor={{ fill: C.bg4 }} />
                 <Bar dataKey="count" name="Deals" fill={C.gold} radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -1884,7 +1841,7 @@ function DealPipeline() {
                 <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} />
                 <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 9 }} />
                 <YAxis stroke={C.dim} tick={{ fontSize: 12, fontFamily: 'Inter,sans-serif', fill: C.muted }} tickFormatter={v => `$${v.toFixed(1)}M`} />
-                <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`$${Number(v).toFixed(2)}M`]} />
+                <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, fontFamily: "Inter,sans-serif", padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)", backdropFilter: "blur(12px)" }} cursor={{ stroke: C.gold, strokeWidth: 1, strokeDasharray: "4 4" }} formatter={v => [`$${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`]} />
                 <Bar dataKey="value" name="Value" fill={C.blue} radius={[3, 3, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
@@ -2229,7 +2186,7 @@ function DataIntel() {
               <CartesianGrid strokeDasharray="3 6" stroke={C.border} strokeOpacity={0.5} vertical={false} />
               <XAxis dataKey="name" stroke={C.dim} tick={{ fontSize: 11, fontFamily: 'Inter,sans-serif', fill: C.muted }} />
               <YAxis stroke={C.dim} tick={{ fontSize: 11, fontFamily: 'Inter,sans-serif', fill: C.muted }} allowDecimals={false} />
-              <Tooltip contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)" }} cursor={{ fill: C.bg4 }} />
+              <Tooltip separator=" " contentStyle={{ background: "rgba(17,19,24,0.95)", border: `1px solid ${C.gold}33`, borderRadius: 8, fontSize: 13, padding: "10px 14px", boxShadow: "0 8px 32px rgba(212,168,67,0.15)" }} cursor={{ fill: C.bg4 }} />
               <Bar dataKey="count" fill={C.gold} radius={[3, 3, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
@@ -2267,26 +2224,37 @@ function DataIntel() {
 function CalcHub() {
   const [ac, setAc] = useState("mortgage");
   const calcs = [
-    { id: "mortgage", label: "Mortgage Calculator", desc: "Monthly payment, amortization schedule, total interest" },
-    { id: "roi", label: "Flip ROI Analysis", desc: "Purchase, rehab, sale price, holding costs, ROI" },
-    { id: "devprofit", label: "Dev Profit (New Build)", desc: "Ground-up development profit analysis" },
-    { id: "construction", label: "Construction Estimator", desc: "Per-SF cost estimation by trade" },
-    { id: "insurance", label: "Insurance Estimator", desc: "Annual property insurance and liability" },
-    { id: "caprate", label: "Cap Rate / NOI", desc: "Capitalization rate, NOI, and value analysis" },
-    { id: "dscr", label: "DSCR Calculator", desc: "Debt service coverage ratio for lenders" },
-    { id: "exchange", label: "1031 Exchange", desc: "Like-kind exchange timeline and requirements" },
-    { id: "cashoncash", label: "Cash-on-Cash Return", desc: "Annual cash return on invested equity" },
+    { id: "mortgage", label: "Mortgage", desc: "Monthly payment & amortization" },
+    { id: "roi", label: "Flip ROI", desc: "Purchase, rehab, and profit" },
+    { id: "devprofit", label: "Dev Profit", desc: "Ground-up development profit" },
+    { id: "construction", label: "Construction", desc: "Cost estimation" },
+    { id: "insurance", label: "Insurance", desc: "Annual premium estimates" },
+    { id: "caprate", label: "Cap Rate", desc: "NOI and value analysis" },
+    { id: "dscr", label: "DSCR", desc: "Debt coverage ratio" },
+    { id: "exchange", label: "1031 Exchange", desc: "Exchange timeline" },
+    { id: "cashoncash", label: "Cash-on-Cash", desc: "Annual equity return" },
   ];
+
   return (
-    <div>
-      <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-        <div style={{ width: 200, flexShrink: 0 }}>
-          {calcs.map(c => (
-            <div key={c.id} style={{ ...S.navi(ac === c.id), marginBottom: 2, borderRadius: 3, borderLeft: ac === c.id ? `2px solid ${C.gold}` : "2px solid transparent" }} onClick={() => setAc(c.id)}>
-              <span style={{ fontSize: 12 }}>{c.label}</span>
-            </div>
-          ))}
-        </div>
+    <div className="axiom-stack-20">
+      <div style={{ ...S.hbar, flexWrap: "wrap", borderBottom: `1px solid ${C.border}`, marginBottom: 20 }}>
+        {calcs.map(c => (
+          <button
+            key={c.id}
+            onClick={() => setAc(c.id)}
+            style={{
+              ...S.tab(ac === c.id),
+              padding: "10px 16px",
+              cursor: "pointer"
+            }}
+            title={c.desc}
+          >
+            {c.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="axiom-animate-fade">
         <div style={{ flex: 1 }}>
           {ac === "mortgage" && <MortgageCalc2 />}
           {ac === "roi" && <ROICalc2 />}
@@ -2325,7 +2293,7 @@ function MortgageCalc2() {
       </div>
       <div style={{ ...S.g3, marginTop: 14 }}>
         <div style={{ background: C.bg, border: `1px solid ${C.gold}44`, borderRadius: 4, padding: 16, textAlign: "center" }}>
-          <div style={{ fontSize: 9, color: C.dim, letterSpacing: 2 }}>MONTHLY PAYMENT</div>
+          <div style={{ fontSize: 9, color: "var(--c-sub)", letterSpacing: 2 }}>MONTHLY PAYMENT</div>
           <div style={{ fontSize: 37, color: C.gold, fontWeight: 700 }}>{fmt.usd(Math.round(pmt))}</div>
         </div>
         <KPI label="Total Paid" value={fmt.usd(Math.round(totalPaid))} color={C.sub} />
@@ -3637,62 +3605,127 @@ function ResourceCenter() {
 
 
 
+const JURIS_DATA = {
+  FL: { name: "Florida", abbr: "FL", flag: "🌴", overview: "Florida has a streamlined subdivision approval process under the Florida Subdivision Act (Ch. 177 F.S.). No CEQA equivalent.", entitlement: [{ phase: "Pre-Application", duration: "2–4 weeks", notes: "Identify issues early." }, { phase: "Preliminary Plat", duration: "30–60 days", notes: "Staff review." }, { phase: "Public Hearing", duration: "30–45 days", notes: "Quasi-judicial." }, { phase: "Final Recording", duration: "60–120 days", notes: "Filed with Clerk." }], fees: [{ type: "Impact (Roads)", range: "$3,000–$8,000", notes: "County-specific." }, { type: "Impact (Schools)", range: "$2,500–$6,500", notes: "School board set." }], env: [{ item: "Wetlands", detail: "FDEP & WMD jurisdiction. Mitigation required." }], zones: "Municipality specific. R-1, R-3, PUD common.", tips: ["DRI review > 3,000 units.", "School concurrency required."] },
+  TX: { name: "Texas", abbr: "TX", flag: "⭐", overview: "Texas is developer-friendly with minimal state-level land use regulation. 30-day statutory shot clock for plats.", entitlement: [{ phase: "Preliminary Plat", duration: "30 days", notes: "Statutory clock." }, { phase: "City Approval", duration: "30 days", notes: "Final authority." }], fees: [{ type: "Impact Fees", range: "$0–$15,000", notes: "LGC Ch 395." }], env: [{ item: "TCEQ Stormwater", detail: "NOI for > 1ac." }], zones: "No city-wide zoning in Houston.", tips: ["MUD strategy for infrastructure."] },
+  CA: { name: "California", abbr: "CA", flag: "🌉", overview: "Complex regulatory environment. CEQA review required for discretionary permits.", entitlement: [{ phase: "CEQA Review", duration: "3–18 months", notes: "EIR or MND required." }, { phase: "Final Map", duration: "6–18 months", notes: "Full engineering." }], fees: [{ type: "Impact Fees", range: "$10k–$100k+", notes: "Highest in US." }], env: [{ item: "CEQA / EIR", detail: "Significant litigation risk." }], zones: "SB 9 & SB 10 streamlining.", tips: ["Density Bonus Law (G.C. 65915)."] },
+  AZ: { name: "Arizona", abbr: "AZ", flag: "🌵", overview: "Strong property rights. Water AWS 100-year report is the critical path.", entitlement: [{ phase: "Rezoning", duration: "60–90 days", notes: "Public hearing." }, { phase: "AWS Water", duration: "4–8 months", notes: "Assured water supply." }], fees: [{ type: "Impact Fees", range: "$3k–$20k", notes: "Phoenix ~$8k." }], env: [{ item: "Water Report", detail: "AWS demonstration mandatory." }], zones: "PAD zoning used for large projects.", tips: ["Verify water before LOI."] },
+  CO: { name: "Colorado", abbr: "CO", flag: "⛰️", overview: "Prior appropriation doctrine for water. High altitude geotechnical concerns.", entitlement: [{ phase: "Preliminary Plan", duration: "45–90 days", notes: "Public hearing." }, { phase: "Final Plat", duration: "30–60 days", notes: "Recorded." }], fees: [{ type: "Water Taps", range: "$10k–$40k", notes: "Extremely high." }], env: [{ item: "Water Rights", detail: "Separate legal proceedings." }], zones: "Metro Districts common.", tips: ["SB23-213 land use reform."] },
+  NV: { name: "Nevada", abbr: "NV", flag: "🎰", overview: "Federal land dominant (BLM). Water availability overriding constraint.", entitlement: [{ phase: "Tentative Map", duration: "45–60 days", notes: "Planning commission." }, { phase: "Final Map", duration: "30–45 days", notes: "Bonded recording." }], fees: [{ type: "Water Access", range: "$3k–$8k", notes: "SNWA commitment." }], env: [{ item: "Desert Tortoise", detail: "ESA protected habitat." }], zones: "MPCs dominate Vegas valley.", tips: ["Dust control strictly enforced."] },
+  PA: { name: "Pennsylvania", abbr: "PA", flag: "🔔", overview: "Hyper-local via MPC. Fragmented municipality control (2,500+).", entitlement: [{ phase: "Land Dev", duration: "90–120 days", notes: "Engineering review." }, { phase: "NPDES", duration: "90–180 days", notes: "Stormwater scrutiny." }], fees: [{ type: "Sewer Taps", range: "$2k–$8k", notes: "Act 57 governed." }], env: [{ item: "Bog Turtle", detail: "Survey windows are tight." }], zones: "Curative amendments possible.", tips: ["NIMBYism is powerful in PA."] },
+  GA: { name: "Georgia", abbr: "GA", flag: "🍑", overview: "County-driven with state EPD oversight. Stream buffer laws are major.", entitlement: [{ phase: "LDP Permit", duration: "30–60 days", notes: "Land disturbance." }, { phase: "Preliminary Plat", duration: "30–60 days", notes: "Staff review." }], fees: [{ type: "Impact Fees", range: "$1k–$8k", notes: "Varies significantly." }], env: [{ item: "Stream Buffers", detail: "25-ft state requirement." }], zones: "UDC codes in Atlanta metro.", tips: ["Check GIS for water early."] },
+  NC: { name: "North Carolina", abbr: "NC", flag: "🦅", overview: "Ch. 160D hybrid framework. NCDEQ water quality SCRUTINY.", entitlement: [{ phase: "Preliminary Plat", duration: "30–60 days", notes: "TRC review." }, { phase: "Construction", duration: "30–60 days", notes: "Engineering approval." }], fees: [{ type: "Impact Fees", range: "$1k–$8k", notes: "Wake/Meck counties." }], env: [{ item: "Riparian Buffers", detail: "Jordan Lake 50-ft buffers." }], zones: "Conditional District rezonings.", tips: ["Vested rights for 5 years."] },
+  TN: { name: "Tennessee", abbr: "TN", flag: "🎸", overview: "Business-friendly. High karst/sinkhole geotechnical risk.", entitlement: [{ phase: "Regional PC", duration: "30–60 days", notes: "Primary authority." }, { phase: "Final Plat", duration: "30–45 days", notes: "Recorded plat." }], fees: [{ type: "Connection Fees", range: "$1k–$5k", notes: "Local authorities." }], env: [{ item: "Karst Geology", detail: "Geotech borings mandatory." }], zones: "Many rural counties unzoned.", tips: ["Verify sinkholes before LOI."] }
+};
+
 function JurisdictionIntel() {
-  const { project } = useContext(Ctx);
-  const stLabel = project.state || "(select state above)";
-  const muniLabel = project.municipality || "(enter city/county above)";
-  const loc = project.state ? (project.municipality ? `${project.municipality}, ${project.state}` : project.state) : "United States";
-  const regSys = `You are a real estate development regulatory expert for ${loc}. Provide accurate, detailed information about development regulations, zoning codes, building requirements, and approval processes specific to ${loc}. Include specific code sections, fee amounts, timelines, and agency contacts when possible. If the user hasn't selected a state yet, ask them to select one from the top bar.`;
-  const feeSys = `You are a development fee estimation expert for ${loc}. Provide detailed estimates of all development-related fees including impact fees, permit fees, school fees, park fees (Quimby), utility connection fees, plan check fees, and any special district assessments. Give specific dollar amounts or ranges for ${loc}. Break down by fee type and agency. Note which fees are per-unit, per-lot, per-SF, or lump sum.`;
-  const compSys = `You are a compliance and environmental regulatory expert for ${loc}. Cover state-specific environmental review processes (CEQA for CA, SEPA for WA, NEPA overlay, etc.), wetlands regulations, endangered species requirements, air quality rules, stormwater management, and any state-specific compliance mandates. Provide specific statutes, agencies, and timelines for ${loc}.`;
-  const zoneSys = `You are a zoning and land use expert for ${loc}. Help with zoning code interpretation, density calculations, setback requirements, height limits, parking ratios, design standards, overlay zones, specific plans, and variance/CUP procedures. Reference specific municipal code sections for ${loc} when possible.`;
+  const [sel, setSel] = useState("CA");
+  const [tab, setTab] = useState(0);
+  const data = JURIS_DATA[sel] || JURIS_DATA.CA;
+  const states = Object.keys(JURIS_DATA);
+  const tabs = ["Overview", "Timeline", "Fees", "Environmental", "AI Advisor"];
+
+  const aiSystem = `You are a real estate development expert for ${data.name}. Entitlements: ${data.entitlement.map(e => e.phase).join(", ")}. Fees: ${data.fees.map(f => f.type).join(", ")}. Env: ${data.env.map(e => e.item).join(", ")}. Specific tips: ${data.tips.join(" | ")}. Reference specific statutes and agencies local to ${data.name}.`;
+
   return (
-    <Tabs tabs={["Regulatory Intel", "Fee Estimator", "Compliance & Environmental", "Zoning Assistant"]}>
-      <div>
-        <Card title={`Regulatory Intelligence — ${loc}`} action={project.state ? <Badge label={ST_ABBR[project.state] || ""} color={C.gold} /> : <Badge label="Set State — —" color={C.amber} />}>
-          <div style={{ fontSize: 12, color: C.sub, marginBottom: 10 }}>Ask about entitlement processes, approval timelines, required studies, hearing procedures, and regulatory requirements for <b style={{ color: C.gold }}>{loc}</b>.</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-            {["What is the entitlement process?", "Typical approval timeline?", "Required environmental studies?", "Planning commission procedures?", "Appeal process and timeline?", "Subdivision map requirements?"].map((q, i) => (
-              <button key={i} style={{ ...S.btn(), padding: "4px 10px", fontSize: 9 }} onClick={() => { const el = document.getElementById("reg-agent-input"); if (el) { el.value = q; el.dispatchEvent(new Event("input", { bubbles: true })); } }}>{q}</button>
-            ))}
-          </div>
-          <Agent id="RegulatoryIntel" system={regSys} placeholder={`Ask about regulations in ${loc}...`} />
-        </Card>
+    <div className="axiom-stack-20">
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap", alignItems: "center" }}>
+        <div style={{ fontSize: 9, fontWeight: 700, color: C.dim, letterSpacing: 1 }}>SELECT STATE:</div>
+        {states.map(st => (
+          <button
+            key={st}
+            style={{
+              padding: "5px 12px", fontSize: 10, fontWeight: sel === st ? 700 : 400,
+              background: sel === st ? C.gold : C.bg2, color: sel === st ? "#000" : C.sub,
+              border: `1px solid ${sel === st ? C.gold : C.border}`, borderRadius: 3, cursor: "pointer"
+            }}
+            onClick={() => setSel(st)}
+          >
+            {JURIS_DATA[st].flag} {JURIS_DATA[st].abbr}
+          </button>
+        ))}
       </div>
-      <div>
-        <Card title={`Fee Estimator — ${loc}`} action={project.state ? <Badge label={ST_ABBR[project.state] || ""} color={C.gold} /> : <Badge label="Set State — —" color={C.amber} />}>
-          <div style={{ fontSize: 12, color: C.sub, marginBottom: 10 }}>Get detailed fee estimates for development in <b style={{ color: C.gold }}>{loc}</b>. Includes impact fees, permit fees, school fees, park fees, and utility connections.</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-            {["Estimate all impact fees for 50-lot SFR subdivision", "School fee rates and calculation method?", "Park/Quimby fee requirements?", "Utility connection fee estimates?", "Permit and plan check fees?", "Any special assessment districts?"].map((q, i) => (
-              <button key={i} style={{ ...S.btn(), padding: "4px 10px", fontSize: 9 }}>{q}</button>
-            ))}
-          </div>
-          <Agent id="FeeEstimator" system={feeSys} placeholder={`Ask about fees in ${loc}...`} />
-        </Card>
+
+      <div style={{ background: C.bg2, border: `1px solid ${C.gold}44`, borderRadius: 6, padding: "14px 18px", marginBottom: 14, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+        <div>
+          <div style={{ fontSize: 20, fontWeight: 700, color: C.gold }}>{data.flag} {data.name} Intelligence</div>
+          <div style={{ fontSize: 12, color: C.sub, marginTop: 4, maxWidth: 600, lineHeight: 1.5 }}>{data.overview}</div>
+        </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: 9, color: C.dim }}>TIMELINE</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: C.text }}>6–18 Mos</div>
+        </div>
       </div>
-      <div>
-        <Card title={`Compliance & Environmental — ${loc}`} action={project.state ? <Badge label={ST_ABBR[project.state] || ""} color={C.gold} /> : <Badge label="Set State — —" color={C.amber} />}>
-          <div style={{ fontSize: 12, color: C.sub, marginBottom: 10 }}>State-specific environmental review and compliance requirements for <b style={{ color: C.gold }}>{loc}</b>.</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-            {["Environmental review process?", "Wetlands and waterway regulations?", "Endangered species requirements?", "Stormwater and NPDES permits?", "Air quality and GHG requirements?", "Cultural resource survey requirements?"].map((q, i) => (
-              <button key={i} style={{ ...S.btn(), padding: "4px 10px", fontSize: 9 }}>{q}</button>
-            ))}
-          </div>
-          <Agent id="ComplianceIntel" system={compSys} placeholder={`Ask about environmental compliance in ${loc}...`} />
-        </Card>
+
+      <div style={{ display: "flex", background: C.bg2, borderBottom: `1px solid ${C.border}`, marginBottom: 16 }}>
+        {tabs.map((t, i) => (
+          <button key={i} style={S.tab(tab === i)} onClick={() => setTab(i)}>{t}</button>
+        ))}
       </div>
-      <div>
-        <Card title={`Zoning Assistant — ${loc}`} action={project.state ? <Badge label={ST_ABBR[project.state] || ""} color={C.gold} /> : <Badge label="Set State — —" color={C.amber} />}>
-          <div style={{ fontSize: 12, color: C.sub, marginBottom: 10 }}>Zoning code interpretation and land use guidance for <b style={{ color: C.gold }}>{loc}</b>.</div>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 12 }}>
-            {["What zones allow residential subdivision?", "Density and lot size minimums?", "Setback and height requirements?", "Parking requirements for SFR?", "How to apply for a variance?", "ADU regulations and allowances?"].map((q, i) => (
-              <button key={i} style={{ ...S.btn(), padding: "4px 10px", fontSize: 9 }}>{q}</button>
+
+      {tab === 0 && (
+        <div style={S.g2}>
+          <Card title="Market Strategy">
+            {data.tips.map((t, i) => (
+              <div key={i} style={{ padding: "8px 0", borderBottom: `1px solid ${C.border}`, fontSize: 12, color: C.sub }}>
+                <span style={{ color: C.gold, fontWeight: 700, marginRight: 8 }}>{i + 1}.</span> {t}
+              </div>
             ))}
-          </div>
-          <Agent id="ZoningAssistant" system={zoneSys} placeholder={`Ask about zoning in ${loc}...`} />
+          </Card>
+          <Card title="Zoning Framework">
+            <div style={{ fontSize: 12, color: C.sub, lineHeight: 1.7 }}>{data.zones}</div>
+          </Card>
+        </div>
+      )}
+
+      {tab === 1 && (
+        <Card title="Entitlement Timeline">
+          {data.entitlement.map((e, i) => (
+            <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderBottom: `1px solid ${C.border}` }}>
+              <div>
+                <div style={{ fontSize: 13, color: C.text, fontWeight: 600 }}>{e.phase}</div>
+                <div style={{ fontSize: 10, color: C.dim }}>{e.notes}</div>
+              </div>
+              <Badge label={e.duration} color={C.blue} />
+            </div>
+          ))}
         </Card>
-      </div>
-    </Tabs>
+      )}
+
+      {tab === 2 && (
+        <Card title="Fee Schedule">
+          <table style={S.tbl}>
+            <thead><tr><th style={S.th}>Fee Type</th><th style={S.th}>Range</th><th style={S.th}>Notes</th></tr></thead>
+            <tbody>
+              {data.fees.map((f, i) => (
+                <tr key={i}>
+                  <td style={S.td}>{f.type}</td>
+                  <td style={{ ...S.td, color: C.green }}>{f.range}</td>
+                  <td style={{ ...S.td, fontSize: 10 }}>{f.notes}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Card>
+      )}
+
+      {tab === 3 && (
+        <Card title="Environmental Scrutiny">
+          {data.env.map((e, i) => (
+            <div key={i} style={{ padding: "10px 0", borderBottom: `1px solid ${C.border}` }}>
+              <div style={{ fontSize: 13, color: C.text, fontWeight: 600 }}>{e.item}</div>
+              <div style={{ fontSize: 12, color: C.sub }}>{e.detail}</div>
+            </div>
+          ))}
+        </Card>
+      )}
+
+      {tab === 4 && (
+        <Card title="AI Strategic Advisor">
+          <Agent id="JurisAI" system={aiSystem} placeholder={`Ask about development in ${data.name}...`} />
+        </Card>
+      )}
+    </div>
   );
 }
 

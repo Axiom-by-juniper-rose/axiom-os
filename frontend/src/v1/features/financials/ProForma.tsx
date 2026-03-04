@@ -125,7 +125,7 @@ export function ProForma() {
                                     <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} vertical={false} />
                                     <XAxis dataKey="name" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                                     <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} tickFormatter={v => `$${v}M`} />
-                                    <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [`$${Number(v).toFixed(2)}M`, ""]} />
+                                    <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [`$${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`, ""]} />
                                     <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                                         {waterfallData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -168,21 +168,21 @@ export function ProForma() {
                 <Card title="Financing Stack">
                     <div className="axiom-stack-15">
                         <div className="axiom-flex-between">
-                            <span className="axiom-dim-12">Senior Debt</span>
+                            <span style={{ color: "var(--c-sub)", fontSize: 12 }}>Senior Debt</span>
                             <span className="axiom-bold">{fmt.M(calculations.loanAmount)}</span>
                         </div>
                         <Progress value={loan.ltc} color="var(--c-blue)" />
                         <div className="axiom-flex-between">
-                            <span className="axiom-kpi-sub">Equity Required</span>
+                            <span style={{ color: "var(--c-sub)", fontSize: 12 }}>Equity Required</span>
                             <span className="axiom-bold">{fmt.M(calculations.equityNeed)}</span>
                         </div>
                         <div style={{ borderTop: "1px solid var(--c-border)", paddingTop: 10 }}>
                             <div className="axiom-flex-between" style={{ padding: "2px 0" }}>
-                                <span className="axiom-kpi-sub">LP Equity ({equity.lpPct}%)</span>
+                                <span style={{ color: "var(--c-sub)", fontSize: 11 }}>LP Equity ({equity.lpPct}%)</span>
                                 <span className="axiom-text-11">{fmt.M(calculations.lpEquity)}</span>
                             </div>
                             <div className="axiom-flex-between" style={{ padding: "2px 0" }}>
-                                <span className="axiom-kpi-sub">GP Equity ({equity.gpPct}%)</span>
+                                <span style={{ color: "var(--c-sub)", fontSize: 11 }}>GP Equity ({equity.gpPct}%)</span>
                                 <span className="axiom-text-11">{fmt.M(calculations.gpEquity)}</span>
                             </div>
                         </div>
@@ -192,15 +192,15 @@ export function ProForma() {
                 <Card title="Return Metrics">
                     <div className="axiom-stack-12">
                         <div className="axiom-flex-between" style={{ padding: "8px 0", borderBottom: "1px solid var(--c-bg)" }}>
-                            <span className="axiom-kpi-sub">LP Multiple</span>
+                            <span style={{ color: "var(--c-sub)", fontSize: 12 }}>LP Multiple</span>
                             <span style={{ fontSize: 14, fontWeight: "bold", color: "var(--c-gold)" }}>{calculations.lpMultiple.toFixed(2)}x</span>
                         </div>
                         <div className="axiom-flex-between" style={{ padding: "8px 0", borderBottom: "1px solid var(--c-bg)" }}>
-                            <span className="axiom-kpi-sub">GP Multiple</span>
+                            <span style={{ color: "var(--c-sub)", fontSize: 12 }}>GP Multiple</span>
                             <span style={{ fontSize: 14, fontWeight: "bold", color: "var(--c-gold)" }}>{calculations.gpMultiple.toFixed(2)}x</span>
                         </div>
                         <div className="axiom-flex-between" style={{ padding: "8px 0" }}>
-                            <span className="axiom-kpi-sub">ROI (Unlevered)</span>
+                            <span style={{ color: "var(--c-sub)", fontSize: 12 }}>ROI (Unlevered)</span>
                             <span style={{ fontSize: 14, fontWeight: "bold", color: calculations.roi >= 0 ? "var(--c-green)" : "var(--c-red)" }}>{calculations.roi.toFixed(1)}%</span>
                         </div>
                     </div>

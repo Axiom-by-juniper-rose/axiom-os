@@ -163,7 +163,7 @@ export function DataIntel() {
                             <CartesianGrid strokeDasharray="3 6" stroke={GRID_STROKE} vertical={false} />
                             <XAxis dataKey="name" tick={AXIS_TICK} axisLine={false} tickLine={false} />
                             <YAxis tick={AXIS_TICK} axisLine={false} tickLine={false} allowDecimals={false} />
-                            <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [v === 1 ? "1 record" : `${v} records`, "Intel Records"]} />
+                            <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [v === 1 ? "1 record" : `${Number(v).toLocaleString()} records`, "Intel Records"]} />
                             <Bar dataKey="count" name="Intel Records" fill="var(--c-gold)" radius={[3, 3, 0, 0]} />
                         </BarChart>
                     </ResponsiveContainer>

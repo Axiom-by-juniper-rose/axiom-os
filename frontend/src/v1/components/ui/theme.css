@@ -9,10 +9,10 @@
     --c-bg4: #1A1E2A;
     --c-border: #1E2330;
     --c-border2: #2D3748;
-    --c-dim: #94A3B8;
+    --c-dim: #E2E8F0;
     --c-text: #F8FAFC;
-    --c-muted: #94A3B8;
-    --c-sub: #E2E8F0;
+    --c-muted: #E2E8F0;
+    --c-sub: #F1F5F9;
     --c-green: #22C55E;
     --c-blue: #3B82F6;
     --c-purple: #8B5CF6;
@@ -127,6 +127,12 @@ body.light-mode {
     border: 1px solid var(--c-border2);
     background: transparent;
     color: var(--c-muted);
+}
+
+.axiom-btn:hover {
+    color: var(--c-text);
+    border-color: var(--c-text);
+    background: var(--c-bg2);
 }
 
 .axiom-btn-gold {
@@ -265,9 +271,9 @@ body.light-mode {
     bottom: calc(100% + 8px);
     left: 50%;
     transform: translateX(-50%);
-    background: var(--c-bg);
+    background: var(--c-text);
     border: 1px solid var(--c-border);
-    color: var(--c-text);
+    color: var(--c-bg);
     padding: 6px 10px;
     border-radius: 4px;
     font-size: 11px;

@@ -14,7 +14,7 @@ import {
 } from "recharts";
 
 const CHART_STYLE = { fontSize: 11, fontFamily: "Inter, sans-serif" };
-const TT = () => ({ contentStyle: { background: "#0D0F13", border: "1px solid #1A1D24", borderRadius: 4, color: "#E0E2E8", fontSize: 11, boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }, itemStyle: { color: "#C4A052" } });
+const TT = () => ({ contentStyle: { background: "#0D0F13", border: "1px solid #1A1D24", borderRadius: 4, color: "#E0E2E8", fontSize: 11, boxShadow: "0 4px 12px rgba(0,0,0,0.5)" }, itemStyle: { color: "#C4A052" }, separator: " " });
 const TT_BAR = () => ({ ...TT(), cursor: { fill: "#1A1D24", opacity: 0.4 } });
 const onChartClick = (setSel: (data: unknown) => void) => (data: any) => {
     if (data && data.activePayload) setSel(data.activePayload[0].payload);
@@ -282,7 +282,7 @@ export function Deals() {
                                     <CartesianGrid strokeDasharray="3 6" stroke="var(--c-border)" strokeOpacity={0.5} vertical={false} />
                                     <XAxis dataKey="name" stroke="var(--c-dim)" tick={{ fontSize: 11, fontFamily: 'Inter,sans-serif', fill: 'var(--c-muted)' }} />
                                     <YAxis stroke="var(--c-dim)" tick={{ fontSize: 11, fontFamily: 'Inter,sans-serif', fill: 'var(--c-muted)' }} allowDecimals={false} />
-                                    <Tooltip {...TT_BAR()} formatter={(v: any, name: any) => [v === 1 ? "1 deal" : `${v} deals`, name]} labelFormatter={l => `Stage: ${l}`} />
+                                    <Tooltip {...TT_BAR()} formatter={(v: any, name: any) => [v === 1 ? "1 deal" : `${Number(v).toLocaleString()} deals`, name]} labelFormatter={l => `Stage: ${l}`} />
                                     <Legend wrapperStyle={{ fontSize: 11, color: 'var(--c-muted)', paddingTop: 12 }} />
                                     <Bar dataKey="count" name="Deals" fill="var(--c-gold)" radius={[3, 3, 0, 0]} />
                                 </BarChart>
@@ -294,7 +294,7 @@ export function Deals() {
                                     <CartesianGrid strokeDasharray="3 6" stroke="var(--c-border)" strokeOpacity={0.5} />
                                     <XAxis dataKey="name" stroke="var(--c-dim)" tick={{ fontSize: 9, fill: 'var(--c-muted)' }} />
                                     <YAxis stroke="var(--c-dim)" tick={{ fontSize: 12, fontFamily: 'Inter,sans-serif', fill: 'var(--c-muted)' }} tickFormatter={v => `$${v.toFixed(1)}M`} />
-                                    <Tooltip {...TT()} formatter={(v: any, name: any) => [`$${Number(v).toFixed(2)}M`, name]} labelFormatter={l => `Stage: ${l}`} />
+                                    <Tooltip {...TT()} formatter={(v: any, name: any) => [`$${Number(v).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}M`, name]} labelFormatter={l => `Stage: ${l}`} />
                                     <Legend wrapperStyle={{ fontSize: 11, color: 'var(--c-muted)', paddingTop: 12 }} />
                                     <Bar dataKey="value" name="Deal Value" fill="var(--c-blue)" radius={[3, 3, 0, 0]} />
                                 </BarChart>

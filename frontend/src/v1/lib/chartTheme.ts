@@ -28,6 +28,7 @@ export const CHART_TT = {
     },
     cursor: { stroke: "rgba(212,168,67,0.4)", strokeWidth: 1, strokeDasharray: "4 4" },
     wrapperStyle: { outline: "none" },
+    separator: " ",
 };
 
 /** Tooltip props for Bar charts (block cursor instead of line cursor) */

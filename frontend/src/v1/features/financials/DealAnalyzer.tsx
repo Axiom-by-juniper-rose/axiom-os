@@ -90,7 +90,7 @@ export function DealAnalyzer() {
                                     fill="var(--c-gold)"
                                     fillOpacity={0.3}
                                 />
-                                <Tooltip {...CHART_TT} formatter={(v: any) => [v, "Score"]} />
+                                <Tooltip {...CHART_TT} formatter={(v: any) => [Number(v).toLocaleString(), "Score"]} />
                             </RadarChart>
                         </ResponsiveContainer>
                     </div>

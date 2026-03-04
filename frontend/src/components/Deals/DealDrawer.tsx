@@ -417,11 +417,11 @@ export const DealDrawer: React.FC<DealDrawerProps> = ({ deal, onClose, onUpdate 
                         <div className="space-y-6">
                             <div className="bg-slate-900 text-white p-6 rounded-lg shadow-xl relative overflow-hidden">
                                 <div className="relative z-10">
-                                    <h3 className="text-indigo-400 text-xs font-bold uppercase tracking-widest mb-1">Estimated Debt Capacity</h3>
+                                    <h3 className="text-indigo-300 text-xs font-bold uppercase tracking-widest mb-1">Estimated Debt Capacity</h3>
                                     <div className="text-3xl font-mono font-bold">
                                         {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(deal.acquisition_price * 0.75)}
                                     </div>
-                                    <p className="text-slate-400 text-xs mt-2">Based on target 75% LTV Senior Debt</p>
+                                    <p className="text-indigo-100 text-xs mt-2">Based on target 75% LTV Senior Debt</p>
                                 </div>
                                 <div className="absolute top-0 right-0 p-4 opacity-10">
                                     <Database size={120} />

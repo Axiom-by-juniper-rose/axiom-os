@@ -6,6 +6,7 @@ import {
     Radar, RadarChart, PolarGrid, PolarAngleAxis, ResponsiveContainer,
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip
 } from "recharts";
+import { CHART_TT_BAR } from "../../lib/chartTheme";
 
 interface Props { projectId: string; }
 
@@ -94,11 +95,7 @@ export function RiskRegistry({ projectId }: Props) {
                                 <CartesianGrid strokeDasharray="3 3" stroke="var(--c-border)" vertical={false} />
                                 <XAxis dataKey="name" tick={{ fill: "var(--c-dim)", fontSize: 10 }} axisLine={false} tickLine={false} />
                                 <YAxis tick={{ fill: "var(--c-dim)", fontSize: 10 }} axisLine={false} tickLine={false} />
-                                <Tooltip
-                                    cursor={{ fill: "var(--c-bg3)" }}
-                                    contentStyle={{ background: "var(--c-bg2)", border: "1px solid var(--c-border)", borderRadius: 8 }}
-                                    itemStyle={{ color: "var(--c-gold)" }}
-                                />
+                                <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [Number(v).toLocaleString(), "Risks"]} />
                                 <Bar dataKey="value" fill="var(--c-gold)" radius={[4, 4, 0, 0]} barSize={30} />
                             </BarChart>
                         </ResponsiveContainer>

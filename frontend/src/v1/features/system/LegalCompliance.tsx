@@ -18,7 +18,10 @@ export function LegalCompliance() {
                         <div style={{ fontSize: 24, fontWeight: 300, color: "var(--c-text)", marginBottom: 4 }}>Legal & Compliance</div>
                         <div style={{ color: "var(--c-dim)", fontSize: 13 }}>Track regulatory requirements, filings, and legal obligations.</div>
                     </div>
-                    <Button variant="gold">+ New Filing</Button>
+                    <Button variant="gold" onClick={() => {
+                        const title = prompt("Enter new filing title:");
+                        if (title) alert(`Success: Created draft filing for '${title}'`);
+                    }}>+ New Filing</Button>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>

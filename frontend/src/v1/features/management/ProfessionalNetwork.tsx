@@ -28,7 +28,10 @@ export function ProfessionalNetwork() {
                         <div style={{ fontSize: 24, fontWeight: 300, color: "var(--c-text)", marginBottom: 4 }}>Professional Network</div>
                         <div style={{ color: "var(--c-dim)", fontSize: 13 }}>Manage relationships with architects, engineers, and legal counsel.</div>
                     </div>
-                    <Button variant="gold">+ Add Professional</Button>
+                    <Button variant="gold" onClick={() => {
+                        const name = prompt("Enter professional's name:");
+                        if (name) alert(`Success: Added ${name} to your network.`);
+                    }}>+ Add Professional</Button>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr 1fr", gap: 12 }}>
@@ -82,7 +85,7 @@ export function ProfessionalNetwork() {
                                             <td className="axiom-td">{p.location}</td>
                                             <td className="axiom-td">{p.projects}</td>
                                             <td className="axiom-td" style={{ paddingRight: 16, textAlign: "right" }}>
-                                                <Button variant="ghost" style={{ padding: "4px 8px", fontSize: 11 }}>View Profile</Button>
+                                                <Button variant="ghost" style={{ padding: "4px 8px", fontSize: 11 }} onClick={() => alert(`Opening profile for ${p.name}`)}>View Profile</Button>
                                             </td>
                                         </tr>
                                     ))}

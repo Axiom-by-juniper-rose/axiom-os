@@ -45,8 +45,8 @@ export function Agent({ id, system, placeholder, context }: AgentProps) {
                 {!msgs.length && (
                     <div style={{ padding: 40, textAlign: "center", color: "var(--c-dim)" }}>
                         <div style={{ fontSize: 24, marginBottom: 10 }}>—</div>
-                        <div style={{ fontSize: 13 }}>Initializing secure session with {id}...</div>
-                        <div style={{ fontSize: 11, marginTop: 4 }}>How can I help you regarding this project?</div>
+                        <div style={{ fontSize: 13, color: "var(--c-teal)", fontWeight: 600 }}>✓ Secure session established with {id}</div>
+                        <div style={{ fontSize: 11, marginTop: 6, color: "var(--c-text)" }}>Waiting for your input...</div>
                     </div>
                 )}
                 {msgs.map((m, i) => (
@@ -61,7 +61,7 @@ export function Agent({ id, system, placeholder, context }: AgentProps) {
                         <div style={{ fontSize: 9, color: "var(--c-dim)", textTransform: "uppercase", marginBottom: 4, letterSpacing: 1 }}>
                             {m.role === "user" ? "You" : id}
                         </div>
-                        <div style={{ fontSize: 13, lineHeight: 1.5, whiteSpace: "pre-wrap" }}>{m.content}</div>
+                        <div style={{ fontSize: 13, lineHeight: 1.5, whiteSpace: "pre-wrap", color: m.role === "user" ? "#94A3B8" : "var(--c-text)" }}>{m.content}</div>
                     </div>
                 ))}
                 {busy && (

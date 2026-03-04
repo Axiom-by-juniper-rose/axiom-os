@@ -3,6 +3,7 @@ import { Card, KPI, Field, Button } from "../../components/ui/components";
 import { Agent } from "../agents/Agent";
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import { fmt } from "../../lib/utils";
+import { CHART_TT } from "../../lib/chartTheme";
 
 interface Props { projectId: string; }
 
@@ -63,7 +64,7 @@ export function ConceptDesign({ projectId }: Props) {
                                 <Pie data={pieD} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={60} label={({ name, value }) => `${name} ${value}%`}>
                                     {pieD.map((d, i) => <Cell key={i} fill={d.fill} />)}
                                 </Pie>
-                                <Tooltip />
+                                <Tooltip {...CHART_TT} formatter={(v: any) => [`${v}%`, ""]} />
                             </PieChart>
                         </ResponsiveContainer>
                     </div>

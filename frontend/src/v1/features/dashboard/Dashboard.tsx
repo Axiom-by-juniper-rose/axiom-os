@@ -4,6 +4,7 @@ import { Card, KPI, Button, Badge } from "../../components/ui/components";
 import { fmt } from "../../lib/utils";
 import { DEFAULT_FIN, DEFAULT_RISKS, DEFAULT_PERMITS } from "../../lib/defaults";
 import { buildMonthlyCashFlows, calcIRR } from "../../lib/math";
+import { CHART_TT, CHART_TT_BAR } from "../../lib/chartTheme";
 import {
     AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
     XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
@@ -12,17 +13,6 @@ import {
 interface Props { projectId: string; }
 
 // ─── CHART THEME ─────────────────────────────────────────────
-const TT_STYLE = {
-    contentStyle: {
-        background: "rgba(13,15,19,0.97)",
-        border: "1px solid rgba(212,168,67,0.4)",
-        borderRadius: 8, fontSize: 12,
-        padding: "10px 14px", color: "#E2E8F0",
-    },
-    itemStyle: { color: "#D4A843", fontWeight: 600 },
-    labelStyle: { color: "#8892A4", fontSize: 11, textTransform: "uppercase" as const, letterSpacing: 1 },
-    cursor: { stroke: "rgba(212,168,67,0.3)", strokeWidth: 1 },
-};
 const PIE_COLORS = ["#D4A843", "#3B82F6", "#22C55E", "#8B5CF6", "#F59E0B", "#10B981", "#EF4444"];
 const AXIS_STYLE = { fontSize: 10, fill: "#6B7280" };
 const GRID_STROKE = "rgba(255,255,255,0.05)";
@@ -107,8 +97,14 @@ export function Dashboard({ projectId }: Props) {
                     <div className="axiom-page-title">{project.name || "Unnamed Project"}</div>
                 </div>
                 <div className="axiom-flex-gap-12">
-                    <Button label="Export Summary" variant="gold" />
-                    <Button label="Refresh Data" />
+                    <Button label="Export Summary" variant="gold" onClick={() => {
+                        const blob = new Blob([JSON.stringify(snap, null, 2)], { type: 'application/json' });
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = 'Axiom-Project-Export.json';
+                        document.body.appendChild(a); a.click(); document.body.removeChild(a);
+                    }} />
+                    <Button label="Refresh Data" onClick={() => updateProject({ lastRefresh: Date.now() })} />
                 </div>
             </div>
 
@@ -144,7 +140,7 @@ export function Dashboard({ projectId }: Props) {
                             <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
                             <XAxis dataKey="month" tick={AXIS_STYLE} interval={3} />
                             <YAxis tick={AXIS_STYLE} tickFormatter={v => `$${v}K`} />
-                            <Tooltip {...TT_STYLE} formatter={(v: any) => [`$${v}K`, ""]} />
+                            <Tooltip {...CHART_TT} formatter={(v: any) => [`$${Number(v).toLocaleString()}K`, ""]} />
                             <Legend wrapperStyle={{ fontSize: 10, color: "#6B7280" }} />
                             <Area type="monotone" dataKey="cashFlow" stroke="#D4A843" fill="url(#cfGrad)" strokeWidth={2} dot={false} name="Monthly" />
                             <Area type="monotone" dataKey="cumulative" stroke="#3B82F6" fill="url(#cumGrad)" strokeWidth={2} dot={false} name="Cumulative" />
@@ -168,7 +164,7 @@ export function Dashboard({ projectId }: Props) {
                                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} opacity={selectedSlice && _.name !== selectedSlice ? 0.4 : 1} />
                                     ))}
                                 </Pie>
-                                <Tooltip {...TT_STYLE} formatter={(v: any) => [`$${v}K`, ""]} />
+                                <Tooltip {...CHART_TT} formatter={(v: any) => [`$${Number(v).toLocaleString()}K`, ""]} />
                             </PieChart>
                         </ResponsiveContainer>
                         <div style={{ flex: 1 }}>
@@ -195,11 +191,11 @@ export function Dashboard({ projectId }: Props) {
                             <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
                             <XAxis dataKey="name" tick={AXIS_STYLE} />
                             <YAxis tick={AXIS_STYLE} tickFormatter={v => `$${v}K`} />
-                            <Tooltip {...TT_STYLE} />
+                            <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [`$${Number(v).toLocaleString()}K`, "Profit"]} />
                             <Legend wrapperStyle={{ fontSize: 10, color: "#6B7280" }} />
-                            <Bar dataKey="profit" name="Profit" radius={[3, 3, 0, 0]}>
+                            <Bar dataKey="profit" name="Profit">
                                 {snap.scenarios.map((s, i) => (
-                                    <Cell key={i} fill={s.profit > 0 ? ["#F59E0B", "#D4A843", "#22C55E"][i] : "#EF4444"} />
+                                    <Cell key={i} fill={s.profit >= 0 ? ["#F59E0B", "#D4A843", "#22C55E"][i] || "#D4A843" : "#EF4444"} />
                                 ))}
                             </Bar>
                         </BarChart>
@@ -216,7 +212,7 @@ export function Dashboard({ projectId }: Props) {
                                             <Cell key={i} fill={item.color} />
                                         ))}
                                     </Pie>
-                                    <Tooltip {...TT_STYLE} formatter={(v: any) => [v, "risks"]} />
+                                    <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [Number(v).toLocaleString(), "risks"]} />
                                 </PieChart>
                             </ResponsiveContainer>
                             <div style={{ flex: 1 }}>
