@@ -677,6 +677,11 @@ textarea::placeholder {
     color: var(--c-dim);
 }
 
+.axiom-text-13 {
+    font-size: 13px;
+    color: var(--c-text);
+}
+
 .axiom-text-13-dim {
     font-size: 13px;
     color: var(--c-dim);
