@@ -20,6 +20,13 @@ const PP = [C.gold, C.blue, C.teal, C.purple, "#F87171", C.amber, C.green];
 const US_STATES = ["", "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado", "Connecticut", "Delaware", "District of Columbia", "Florida", "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa", "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland", "Massachusetts", "Michigan", "Minnesota", "Mississippi", "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire", "New Jersey", "New Mexico", "New York", "North Carolina", "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania", "Rhode Island", "South Carolina", "South Dakota", "Tennessee", "Texas", "Utah", "Vermont", "Virginia", "Washington", "West Virginia", "Wisconsin", "Wyoming"];
 const ST_ABBR = { "": "", "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "District of Columbia": "DC", "Florida": "FL", "Georgia": "GA", "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA", "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD", "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH", "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC", "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT", "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY" };
 
+const TIER_NAMES = { free: "Free", pro: "Pro", pro_plus: "Pro+", enterprise: "Enterprise" };
+const TIER_PRICES = { pro: 299, pro_plus: 799, enterprise: 2499 };
+const TIER_CONFIG = { free: { level: 0 }, pro: { level: 1 }, pro_plus: { level: 2 }, enterprise: { level: 3 } };
+
+const callClaude = callLLM;
+const TierGate = ({ children }) => children;
+
 const NAV = [
   { id: "dashboard", label: "Command Center", group: "Overview" },
   { id: "connectors", label: "Connectors & APIs", group: "Overview" },
@@ -187,6 +194,42 @@ const downloadText = (text, filename) => {
   URL.revokeObjectURL(url);
 };
 
+// ─── FINANCIAL CALCULATION ENGINE ────────────────────────────────
+const calcNPV = (rate, cashFlows) => cashFlows.reduce((npv, cf, t) => npv + cf / Math.pow(1 + rate, t), 0);
+const calcIRR = (cashFlows, guess = 0.1, maxIter = 100, tol = 1e-7) => {
+  let rate = guess;
+  for (let i = 0; i < maxIter; i++) {
+    const npv = calcNPV(rate, cashFlows);
+    const dnpv = cashFlows.reduce((d, cf, t) => d - t * cf / Math.pow(1 + rate, t + 1), 0);
+    if (Math.abs(dnpv) < tol) break;
+    const newRate = rate - npv / dnpv;
+    if (Math.abs(newRate - rate) < tol) return newRate;
+    rate = newRate;
+  }
+  return rate;
+};
+const buildMonthlyCashFlows = (fin) => {
+  const lots = fin.totalLots || 1;
+  const hard = lots * (fin.hardCostPerLot || 0);
+  const soft = hard * (fin.softCostPct || 0) / 100;
+  const fees = (fin.planningFees || 0) + ((fin.permitFeePerLot || 0) + (fin.schoolFee || 0) + (fin.impactFeePerLot || 0)) * lots;
+  const cont = (hard + soft) * (fin.contingencyPct || 0) / 100;
+  const totalCost = (fin.landCost || 0) + (fin.closingCosts || 0) + hard + soft + cont + fees;
+  const constMonths = Math.max(6, Math.ceil(lots / 8));
+  const sellMonths = Math.ceil(lots / (fin.absorbRate || 1));
+  const totalMonths = constMonths + sellMonths;
+  const monthlyCost = (totalCost - (fin.landCost || 0)) / constMonths;
+  const monthlyRev = (fin.absorbRate || 1) * (fin.salesPricePerLot || 0) * (1 - (fin.salesCommission || 0) / 100);
+  const flows = [-(fin.landCost || 0) - (fin.closingCosts || 0)];
+  for (let m = 1; m <= totalMonths; m++) {
+    let cf = 0;
+    if (m <= constMonths) cf -= monthlyCost;
+    if (m > constMonths) cf += monthlyRev;
+    flows.push(cf);
+  }
+  return { flows, constMonths, sellMonths, totalMonths };
+};
+
 
 
 const Ctx = createContext(null);
@@ -260,20 +303,20 @@ function Agent({ id, system, placeholder }) {
         </select>
         <span style={{ fontSize: 9, color: C.dim }}>{MODELS.find(x => x.id === model)?.provider || ""}</span>
       </div>
-      <div style={{ maxHeight: 300, overflowY: "auto", marginBottom: 9 }}>
-        {!msgs.length && <div style={{ fontSize: 12, color: C.dim, fontStyle: "italic", padding: "8px 0" }}>Agent ready — ask anything about this section.</div>}
+      <div style={{ maxHeight: 400, overflowY: "auto", marginBottom: 9 }}>
+        {!msgs.length && <div style={{ fontSize: 13, color: C.dim, fontStyle: "italic", padding: "10px 0" }}>Agent ready \u2014 ask anything about this section.</div>}
         {msgs.map((m, i) => (
           <div key={i} style={S.bub(m.role)}>
-            <div style={{ fontSize: 9, color: C.dim, letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>{m.role === "user" ? "You" : `· ${id}`}</div>
-            <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 13, lineHeight: 1.5, color: "var(--c-text)" }}>{m.content}</pre>
+            <div style={{ fontSize: 10, color: C.dim, letterSpacing: 1, marginBottom: 4, textTransform: "uppercase" }}>{m.role === "user" ? "You" : `\u00B7 ${id}`}</div>
+            <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 15, lineHeight: 1.6, color: "var(--c-text)" }}>{m.content}</pre>
           </div>
         ))}
-        {busy && <div style={{ ...S.bub("assistant"), color: C.gold, fontSize: 12 }}>· Processing...</div>}
+        {busy && <div style={{ ...S.bub("assistant"), color: C.gold, fontSize: 13 }}>\u00B7 Processing...</div>}
       </div>
       <div style={{ display: "flex", gap: 7 }}>
-        <input style={{ ...S.inp, flex: 1 }} value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder={placeholder || "Ask the agent..."} />
-        <button style={S.btn("gold")} onClick={send} disabled={busy}>Send</button>
-        <button style={S.btn()} onClick={() => setMsgs([])}>Clear</button>
+        <input style={{ ...S.inp, flex: 1, padding: "10px 12px", fontSize: 14 }} value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder={placeholder || "Ask the agent..."} />
+        <button style={{ ...S.btn("gold"), padding: "10px 20px" }} onClick={send} disabled={busy}>Send</button>
+        <button style={{ ...S.btn(), padding: "10px 15px" }} onClick={() => setMsgs([])}>Clear</button>
       </div>
     </div>
   );
@@ -398,16 +441,17 @@ function Dashboard() {
     { sub: "Financial", val: finS }, { sub: "Due Diligence", val: ddS },
     { sub: "Risk", val: riskS }, { sub: "Permits", val: permS }, { sub: "Market", val: 68 },
   ];
-  const [layout, setLayout] = useLS("axiom_dashboard_layout", "Standard");
+  const { viewMode, setViewMode } = usePrj();
+  const layout = viewMode === "Metric" ? "Metrics" : viewMode === "Minimalistic" ? "Compact" : "Standard";
 
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <div style={{ fontSize: 13, color: "var(--c-dim)", textTransform: "uppercase", letterSpacing: 2 }}>Project Overview</div>
         <div style={{ display: "flex", gap: 4, background: "var(--c-bg2)", padding: 4, borderRadius: 6, border: `1px solid var(--c-border)` }}>
-          {["Standard", "Compact", "Metrics"].map(l => (
-            <div key={l} style={{ padding: "4px 12px", fontSize: 10, cursor: "pointer", borderRadius: 4, background: layout === l ? "var(--c-border2)" : "transparent", color: layout === l ? "var(--c-text)" : "var(--c-dim)", fontWeight: layout === l ? 600 : 400, transition: "all 0.1s" }} onClick={() => setLayout(l)}>
-              {l}
+          {["Standard", "Metric", "Minimalistic"].map(m => (
+            <div key={m} style={{ padding: "4px 12px", fontSize: 10, cursor: "pointer", borderRadius: 4, background: viewMode === m ? "var(--c-border2)" : "transparent", color: viewMode === m ? "var(--c-text)" : "var(--c-dim)", fontWeight: viewMode === m ? 600 : 400, transition: "all 0.1s" }} onClick={() => setViewMode(m)}>
+              {m}
             </div>
           ))}
         </div>
@@ -2577,42 +2621,42 @@ function CopilotPanel() {
       </div>
       <div style={S.g2}>
         <div>
-          <Card title={`Copilot — · ${modes[mode].label}`}>
-            <div style={{ maxHeight: 450, overflowY: "auto", marginBottom: 12 }}>
+          <Card title={`Copilot \u2014 \u00B7 ${modes[mode].label}`}>
+            <div style={{ height: 450, overflowY: "auto", marginBottom: 12 }}>
               {!msgs.length && (
-                <div style={{ padding: 20, textAlign: "center" }}>
-                  <div style={{ fontSize: 32, color: C.gold, marginBottom: 8 }}>— </div>
-                  <div style={{ fontSize: 14, color: C.text, fontWeight: 600 }}>Axiom Copilot</div>
+                <div style={{ padding: 40, textAlign: "center" }}>
+                  <div style={{ fontSize: 32, color: C.gold, marginBottom: 8 }}>\u2014</div>
+                  <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 600 }}>Axiom Copilot</div>
                   <div style={{ fontSize: 12, color: C.dim, marginTop: 4 }}>Your AI development intelligence assistant</div>
-                  <div style={{ fontSize: 10, color: C.dim, marginTop: 8 }}>Mode: {modes[mode].label} — · Project: {project.name || "None"}</div>
+                  <div style={{ fontSize: 10, color: C.dim, marginTop: 8 }}>Mode: {modes[mode].label} \u2014 \u00B7 Project: {project.name || "None"}</div>
                 </div>
               )}
               {msgs.map((m, i) => (
                 <div key={i} style={S.bub(m.role)}>
-                  <div style={{ fontSize: 9, color: C.dim, letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>{m.role === "user" ? "You" : "—  Copilot"}</div>
-                  <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 13, lineHeight: 1.5 }}>{m.content}</pre>
+                  <div style={{ fontSize: 9, color: C.dim, letterSpacing: 1, marginBottom: 3, textTransform: "uppercase" }}>{m.role === "user" ? "You" : "\u2014 Copilot"}</div>
+                  <pre style={{ margin: 0, whiteSpace: "pre-wrap", fontFamily: "inherit", fontSize: 13, lineHeight: 1.5, color: "var(--c-text)" }}>{m.content}</pre>
                 </div>
               ))}
-              {busy && <div style={{ ...S.bub("assistant"), color: C.gold, fontSize: 12 }}>—  Thinking...</div>}
+              {busy && <div style={{ ...S.bub("assistant"), color: C.gold, fontSize: 12 }}>\u2014 Thinking...</div>}
             </div>
             <div style={{ display: "flex", gap: 7 }}>
-              <input style={{ ...S.inp, flex: 1 }} value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder={`Ask ${modes[mode].label}...`} />
-              <button style={S.btn("gold")} onClick={send} disabled={busy}>Send</button>
+              <input style={{ ...S.inp, flex: 1, padding: "10px 12px", fontSize: 14 }} value={inp} onChange={e => setInp(e.target.value)} onKeyDown={e => e.key === "Enter" && send()} placeholder={`Ask ${modes[mode].label}...`} />
+              <button style={{ ...S.btn("gold"), padding: "10px 20px" }} onClick={send} disabled={busy}>Send</button>
             </div>
           </Card>
         </div>
         <div>
           <Card title="Quick Prompts">
             {prompts.map((p, i) => (
-              <div key={i} style={{ padding: "7px 0", borderBottom: "1px solid #0F1117", cursor: "pointer" }} onClick={() => setInp(p)}>
+              <div key={i} style={{ padding: "8px 0", borderBottom: `1px solid ${C.border}`, cursor: "pointer" }} onClick={() => setInp(p)}>
                 <span style={{ fontSize: 12, color: C.sub }}>{p}</span>
               </div>
             ))}
           </Card>
           <Card title="Context">
             <div style={{ fontSize: 12, color: C.dim }}>
-              {[["Project", project.name || "—"], ["Address", project.address || "—"], ["Jurisdiction", project.jurisdiction || "—"], ["Lots", fin.totalLots], ["Land Cost", fmt.usd(fin.landCost)], ["Sale Price/Lot", fmt.usd(fin.salesPricePerLot)]].map(([l, v]) => (
-                <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "4px 0", borderBottom: "1px solid #0F1117" }}>
+              {[["Project", project.name || "\u2014"], ["Address", project.address || "\u2014"], ["Lots", fin.totalLots], ["Land Cost", fmt.usd(fin.landCost)], ["Sale Price/Lot", fmt.usd(fin.salesPricePerLot)]].map(([l, v]) => (
+                <div key={l} style={{ display: "flex", justifyContent: "space-between", padding: "5px 0", borderBottom: `1px solid ${C.border}` }}>
                   <span>{l}</span><span style={{ color: C.sub }}>{v}</span>
                 </div>
               ))}
@@ -2622,7 +2666,7 @@ function CopilotPanel() {
       </div>
     </div>
   );
-}
+};
 
 function Agents() {
   return (
@@ -2641,7 +2685,6 @@ function InvoicesPayments() {
     { id: 3, vendor: "City of Sacramento", amount: 8500, date: "2025-02-18", status: "Approved", category: "Fees", deal: "Hawk Valley" },
     { id: 4, vendor: "A+ Grading Services", amount: 28000, date: "2025-02-22", status: "New", category: "Hard Costs", deal: "Sunset Ridge" },
   ]);
-  const [active, setActive] = useState("all");
   const stats = [
     { l: "Total Invoiced", v: fmt.usd(invoices.reduce((a, b) => a + b.amount, 0)), c: C.text },
     { l: "Paid", v: fmt.usd(invoices.filter(i => i.status === "Paid").reduce((a, b) => a + b.amount, 0)), c: C.green },
@@ -2707,7 +2750,7 @@ function InvoicesPayments() {
 }
 
 function SiteManagement() {
-  const [tasks, setTasks] = useLS("axiom_site_tasks", [
+  const [tasks] = useLS("axiom_site_tasks", [
     { id: 1, name: "Mass Grading", start: "2025-03-01", dur: 14, progress: 0, status: "Planned" },
     { id: 2, name: "Wet Utilities", start: "2025-03-15", dur: 21, progress: 0, status: "Planned" },
     { id: 3, name: "Staking & Survey", start: "2025-02-25", dur: 3, progress: 100, status: "Complete" },
@@ -3507,7 +3550,7 @@ function ResourceCenter() {
   const resources = [
     { id: 1, title: "Land Development Feasibility Guide", category: "Getting Started", type: "Guide", desc: "Complete walkthrough of the development feasibility process from site identification through entitlement and construction.", readTime: "15 min", level: "Beginner", content: "LAND DEVELOPMENT FEASIBILITY GUIDE\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. SITE IDENTIFICATION\n───────────────────────\n• Define target market: geography, price point, product type\n• Source opportunities: MLS, off-market, broker networks, auctions\n• Initial screening: zoning, size, access, utilities, flood zone\n• Drive the site: visual inspection, neighborhood, traffic\n\n2. PRELIMINARY ANALYSIS\n──────────────────────────\n• Pull APN data: lot size, zoning, assessor value\n• Check General Plan designation and overlays\n• Verify utility availability: water, sewer, electric, gas\n• Review FEMA flood maps and NWI wetlands\n• Research title: easements, encumbrances, liens\n\n3. FINANCIAL FEASIBILITY\n───────────────────────────\n• Build preliminary pro forma:\n  - Land cost + closing costs\n  - Hard costs: grading, utilities, roads, landscaping\n  - Soft costs: engineering, architecture, permits, legal\n  - Impact fees: city, school, park, drainage\n  - Financing: construction loan interest, fees\n  - Contingency: 10-15% of hard + soft costs\n• Revenue: comparable lot sales ($/lot, $/SF), absorption rate\n• Target: 15-25% margin on cost, 20%+ unlevered IRR\n\n4. DUE DILIGENCE\n────────────────\n• Phase I ESA • Title Report • ALTA Survey\n• Geotech Investigation • Bio/Cultural Survey\n• Traffic Study • Utility will-serve letters\n\n5. ENTITLEMENT PROCESS\n──────────────────────────\n• Pre-app meeting → Tentative Map → CEQA\n• Design Review → Planning Commission → Council\n• Final Map recordation\n\n6. CONSTRUCTION & DELIVERY\n──────────────────────────────\n• Grading → Utilities → Roads → Landscaping\n• Punch list → NOC → Lot sales" },
     { id: 2, title: "Pro Forma Modeling Best Practices", category: "Financial Modeling", type: "Guide", desc: "How to structure a development pro forma, including cost categories, revenue assumptions, and sensitivity analysis.", readTime: "20 min", level: "Intermediate", content: "PRO FORMA MODELING BEST PRACTICES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nSTRUCTURE YOUR PRO FORMA\n──────────────────────────\n\n1. LAND ACQUISITION\n   • Purchase price, closing costs (1-2%), DD costs\n\n2. HARD COSTS (Direct Construction)\n   • Grading: $8K-$15K/lot\n   • Wet utilities: $15K-$25K/lot\n   • Dry utilities: $3K-$8K/lot\n   • Roads & paving: $6K-$12K/lot\n   • Landscaping: lump sum\n\n3. SOFT COSTS (Indirect)\n   • Civil engineering: 5-8% of hard costs\n   • Legal: $50K-$150K\n   • Project management: 3-5% of hard costs\n\n4. FEES & EXACTIONS\n   • City: $5K-$30K/lot • School: $3-$5/SF\n   • Park (Quimby): $3K-$8K/lot\n\n5. FINANCING\n   • Construction loan interest (model monthly draws)\n   • Origination fee: 0.5-1.5%\n\n6. CONTINGENCY: 10% hard, 5-10% soft\n\nSENSITIVITY ANALYSIS\n──────────────────────\nTest: Lot price ±10%, Costs ±15%, Absorption ±30%,\nInterest rate ±100bps, Timeline +6 months\n\nKEY METRICS: Gross margin, Developer spread,\nUnlevered IRR (20%+), Cash-on-cash, Breakeven lots" },
-    { id: 3, title: "CEQA Compliance Roadmap", category: "Entitlements", type: "Reference", desc: "Step-by-step guide to California Environmental Quality Act compliance for residential subdivisions.", readTime: "25 min", level: "Advanced", content: "CEQA COMPLIANCE ROADMAP\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nSTEP 1: DETERMINE IF CEQA APPLIES\n───────────────────────────────────\n• Is it a 'project' under CEQA? (physical change)\n• Is it discretionary? (government judgment)\n• Does an exemption apply?\n  - Statutory exemptions (PRC §21080)\n  - Categorical exemptions (14 CCR §15300-15333)\n  - Common: Class 32 (Infill Development)\n\nSTEP 2: INITIAL STUDY\n───────────────────────\nPrepare IS using Appendix G checklist:\nAesthetics, Air Quality, Biological Resources,\nCultural Resources, Geology, GHG, Hazards,\nHydrology, Noise, Transportation, Utilities, Wildfire\n\nSTEP 3: DOCUMENT TYPE\n───────────────────────\n• Negative Declaration (ND): no significant impacts\n• Mitigated ND (MND): mitigated to less-than-significant\n• EIR: significant unavoidable impacts\n\nTIMELINES\n───────────\n• MND: 3-6 months (20-30 day public review)\n• EIR: 12-24 months (45-day review)\n\nCOSTS: MND $15K-$50K, Focused EIR $75K-$200K,\nFull EIR $200K-$500K+" },
+    { id: 3, title: "CEQA Compliance Roadmap", category: "Entitlements", type: "Reference", desc: "Step-by-step guide to California Environmental Quality Act compliance for residential subdivisions.", readTime: "25 min", level: "Advanced", content: "CEQA COMPLIANCE ROADMAP\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nSTEP 1: DETERMINE IF CEQA APPLIES\n───────────────────────────────────\n• Is it a 'project' under CEQA? (physical change)\n• Is it discretionary? (government judgment)\n• Does an exemption apply?\n  - Statutory exemptions (PRC §21080)\n  - Categorical exemptions (14 CCR §15300-15333)\n  - Common: Class 32 (Infill Development)\n\nSTEP 2: INITIAL STUDY\n───────────────────────\nPrepare IS using Appendix G checklist:\nAesthetics, Air Quality, Biological Resources,\nCultural Resources, Geology, GHG, Hazards,\nHydrology, Transportation, Utilities, Wildfire\n\nSTEP 3: DOCUMENT TYPE\n───────────────────────\n• Negative Declaration (ND): no significant impacts\n• Mitigated ND (MND): mitigated to less-than-significant\n• EIR: significant unavoidable impacts\n\nTIMELINES\n───────────\n• MND: 3-6 months (20-30 day public review)\n• EIR: 12-24 months (45-day review)\n\nCOSTS: MND $15K-$50K, Focused EIR $75K-$200K,\nFull EIR $200K-$500K+" },
     { id: 4, title: "Comparable Sales Analysis Methodology", category: "Market Analysis", type: "Guide", desc: "How to identify, analyze, and adjust comparable land and lot sales for pricing accuracy.", readTime: "12 min", level: "Intermediate", content: "COMPARABLE SALES ANALYSIS\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n1. IDENTIFY COMPS\n───────────────────────\n• Same submarket, 5-mile radius\n• Sold within 12 months (24 max)\n• Similar lot count and sizes (±25%)\n• Same product type\nSources: MLS, CoStar, county recorder, brokers\n\n2. ADJUSTMENT CATEGORIES\n───────────────────────────\n• Time: 3-8% annual appreciation typical\n• Location: school district, access, views (5-15%)\n• Physical: lot size, slope (5-20%), shape\n• Entitlement: raw (+0%), entitled (+20-40%),\n  finished lots (+60-100%)\n\n3. CALCULATE\n────────────\n• Price per lot or per SF/acre\n• Net adjustment ≤25% total\n• Use 3-6 comps minimum\n• Discard outliers\n• Weight by similarity and recency" },
     { id: 5, title: "Understanding Impact Fees", category: "Legal", type: "Reference", desc: "Comprehensive overview of development impact fees, Quimby Act, school fees, and mitigation measures.", readTime: "18 min", level: "Intermediate", content: "UNDERSTANDING IMPACT FEES\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nCITY/COUNTY FEES (per unit)\n───────────────────────────\n• Traffic: $2K-$15K • Water: $3K-$12K\n• Sewer: $3K-$10K • Storm drainage: $1K-$5K\n• Fire: $500-$3K • Police: $200-$1.5K\n\nSCHOOL FEES\n───────────\n• Level 1 (statutory): $4.79/SF residential\n• Level 2: higher, requires state approval\n• Level 3 (Mello-Roos): unlimited, 2/3 vote\n\nPARK (QUIMBY ACT)\n─────────────────\n• 3 acres per 1,000 residents\n• In-lieu fees: $3K-$10K/lot\n• Applies to subdivisions of 5+ lots only\n\nNEGOTIATION STRATEGIES\n──────────────────────────\n• Request fee deferral to building permit\n• Seek credits for oversized infrastructure\n• Lock in fee schedule at tentative map\n• Use development agreements for certainty" },
     { id: 6, title: "Construction Cost Estimation", category: "Construction", type: "Guide", desc: "Methods for estimating horizontal improvement costs per lot for subdivision development.", readTime: "15 min", level: "Intermediate", content: "CONSTRUCTION COST ESTIMATION\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\nMASS GRADING: $8K-$15K/lot\n───────────────────────────\n• Balanced cut/fill: $3-$5/CY\n• Import/export: $8-$15/CY + trucking\n• Fine grading: $0.50-$1.00/SF\n\nWET UTILITIES: $15K-$25K/lot\n───────────────────────────\n• 8\" water main: $45-$65/LF\n• 12\" water main: $65-$95/LF\n• 8\" sewer main: $55-$80/LF\n• Storm drain 18\": $40-$60/LF\n• Manholes: $4K-$7K each\n\nDRY UTILITIES: $3K-$8K/lot\n───────────────────────────\n• Electric: $2K-$5K/lot (underground)\n• Gas: $1.5K-$3K/lot\n• Joint trench: 15-20% savings\n\nROADS: $6K-$12K/lot\n───────────────────\n• Subgrade: $2-$4/SF • Base: $3-$5/SF\n• Asphalt: $4-$7/SF • Curb: $25-$40/LF\n\nESCALATION: 4-6% annual, add 10% contingency" },
@@ -3601,10 +3644,138 @@ function ResourceCenter() {
   );
 }
 
+const ICMemoGenerator = ({ fin, project, risks }) => {
+  const [generating, setGenerating] = useState(false);
+  const [memo, setMemo] = useState("");
+  const [memoType, setMemoType] = useState("ic_memo");
 
+  const { flows } = buildMonthlyCashFlows(fin);
+  const totalCost = Math.abs(flows[0]) + flows.slice(1).reduce((sum, f) => sum + (f < 0 ? Math.abs(f) : 0), 0);
+  const revenue = fin.totalLots * fin.salesPricePerLot;
+  const profit = revenue * (1 - (fin.salesCommission || 0) / 100) - totalCost;
+  const margin = revenue > 0 ? profit / revenue * 100 : 0;
+  const roi = totalCost > 0 ? profit / totalCost * 100 : 0;
+  const openRisks = (risks || []).filter(r => r.status === "Open" || !r.status);
 
+  const MEMO_PROMPTS = {
+    ic_memo: `Generate a professional Investment Committee Memorandum for: ${project.name || "Unnamed"}. Total Lots: ${fin.totalLots} | Land: ${fmt.usd(fin.landCost)} | Total Cost: ${fmt.usd(totalCost)} | Profit: ${fmt.usd(profit)} | Margin: ${margin.toFixed(1)}%. Format with clear institutional headers.`,
+    lender_pkg: `Generate a Lender Package for: ${project.name || "Unnamed"}. Detailed sources and uses, project overview, and collateral analysis for construction loan committee.`,
+    exec_summary: `Generate a 1-page executive summary for: ${project.name || "Unnamed"}. Deal headline, investment thesis, risk summary, and recommendation.`,
+    risk_memo: `Generate a risk assessment matrix for: ${project.name || "Unnamed"}. Analyzed risks: ${openRisks.map(r => r.risk).join(", ")}.`,
+  };
 
+  const generate = async () => {
+    setGenerating(true); setMemo("");
+    const reply = await callClaude([{ role: "user", content: MEMO_PROMPTS[memoType] }], "You are a senior real estate investment analyst. Write precise, data-driven memos.");
+    setMemo(reply);
+    setGenerating(false);
+  };
 
+  const MEMO_TYPES = [
+    { id: "ic_memo", label: "IC Memo", desc: "Full Investment Committee Memo" },
+    { id: "lender_pkg", label: "Lender Package", desc: "Construction loan presentation" },
+    { id: "exec_summary", label: "Exec Summary", desc: "1-page deal overview" },
+    { id: "risk_memo", label: "Risk Memo", desc: "Risk assessment matrix" },
+  ];
+
+  return (
+    <div>
+      <div style={{ display: "flex", gap: 8, marginBottom: 16, flexWrap: "wrap" }}>
+        {MEMO_TYPES.map(mt => (
+          <button key={mt.id} onClick={() => setMemoType(mt.id)} style={{ ...S.btn(memoType === mt.id ? "gold" : ""), border: memoType === mt.id ? `1px solid ${C.gold}` : `1px solid ${C.border}`, display: "flex", flexDirection: "column", alignItems: "flex-start", padding: "8px 14px", background: memoType === mt.id ? C.gold + "11" : "transparent" }}>
+            <span style={{ fontSize: 12, fontWeight: 700, color: memoType === mt.id ? C.gold : "var(--c-text)" }}>{mt.label}</span>
+            <span style={{ fontSize: 9, color: C.dim, marginTop: 2 }}>{mt.desc}</span>
+          </button>
+        ))}
+      </div>
+      <div style={{ background: C.bg4, border: `1px solid ${C.border}`, borderRadius: 6, padding: 14, marginBottom: 14 }}>
+        <div style={{ fontSize: 10, color: C.dim, letterSpacing: 2, marginBottom: 10, textTransform: "uppercase" }}>Deal Snapshot \u2014 {project.name || "No Active Project"}</div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(6, 1fr)", gap: 12 }}>
+          {[["Lots", fin.totalLots || "\u2014"], ["Total Cost", fmt.M(totalCost)], ["Revenue", fmt.M(revenue)], ["Profit", fmt.M(profit)], ["Margin", margin.toFixed(1) + "%"], ["ROI", roi.toFixed(1) + "%"]].map(([l, v]) => (
+            <div key={l} style={{ textAlign: "center" }}>
+              <div style={{ fontSize: 9, color: C.dim }}>{l}</div>
+              <div style={{ fontSize: 13, color: "var(--c-text)", fontWeight: 700, marginTop: 3 }}>{v}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <button onClick={generate} disabled={generating} style={{ ...S.btn("gold"), width: "100%", padding: "14px 0", fontSize: 14, fontWeight: 700, marginBottom: 14, opacity: generating ? 0.6 : 1 }}>
+        {generating ? "\u27F3 Generating AI Memo..." : `\u2726 Generate ${MEMO_TYPES.find(m => m.id === memoType)?.label}`}
+      </button>
+      {memo && (
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+            <div style={{ fontSize: 11, color: C.green, fontWeight: 600 }}>\u2713 Document Generated</div>
+            <div style={{ display: "flex", gap: 8 }}>
+              <button style={{ ...S.btn(), padding: "6px 12px", fontSize: 11 }} onClick={() => navigator.clipboard.writeText(memo)}>Copy</button>
+            </div>
+          </div>
+          <div style={{ background: "#09090D", border: `1px solid ${C.border}`, borderRadius: 6, padding: 24, fontFamily: "inherit", fontSize: 13, color: "var(--c-text)", lineHeight: 1.6, whiteSpace: "pre-wrap", maxHeight: 500, overflowY: "auto" }}>
+            {memo}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+const ReportsBinder = () => {
+  const { fin, project, risks, permits } = usePrj();
+  const sections = [
+    "1. Executive Summary", "2. Site \u0026 Property Description", "3. Entitlement \u0026 Zoning Analysis",
+    "4. Physical \u0026 Environmental Due Diligence", "5. Infrastructure \u0026 Utilities Report",
+    "6. Concept Yield \u0026 Design Summary", "7. Market Analysis \u0026 Comparables",
+    "8. Financial Pro Forma \u0026 Analysis", "9. Risk Assessment \u0026 Mitigation Plan",
+    "10. Permit \u0026 Approval Schedule", "11. Investment Summary \u0026 Conclusion",
+  ];
+
+  return (
+    <Tabs tabs={["IC Memo Generator", "Binder Contents", "Export Options"]}>
+      <div>
+        <Card title="Investment Committee Memo Generator" action={<Badge label="AI-Powered" color={C.gold} />}>
+          <div style={{ fontSize: 12, color: C.dim, marginBottom: 16, lineHeight: 1.5 }}>Generate institutional-quality IC memos, lender packages, and risk assessments directly from your project data. Powered by Claude AI.</div>
+          <TierGate feature="ai_agents">
+            <ICMemoGenerator fin={fin} project={project} risks={risks} permits={permits} />
+          </TierGate>
+        </Card>
+      </div>
+      <div>
+        <Card title="Development Feasibility Binder" action={<Badge label={project.name || "Unnamed Project"} color={C.gold} />}>
+          <div style={{ fontSize: 12, color: C.dim, marginBottom: 16 }}>Complete investor and lender ready development package.</div>
+          {sections.map((s, i) => (
+            <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: `1px solid ${C.border}` }}>
+              <input type="checkbox" defaultChecked style={{ accentColor: C.gold, width: 16, height: 16 }} />
+              <span style={{ flex: 1, fontSize: 13, color: "var(--c-text)" }}>{s}</span>
+              <Badge label="Ready" color={C.green} />
+            </div>
+          ))}
+        </Card>
+      </div>
+      <div>
+        <TierGate feature="exports">
+          <Card title="Export \u0026 Distribution">
+            {[
+              { fmt: "PDF - Investor Package", desc: "Full binder with all sections, charts, and maps" },
+              { fmt: "PDF - Lender Package", desc: "Financial highlights, pro forma, collateral summary" },
+              { fmt: "Excel - Pro Forma Workbook", desc: "Interactive financial model with sensitivity analysis" },
+              { fmt: "PowerPoint - Investor Deck", desc: "10-slide investment summary presentation" },
+              { fmt: "Word - DD Summary", desc: "Due diligence checklist and findings memo" },
+              { fmt: "CSV - Data Export", desc: "Raw data export for external analysis" },
+            ].map((e, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", borderBottom: `1px solid ${C.border}` }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 14, color: "var(--c-text)", fontWeight: 600 }}>{e.fmt}</div>
+                  <div style={{ fontSize: 11, color: C.dim, marginTop: 4 }}>{e.desc}</div>
+                </div>
+                <button style={{ ...S.btn("gold"), padding: "8px 20px" }} onClick={() => alert("Export started for " + e.fmt)}>Export</button>
+              </div>
+            ))}
+          </Card>
+        </TierGate>
+      </div>
+    </Tabs>
+  );
+};
 const JURIS_DATA = {
   FL: { name: "Florida", abbr: "FL", flag: "🌴", overview: "Florida has a streamlined subdivision approval process under the Florida Subdivision Act (Ch. 177 F.S.). No CEQA equivalent.", entitlement: [{ phase: "Pre-Application", duration: "2–4 weeks", notes: "Identify issues early." }, { phase: "Preliminary Plat", duration: "30–60 days", notes: "Staff review." }, { phase: "Public Hearing", duration: "30–45 days", notes: "Quasi-judicial." }, { phase: "Final Recording", duration: "60–120 days", notes: "Filed with Clerk." }], fees: [{ type: "Impact (Roads)", range: "$3,000–$8,000", notes: "County-specific." }, { type: "Impact (Schools)", range: "$2,500–$6,500", notes: "School board set." }], env: [{ item: "Wetlands", detail: "FDEP & WMD jurisdiction. Mitigation required." }], zones: "Municipality specific. R-1, R-3, PUD common.", tips: ["DRI review > 3,000 units.", "School concurrency required."] },
   TX: { name: "Texas", abbr: "TX", flag: "⭐", overview: "Texas is developer-friendly with minimal state-level land use regulation. 30-day statutory shot clock for plats.", entitlement: [{ phase: "Preliminary Plat", duration: "30 days", notes: "Statutory clock." }, { phase: "City Approval", duration: "30 days", notes: "Final authority." }], fees: [{ type: "Impact Fees", range: "$0–$15,000", notes: "LGC Ch 395." }], env: [{ item: "TCEQ Stormwater", detail: "NOI for > 1ac." }], zones: "No city-wide zoning in Houston.", tips: ["MUD strategy for infrastructure."] },
@@ -3749,8 +3920,37 @@ function NeuralNet() {
     { id: "output", name: "Output Layer", nodes: ["Deal Score", "Go/No-Go", "Optimal Price", "Timeline", "Risk Rating"], color: C.gold, desc: "Final deal intelligence with confidence intervals" },
   ];
 
-  const dealScore = Math.round(45 + Math.random() * 40);
-  const confidence = Math.round(70 + Math.random() * 20);
+  const computeDealScore = () => {
+    const hard = fin.totalLots * (fin.hardCostPerLot || 0);
+    const soft = hard * (fin.softCostPct || 0) / 100;
+    const fees = (fin.planningFees || 0) + ((fin.permitFeePerLot || 0) + (fin.schoolFee || 0) + (fin.impactFeePerLot || 0)) * fin.totalLots;
+    const cont = (hard + soft) * (fin.contingencyPct || 0) / 100;
+    const totalCost = (fin.landCost || 0) + (fin.closingCosts || 0) + hard + soft + cont + fees;
+    const revenue = fin.totalLots * (fin.salesPricePerLot || 0);
+    const comm = revenue * (fin.salesCommission || 0) / 100;
+    const reserves = totalCost * (fin.reservePercentage || 0) / 100;
+    const profit = revenue - comm - reserves - totalCost;
+    const margin = revenue > 0 ? profit / revenue * 100 : 0;
+    const roi = totalCost > 0 ? profit / totalCost * 100 : 0;
+    const months = Math.ceil(fin.totalLots / (fin.absorbRate || 1));
+
+    const marginScore = Math.min(100, Math.max(0, margin * 3.3));
+    const roiScore = Math.min(100, Math.max(0, roi * 2.5));
+    const absorpScore = Math.min(100, Math.max(0, (1 - months / 60) * 100));
+    const costScore = Math.min(100, Math.max(0, totalCost > 0 ? (1 - (fin.landCost || 0) / totalCost) * 100 : 50));
+    const scaleScore = Math.min(100, Math.max(0, Math.log10(Math.max(1, revenue)) * 15 - 50));
+
+    return Math.round(marginScore * 0.30 + roiScore * 0.25 + absorpScore * 0.20 + costScore * 0.15 + scaleScore * 0.10);
+  };
+
+  const computeConfidence = () => {
+    const fields = [fin.totalLots, fin.landCost, fin.hardCostPerLot, fin.softCostPct, fin.salesPricePerLot, fin.absorbRate, fin.planningFees, fin.permitFeePerLot, fin.contingencyPct, fin.salesCommission, project.name, project.state, project.address];
+    const filled = fields.filter(f => f && f !== 0 && f !== "").length;
+    return Math.round((filled / fields.length) * 100);
+  };
+
+  const dealScore = computeDealScore();
+  const confidence = computeConfidence();
 
   const runPipeline = async () => {
     setPipelineRunning(true); setPipelineLog([]);
@@ -3786,7 +3986,15 @@ function NeuralNet() {
       case "Comps": data.metrics = [["Comps Found", "14"], ["Avg $/Lot", "$165K"], ["Trend", "+4.2%"]]; data.insight = `Recent sales in ${loc} indicate strong upward price velocity. Adjusted values applied to pro forma.`; break;
       case "Market Trends": data.metrics = [["Supply", "Low"], ["Demand", "High"], ["DOM", "42"]]; data.insight = `Macroeconomic indicators and local permit tracking suggest a 12-18 month supply shortage in the target submarket.`; break;
       case "Demographics": data.metrics = [["Med. Income", "$98K"], ["Pop Growth", "2.1%"], ["Age", "34"]]; data.insight = `Target demographic aligns with product mix. Strong influx of millennial buyers matching the entry-level price point.`; break;
-      case "Finance": data.metrics = [["Total Cost", "$14.2M"], ["Const. Loan", "65% LTC"], ["Equity", "$4.9M"]]; data.insight = `Capital stack modeled. Current prevailing rates support a 7.5% debt yield on stabilized value.`; break;
+      case "Finance": {
+        const h = fin.totalLots * (fin.hardCostPerLot || 0), s = h * (fin.softCostPct || 0) / 100;
+        const f = (fin.planningFees || 0) + ((fin.permitFeePerLot || 0) + (fin.schoolFee || 0) + (fin.impactFeePerLot || 0)) * fin.totalLots;
+        const c = (h + s) * (fin.contingencyPct || 0) / 100;
+        const tc = (fin.landCost || 0) + (fin.closingCosts || 0) + h + s + c + f;
+        data.metrics = [["Total Cost", fmt.M(tc)], ["Equity Need", fmt.M(tc * 0.35)], ["Debt", fmt.M(tc * 0.65)]];
+        data.insight = `Capital stack modeled for ${pName}. Total project cost ${fmt.M(tc)} with ${fin.totalLots} lots at ${fmt.usd(fin.hardCostPerLot)}/lot hard cost.`;
+        break;
+      }
 
       case "Location Score": data.metrics = [["Walk Score", "74"], ["Transit", "Good"], ["Schools", "8/10"]]; data.insight = `Extracted feature: Location ranks in the 85th percentile relative to the MSA. Strong driver for premium pricing.`; break;
       case "Density Potential": data.metrics = [["Yield Test", "Pass"], ["Efficiency", "82%"], ["Max Lots", "54"]]; data.insight = `Extracted feature: Site geometry allows for high density. Current plan of ${fin.totalLots} lots is optimal for FAR limits.`; break;
@@ -3795,8 +4003,15 @@ function NeuralNet() {
       case "Risk Factors": data.metrics = [["Entitlement", "Med"], ["Const.", "Low"], ["Market", "Med"]]; data.insight = `Extracted feature: Environmental and geotechnical risks are minimal. Primary risk remains timeline elongation during permits.`; break;
       case "Demand Signal": data.metrics = [["Search Vol", "High"], ["Pre-sales", "N/A"], ["Waitlist", "Growing"]]; data.insight = `Extracted feature: Forward-looking demand indicators (Zillow/Redfin query data) show sustained interest in this specific asset class.`; break;
 
-      case "Feasibility Score": data.metrics = [["Internal Score", "84/100"], ["Threshold", ">70"], ["Status", "Viable"]]; data.insight = `Pattern matched: This deal profile closely mirrors 142 successful projects in our historical training set. High probability of success.`; break;
-      case "IRR Prediction": data.metrics = [["Base", "18.4%"], ["Bull", "24.1%"], ["Bear", "12.2%"]]; data.insight = `Pattern matched: Monte Carlo simulation across 10,000 runs confirms expected IRR exceeds the internal hurdle rate of 15%.`; break;
+      case "Feasibility Score": data.metrics = [["Internal Score", `${dealScore}/100`], ["Threshold", ">70"], ["Status", dealScore > 70 ? "Viable" : dealScore > 50 ? "Marginal" : "Weak"]]; data.insight = `Deterministic scoring: margin (30%), ROI (25%), absorption speed (20%), cost structure (15%), scale (10%). Confidence: ${confidence}% based on data completeness.`; break;
+      case "IRR Prediction": {
+        const { flows: irrFlows } = buildMonthlyCashFlows(fin);
+        const irrCalc = calcIRR(irrFlows, 0.02) * 12 * 100;
+        const irrVal = Math.min(99, Math.max(-20, isNaN(irrCalc) ? 0 : irrCalc));
+        data.metrics = [["Base", `${irrVal.toFixed(1)}%`], ["Bull", `${(irrVal * 1.35).toFixed(1)}%`], ["Bear", `${(irrVal * 0.65).toFixed(1)}%`]];
+        data.insight = `IRR computed via Newton-Raphson iteration on ${irrFlows.length}-month cash flow model. Monthly flows derived from ${fin.totalLots} lots at ${fmt.usd(fin.salesPricePerLot)}/lot.`;
+        break;
+      }
       case "Absorption Model": data.metrics = [["Duration", "16 mo"], ["Phase 1", "Fast"], ["Phase 2", "Stabilized"]]; data.insight = `Pattern matched: Non-linear absorption curve applied. Initial 3 months expected to capture pent-up demand before stabilizing.`; break;
       case "Risk Heatmap": data.metrics = [["Concentration", "Q3 25"], ["Severity", "2.4/5"], ["Mitigation", "Active"]]; data.insight = `Pattern matched: Highest risk concentration occurs during horizontal construction phase. Buffer added to carry costs.`; break;
 
@@ -3827,7 +4042,7 @@ function NeuralNet() {
   };
 
   const NeuronNode = ({ label, color, active, onClick }) => (
-    <div onClick={onClick} style={{ padding: "6px 10px", borderRadius: 20, border: `1.5px solid ${active ? color : color + "55"}`, background: active ? color + "22" : "transparent", cursor: "pointer", fontSize: 10, color: active ? color : C.muted, fontWeight: active ? 600 : 400, transition: "all 0.3s", fontFamily: "Inter,sans-serif", textAlign: "center", minWidth: 70, position: "relative" }}>
+    <div onClick={onClick} style={{ padding: "6px 10px", borderRadius: 20, border: `1.5px solid ${active ? color : "var(--c-border2)"}`, background: active ? color + "22" : "transparent", cursor: "pointer", fontSize: 10, color: active ? color : "var(--c-dim)", fontWeight: active ? 600 : 400, transition: "all 0.3s", fontFamily: "Inter,sans-serif", textAlign: "center", minWidth: 70, position: "relative" }}>
       {active && <div style={{ position: "absolute", top: -2, right: -2, width: 6, height: 6, background: color, borderRadius: 3, boxShadow: `0 0 8px ${color}` }} />}
       {label}
     </div>
@@ -3840,7 +4055,7 @@ function NeuralNet() {
           <div style={{ fontSize: 12, color: C.sub, marginBottom: 16 }}>Visual neural network showing how deal intelligence is computed through feature extraction and pattern recognition layers.</div>
           <div style={{ display: "flex", gap: 8, justifyContent: "space-between", padding: "20px 0", background: C.bg2, borderRadius: 6, border: `1px solid ${C.border}`, marginBottom: 14, position: "relative", overflow: "hidden" }}>
             <div style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, background: `radial-gradient(ellipse at center, ${C.gold}05 0%, transparent 70%)` }} />
-            {layers.map((layer, li) => (
+            {layers.map((layer) => (
               <div key={layer.id} style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: 8, padding: "0 12px", zIndex: 1 }}>
                 <div style={{ fontSize: 10, color: layer.color, fontWeight: 700, letterSpacing: 1, textTransform: "uppercase", marginBottom: 4, fontFamily: "Inter,sans-serif" }}>{layer.name}</div>
                 {layer.nodes.map((node, ni) => (
@@ -4061,12 +4276,12 @@ function Legal() {
     { id: 3, name: "Acceptable Use Policy", status: "Active", version: "1.4", lastUpdated: "2024-11-01", effectiveDate: "2024-11-01", type: "Policy", notes: "Standard AUP for SaaS platform.", content: "AXIOM OS \u2014 ACCEPTABLE USE POLICY\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nVersion 1.4 | Effective: November 1, 2024\n\n1. PURPOSE\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nThis Acceptable Use Policy ('AUP') governs your use of the Axiom OS platform and all associated services. Violation may result in suspension or termination.\n\n2. PERMITTED USE\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nAxiom OS is designed exclusively for:\n  \u2022 Real estate development analysis and feasibility\n  \u2022 CRM and deal pipeline management\n  \u2022 Financial modeling and pro forma creation\n  \u2022 Market research and comparable analysis\n  \u2022 Project management and due diligence tracking\n  \u2022 Document generation and reporting\n  \u2022 Team collaboration and communication\n\n3. PROHIBITED CONDUCT\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nYou may NOT:\n\n3.1 Illegal Activities\n  \u2022 Use the Service for money laundering or fraud\n  \u2022 Violate securities laws or regulations\n  \u2022 Engage in discriminatory practices (Fair Housing Act)\n  \u2022 Violate anti-corruption or bribery laws\n\n3.2 Technical Abuse\n  \u2022 Reverse engineer or decompile the Service\n  \u2022 Introduce viruses, worms, or malicious code\n  \u2022 Attempt to access other users' accounts or data\n  \u2022 Circumvent security measures or rate limits\n  \u2022 Use automated tools to scrape or data-mine\n\n3.3 Content Restrictions\n  \u2022 Upload illegal, defamatory, or obscene content\n  \u2022 Infringe copyrights, trademarks, or patents\n  \u2022 Upload personally identifiable information of others without consent\n  \u2022 Store protected health information (PHI)\n\n3.4 AI-Specific Rules\n  \u2022 Do not use AI features to generate fraudulent documents\n  \u2022 Do not rely on AI outputs as legal or financial advice\n  \u2022 Do not use AI to discriminate against protected classes\n  \u2022 Do not input confidential third-party data into AI without authorization\n\n4. RESOURCE LIMITS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  \u2022 API rate limits per plan tier apply\n  \u2022 Storage limits per plan tier apply\n  \u2022 AI query limits per plan tier apply\n  \u2022 Excessive usage may be throttled\n\n5. ENFORCEMENT\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  \u2022 First violation: written warning\n  \u2022 Second violation: 7-day suspension\n  \u2022 Third violation: permanent termination\n  \u2022 Severe violations: immediate termination\n\n6. REPORTING\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nReport AUP violations to: abuse@axiomos.com" },
     { id: 4, name: "Data Processing Agreement", status: "Draft", version: "1.0", lastUpdated: "2025-02-10", effectiveDate: "", type: "Agreement", notes: "Required for enterprise customers. Pending legal review.", content: "AXIOM OS \u2014 DATA PROCESSING AGREEMENT\n\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\u2550\nVersion 1.0 | Status: DRAFT\n\n1. DEFINITIONS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  \u2022 'Controller': the Customer\n  \u2022 'Processor': Axiom OS, Inc.\n  \u2022 'Data Subject': individuals whose data is processed\n  \u2022 'Personal Data': any information relating to an identified or identifiable natural person\n  \u2022 'Processing': any operation performed on Personal Data\n  \u2022 'Sub-processor': third party engaged by Processor\n\n2. SCOPE AND PURPOSE\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nThis DPA applies when Axiom OS processes Personal Data on behalf of the Customer. Processing includes:\n  \u2022 Contact management (names, emails, phone numbers)\n  \u2022 Deal pipeline data (property addresses, financial terms)\n  \u2022 Document storage and generation\n  \u2022 AI-powered analysis (data processed in-session)\n\n3. PROCESSOR OBLIGATIONS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nThe Processor shall:\n  \u2022 Process data only on documented instructions from Controller\n  \u2022 Ensure personnel are bound by confidentiality\n  \u2022 Implement appropriate technical and organizational measures\n  \u2022 Assist Controller with data subject requests\n  \u2022 Delete or return data upon termination\n  \u2022 Make available information for audits\n\n4. SECURITY MEASURES\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  \u2022 Encryption: TLS 1.3 transit, AES-256 at rest\n  \u2022 Access control: RBAC, MFA, least privilege\n  \u2022 Network: VPC isolation, WAF, DDoS protection\n  \u2022 Monitoring: SIEM, intrusion detection, log retention\n  \u2022 Backup: daily encrypted backups, geo-redundant\n  \u2022 Incident response: documented plan, 72-hour notification\n\n5. SUB-PROCESSORS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\nCurrent sub-processors:\n  \u2022 Vercel (hosting) \u2014 United States\n  \u2022 Supabase (database) \u2014 United States\n  \u2022 Stripe (billing) \u2014 United States\n  \u2022 Anthropic (AI) \u2014 United States\n  \u2022 OpenAI (AI) \u2014 United States\n  \u2022 Groq (AI) \u2014 United States\n\nController will be notified 30 days before any sub-processor change.\n\n6. DATA TRANSFERS\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  \u2022 All data processed within the United States\n  \u2022 EU transfers: Standard Contractual Clauses (SCCs) apply\n  \u2022 UK transfers: UK Addendum to SCCs\n  \u2022 Transfer Impact Assessments available on request\n\n7. DATA BREACH NOTIFICATION\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  \u2022 Processor will notify Controller within 72 hours\n  \u2022 Notification includes: nature, categories, likely consequences, measures taken\n  \u2022 Processor will cooperate with Controller's investigation\n\n8. TERM AND TERMINATION\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n  \u2022 Effective concurrent with the main service agreement\n  \u2022 Upon termination: data deleted within 30 days\n  \u2022 Customer may request data export before deletion\n  \u2022 Certify deletion upon Controller request" },
   ]);
-  const [trademarks, setTrademarks] = useLS("axiom_trademarks", [
+  const [trademarks] = useLS("axiom_trademarks", [
     { id: 1, name: "AXIOM OS", type: "Word Mark", status: "Registered", serial: "97654321", filingDate: "2024-03-15", regDate: "2024-09-20", classes: ["Class 42: SaaS", "Class 9: Software"], notes: "Primary brand mark. US Registration." },
     { id: 2, name: "Axiom Logo (\u25c8)", type: "Design Mark", status: "Registered", serial: "97654322", filingDate: "2024-03-15", regDate: "2024-10-01", classes: ["Class 42: SaaS"], notes: "Diamond/compass design mark." },
     { id: 3, name: "Development Intelligence", type: "Word Mark", status: "Pending", serial: "97789012", filingDate: "2024-11-01", regDate: "", classes: ["Class 42: SaaS"], notes: "Tagline mark. Office action response due April 2025." },
   ]);
-  const [compliance, setCompliance] = useLS("axiom_compliance", [
+  const [compliance] = useLS("axiom_compliance", [
     { id: 1, standard: "SOC 2 Type II", status: "In Progress", auditor: "Deloitte", nextAudit: "2025-06-01", lastAudit: "2024-12-15", score: 85, notes: "Trust Service Criteria: Security, Availability, Confidentiality" },
     { id: 2, standard: "GDPR", status: "Compliant", auditor: "Internal", nextAudit: "2025-03-01", lastAudit: "2025-01-15", score: 92, notes: "EU data protection. Data mapping and DPIA complete." },
     { id: 3, standard: "CCPA/CPRA", status: "Compliant", auditor: "Internal", nextAudit: "2025-04-01", lastAudit: "2025-01-15", score: 90, notes: "California privacy. Opt-out mechanism implemented." },
@@ -4328,6 +4543,8 @@ export default function App() {
   const [lightMode, setLightMode] = useLS("axiom_light_mode", false);
   const [chartSel, setChartSel] = useState(null);
   const [cmdKOpen, setCmdKOpen] = useState(false);
+  const [viewMode, setViewMode] = useLS("axiom_view_mode", "Standard");
+  const [zoom, setZoom] = useLS("axiom_zoom", 1.1);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -4350,13 +4567,91 @@ export default function App() {
       document.body.classList.remove('light-mode');
     }
   }, [lightMode]);
+
+  // --- Scaling & Pinch-to-Zoom Engine ---
+  useEffect(() => {
+    const handleWheel = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        const delta = e.deltaY > 0 ? -0.1 : 0.1;
+        setZoom(prev => Math.min(2, Math.max(0.5, Number((prev + delta).toFixed(1)))));
+      }
+    };
+
+    let lastTouchDistance = 0;
+    const handleTouchStart = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        lastTouchDistance = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+      }
+    };
+
+    const handleTouchMove = (e: TouchEvent) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        const distance = Math.hypot(
+          e.touches[0].pageX - e.touches[1].pageX,
+          e.touches[0].pageY - e.touches[1].pageY
+        );
+        const delta = (distance - lastTouchDistance) / 100;
+        setZoom(prev => Math.min(2, Math.max(0.5, Number((prev + delta).toFixed(2)))));
+        lastTouchDistance = distance;
+      }
+    };
+
+    window.addEventListener('wheel', handleWheel, { passive: false });
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    return () => {
+      window.removeEventListener('wheel', handleWheel);
+      window.removeEventListener('touchstart', handleTouchStart);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, [setZoom]);
   const [project, setProject] = useLS("axiom_project", { name: "New Development", address: "", jurisdiction: "", state: "", municipality: "" });
   const [fin, setFin] = useLS("axiom_fin", DEFAULT_FIN);
   const [risks, setRisks] = useLS("axiom_risks", DEFAULT_RISKS);
   const [permits, setPermits] = useLS("axiom_permits", DEFAULT_PERMITS);
   const [ddChecks, setDdChecks] = useLS("axiom_dd", {});
   const [vendors, setVendors] = useLS("axiom_vendors", []);
-  const ctx = { project, setProject, fin, setFin, risks, setRisks, permits, setPermits, ddChecks, setDdChecks, vendors, setVendors };
+  const ctx = {
+    project, setProject, fin, setFin, risks, setRisks,
+    permits, setPermits, ddChecks, setDdChecks, vendors, setVendors,
+    viewMode, setViewMode, zoom, setZoom
+  };
+  const ZoomControls = () => (
+    <div style={{ display: "flex", alignItems: "center", gap: 4, background: C.bg2, padding: "2px 4px", borderRadius: 4, border: `1px solid ${C.border}` }}>
+      <button style={{ ...S.btn(), padding: "2px 6px", fontSize: 10 }} onClick={() => setZoom(prev => Math.max(0.5, Number((prev - 0.1).toFixed(1))))}>-</button>
+      <span style={{ fontSize: 10, color: C.gold, minWidth: 35, textAlign: "center", fontWeight: 600 }}>{Math.round(zoom * 100)}%</span>
+      <button style={{ ...S.btn(), padding: "2px 6px", fontSize: 10 }} onClick={() => setZoom(prev => Math.min(2, Number((prev + 0.1).toFixed(1))))}>+</button>
+      <button style={{ ...S.btn(), padding: "2px 6px", fontSize: 9, marginLeft: 4, color: C.dim }} onClick={() => setZoom(1.1)}>Reset</button>
+    </div>
+  );
+
+  const ViewModeToggle = () => (
+    <div style={{ display: "flex", gap: 4, background: C.bg2, padding: "2px 4px", borderRadius: 4, border: `1px solid ${C.border}` }}>
+      {["Standard", "Metric", "Minimalistic"].map(m => (
+        <button
+          key={m}
+          style={{
+            ...S.btn(),
+            padding: "3px 8px",
+            fontSize: 9,
+            background: viewMode === m ? C.border2 : "transparent",
+            color: viewMode === m ? C.text : C.dim,
+            fontWeight: viewMode === m ? 600 : 400,
+            border: "none"
+          }}
+          onClick={() => setViewMode(m)}
+        >
+          {m}
+        </button>
+      ))}
+    </div>
+  );
+
   const TITLE = {
     dashboard: "Command Center", connectors: "Connectors & APIs",
     network: "Professional Network",
@@ -4389,7 +4684,9 @@ export default function App() {
         <div style={{ ...S.main, width: collapsed ? "calculate(100% - 64px)" : "calculate(100% - 218px)", transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)" }}>
           <div style={S.bar}>
             <div style={{ fontSize: 14, color: C.gold, letterSpacing: 2, flex: 1, fontWeight: 600 }}>{TITLE[active]}</div>
-            <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+              <ViewModeToggle />
+              <ZoomControls />
               <button style={{ ...S.btn(), padding: "4px 8px", fontSize: 10 }} onClick={() => setLightMode(!lightMode)} title="Toggle Theme">
                 {lightMode ? "🌙 Dark" : "☀️ Light"}
               </button>
@@ -4400,7 +4697,7 @@ export default function App() {
               <NotifBell setActive={setActive} />
             </div>
           </div>
-          <div style={S.cnt}>
+          <div style={{ ...S.cnt, transform: `scale(${zoom})`, transformOrigin: "top left", width: `${100 / zoom}%`, height: `${100 / zoom}%`, transition: "transform 0.1s ease-out" }}>
             {SECTIONS[active] || <div style={{ color: C.dim, padding: 40, textAlign: "center" }}>Section not found.</div>}
           </div>
         </div>
