@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { useProject } from "../../context/ProjectContext";
 import { Field, Button } from "../../components/ui/components";
 
 export function ProjectMetaEditor({ onClose }: { onClose: () => void }) {
     const { project, setProject, activeProjectId, switchProject, allProjects, createProject } = useProject() as any;
+    const [saved, setSaved] = useState(false);
 
     const handleChange = (key: string, value: any) => {
         setProject({ ...project, [key]: value });
@@ -113,7 +115,18 @@ export function ProjectMetaEditor({ onClose }: { onClose: () => void }) {
 
                 <div className="axiom-grid-2" style={{ marginTop: 32 }}>
                     <Button variant="ghost" onClick={onClose}>Discard Changes</Button>
-                    <Button variant="gold" onClick={onClose}>Save Project Intelligence</Button>
+                    <Button
+                        variant="gold"
+                        onClick={() => {
+                            setSaved(true);
+                            setTimeout(() => {
+                                setSaved(false);
+                                onClose();
+                            }, 1500);
+                        }}
+                    >
+                        {saved ? "✓ Saved!" : "Save Project Intelligence"}
+                    </Button>
                 </div>
             </div>
         </div>
