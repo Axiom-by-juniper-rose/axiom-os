@@ -768,6 +768,56 @@ textarea::placeholder {
     letter-spacing: 2px;
 }
 
+/* Newly added missing classes for global contrast */
+.axiom-text-10-dim-ls1 {
+    font-size: 10px;
+    color: var(--c-dim);
+    letter-spacing: 1px;
+}
+
+.axiom-text-10-gold-ls2-caps {
+    font-size: 10px;
+    color: var(--c-gold);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+}
+
+.axiom-text-11-green-bold {
+    font-size: 11px;
+    color: var(--c-green);
+    font-weight: bold;
+}
+
+.axiom-text-14-gold-bold {
+    font-size: 14px;
+    color: var(--c-gold);
+    font-weight: bold;
+}
+
+.axiom-text-18-gold-ls1 {
+    font-size: 18px;
+    color: var(--c-gold);
+    letter-spacing: 1px;
+}
+
+.axiom-text-20-bold {
+    font-size: 20px;
+    color: var(--c-text);
+    font-weight: bold;
+}
+
+.axiom-text-32-bold-gold {
+    font-size: 32px;
+    color: var(--c-gold);
+    font-weight: bold;
+}
+
+.axiom-text-40 {
+    font-size: 40px;
+    color: var(--c-text);
+}
+
+
 .axiom-text-11-dim-lh14 {
     font-size: 11px;
     color: var(--c-dim);
