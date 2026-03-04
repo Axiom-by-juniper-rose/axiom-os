@@ -6,7 +6,6 @@ import { Contacts } from "./features/crm/Contacts";
 import { Deals } from "./features/deals/Deals";
 import { DealAnalyzer } from "./features/financials/DealAnalyzer";
 import { NeuralAgents } from "./features/agents/NeuralAgents";
-import { NeuralNet } from "./features/agents/NeuralNet";
 import { Copilot } from "./features/agents/Copilot";
 import { Financials } from "./features/financials/Financials";
 import { CalcHub } from "./features/financials/CalcHub";
@@ -117,7 +116,6 @@ const NAV_GROUPS = [
         items: [
             { id: "copilot", label: "⬡ Axiom Copilot" },
             { id: "agents", label: "⬡ Neural Agents" },
-            { id: "neuralos", label: "⬡ Neural OS" },
             { id: "hub", label: "⬡ AI Agent Hub" },
         ],
     },
@@ -295,7 +293,6 @@ function renderView(view: string, activeProjectId: string) {
         // ─── OUTPUT ──────────────────────────────────────
         case "copilot": return <Copilot />;
         case "agents": return <NeuralAgents />;
-        case "neuralos": return <NeuralNet />;
         case "hub": return <AgentHub />;
         // ─── SYSTEM ──────────────────────────────────────
         case "settings": return <Settings />;
