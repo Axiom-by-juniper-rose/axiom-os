@@ -58,6 +58,8 @@ export function Workflows() {
     };
     const addAction = () => setNw({ ...nw, actions: [...nw.actions, ""] });
     const updAction = (i: number, val: string) => { const a = [...nw.actions]; a[i] = val; setNw({ ...nw, actions: a }); };
+    const updWf = (id: number, key: keyof Workflow, val: any) => setWorkflows((workflows as Workflow[]).map(w => w.id === id ? { ...w, [key]: val } : w));
+    const updWfAction = (id: number, i: number, val: string) => setWorkflows((workflows as Workflow[]).map(w => w.id === id ? { ...w, actions: w.actions.map((a, idx) => idx === i ? val : a) } : w));
 
     const sorted = [...(workflows as Workflow[])].sort((a, b) => b.lastRun.localeCompare(a.lastRun));
 
@@ -72,7 +74,16 @@ export function Workflows() {
                     <KPI label="Last Run" value={sorted[0]?.lastRun || "Never"} color="var(--c-dim)" />
                 </div>
                 {(workflows as Workflow[]).map(w => (
-                    <Card key={w.id} title={w.name} action={
+                    <Card key={w.id} title={
+                        <input
+                            title="Workflow Name"
+                            placeholder="Workflow Name"
+                            className="axiom-input"
+                            style={{ width: "100%", maxWidth: 350, background: "transparent", border: "1px solid transparent", color: "var(--c-text)", fontWeight: 600, fontSize: 13, padding: "2px 4px", marginLeft: -4 }}
+                            value={w.name}
+                            onChange={e => updWf(w.id, "name", e.target.value)}
+                        />
+                    } action={
                         <div className="axiom-flex-row" style={{ gap: 6 }}>
                             <Badge label={w.status} color={w.status === "Active" ? "var(--c-green)" : "var(--c-amber)"} />
                             <Button label={w.status === "Active" ? "Pause" : "Resume"} onClick={() => toggle(w.id)} />
@@ -82,22 +93,45 @@ export function Workflows() {
                         <div className="axiom-grid-3">
                             <div>
                                 <div className="axiom-text-10-dim" style={{ letterSpacing: 1, textTransform: "uppercase", marginBottom: 3 }}>Trigger</div>
-                                <div style={{ fontSize: 12, color: "var(--c-blue)" }}>{w.trigger}</div>
+                                <select
+                                    title="Workflow Trigger"
+                                    className="axiom-select"
+                                    style={{ fontSize: 12, padding: "2px 4px", width: "100%", background: "transparent", border: "1px solid transparent", marginLeft: -4, color: "var(--c-blue)" }}
+                                    value={w.trigger}
+                                    onChange={e => updWf(w.id, "trigger", e.target.value)}
+                                >
+                                    {TRIGGERS.map(t => <option key={t}>{t}</option>)}
+                                </select>
                             </div>
                             <div>
                                 <div className="axiom-text-10-dim" style={{ letterSpacing: 1, textTransform: "uppercase", marginBottom: 3 }}>Condition</div>
-                                <div style={{ fontSize: 12, color: "var(--c-sub)" }}>{w.condition}</div>
+                                <input
+                                    title="Workflow Condition"
+                                    placeholder="Condition"
+                                    className="axiom-input"
+                                    style={{ fontSize: 12, padding: "2px 4px", width: "100%", background: "transparent", border: "1px solid transparent", marginLeft: -4, color: "var(--c-sub)" }}
+                                    value={w.condition}
+                                    onChange={e => updWf(w.id, "condition", e.target.value)}
+                                />
                             </div>
                             <div>
                                 <div className="axiom-text-10-dim" style={{ letterSpacing: 1, textTransform: "uppercase", marginBottom: 3 }}>Runs / Last</div>
-                                <div style={{ fontSize: 12, color: "var(--c-gold)" }}>{w.runs} runs · {w.lastRun}</div>
+                                <div style={{ fontSize: 12, color: "var(--c-gold)", padding: "4px 0" }}>{w.runs} runs · {w.lastRun}</div>
                             </div>
                         </div>
                         <div style={{ marginTop: 8 }}>
                             <div className="axiom-text-10-dim" style={{ letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>Actions</div>
                             {w.actions.map((a, i) => (
-                                <div key={i} className="axiom-flex-row axiom-text-12-sub" style={{ gap: 6, padding: "2px 0" }}>
-                                    <span style={{ color: "var(--c-gold)" }}>{i + 1}.</span>{a}
+                                <div key={i} className="axiom-flex-row axiom-text-12-sub" style={{ gap: 6, padding: "2px 0", width: "100%" }}>
+                                    <span style={{ color: "var(--c-gold)" }}>{i + 1}.</span>
+                                    <input
+                                        title={`Action ${i + 1}`}
+                                        placeholder={`Action ${i + 1}`}
+                                        className="axiom-input"
+                                        style={{ flex: 1, fontSize: 12, padding: "2px 4px", background: "transparent", border: "1px solid transparent", color: "var(--c-sub)" }}
+                                        value={a}
+                                        onChange={e => updWfAction(w.id, i, e.target.value)}
+                                    />
                                 </div>
                             ))}
                         </div>
