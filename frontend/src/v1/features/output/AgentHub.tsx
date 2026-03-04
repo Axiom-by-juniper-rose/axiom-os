@@ -2,8 +2,17 @@ import { useState } from "react";
 import { Card, Badge, Button } from "../../components/ui/components";
 import { Agent } from "../agents/Agent";
 
+interface AgentInfo {
+    id: string;
+    icon: string;
+    color: string;
+    desc: string;
+    system: string;
+    placeholder: string;
+}
+
 export function AgentHub() {
-    const agents = [
+    const agents: AgentInfo[] = [
         { id: "Zoning Navigator", icon: "Z", color: "var(--c-blue)", desc: "Decodes zoning codes and maps entitlement pathways", system: "You are a land use attorney and zoning consultant. Decode zoning codes, identify entitlement pathways, advise on variances and density bonuses.", placeholder: "Describe the zoning situation and I'll map the entitlement pathway..." },
         { id: "Acquisition Pro", icon: "A", color: "var(--c-gold)", desc: "Expert in site selection, off-market sourcing, and deal initial vetting", system: "You are a senior acquisition officer. Help identify high-potential sites, vet off-market deals, and advise on acquisition strategy.", placeholder: "Ask about site selection criteria or deal vetting..." },
         { id: "Appraisal AI", icon: "V", color: "var(--c-green)", desc: "Valuation specialist for land residual and finished lot analysis", system: "You are a commercial appraiser. Analyze land residual value, finished lot pricing, and market comparables.", placeholder: "Ask for a land residual analysis or comp check..." },

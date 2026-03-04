@@ -15,7 +15,7 @@ export function Card({ title, children, action, className = "" }: { title: strin
     );
 }
 
-export function KPI({ label, value, sub, color, trend, onUpdate }: { label: string, value: string | number, sub?: string, color?: string, trend?: string | number, onUpdate?: (val: any) => void }) {
+export function KPI({ label, value, sub, color, trend, onUpdate, style }: { label: string, value: string | number, sub?: string, color?: string, trend?: string | number, onUpdate?: (val: any) => void, style?: React.CSSProperties }) {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editValue, setEditValue] = React.useState(value);
 
@@ -25,7 +25,7 @@ export function KPI({ label, value, sub, color, trend, onUpdate }: { label: stri
     };
 
     return (
-        <div className="axiom-kpi" onClick={() => onUpdate && !isEditing && setIsEditing(true)}>
+        <div className="axiom-kpi" onClick={() => onUpdate && !isEditing && setIsEditing(true)} style={style}>
             <div className="axiom-label">{label}</div>
             {isEditing ? (
                 <input
@@ -53,7 +53,7 @@ export function KPI({ label, value, sub, color, trend, onUpdate }: { label: stri
     );
 }
 
-export function Field({ label, children, mb = 11, className = "", onUpdate, value }: { label: string, children: React.ReactNode, mb?: number, className?: string, onUpdate?: (val: any) => void, value?: any }) {
+export function Field({ label, children, mb = 11, className = "", onUpdate, value, style }: { label: string, children: React.ReactNode, mb?: number, className?: string, onUpdate?: (val: any) => void, value?: any, style?: React.CSSProperties }) {
     const [isEditing, setIsEditing] = React.useState(false);
     const [editValue, setEditValue] = React.useState(value);
 
@@ -63,7 +63,7 @@ export function Field({ label, children, mb = 11, className = "", onUpdate, valu
     };
 
     return (
-        <div className={`axiom-field ${className}`} style={{ marginBottom: mb }}>
+        <div className={`axiom-field ${className}`} style={{ marginBottom: mb, ...style }}>
             <label className="axiom-label" style={{ display: "flex", justifyContent: "space-between" }}>
                 {label}
                 {onUpdate && !isEditing && <span onClick={() => setIsEditing(true)} style={{ cursor: "pointer", fontSize: 8, opacity: 0.5 }}>✎ EDIT</span>}

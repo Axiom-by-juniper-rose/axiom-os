@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useProject } from "../../context/ProjectContext";
 import { Card, KPI, Field, Progress } from "../../components/ui/components";
 import { Agent } from "../agents/Agent";
@@ -115,9 +115,14 @@ export function ProForma() {
                         <ResponsiveContainer width="100%" height="100%">
                             <BarChart data={waterfallData} onClick={(data: any) => data && setChartSel(data.activePayload?.[0]?.payload)}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={GRID_STROKE} />
-                                <XAxis dataKey="name" stroke={AXIS_TICK} fontSize={10} axisLine={false} tickLine={false} />
+                                <XAxis dataKey="name" stroke={AXIS_TICK.fill} tick={AXIS_TICK} axisLine={false} tickLine={false} />
                                 <YAxis hide />
-                                <Tooltip cursor={{ fill: 'transparent' }} contentStyle={CHART_TT} />
+                                <Tooltip
+                                    cursor={{ fill: 'transparent' }}
+                                    contentStyle={CHART_TT.contentStyle}
+                                    itemStyle={CHART_TT.itemStyle}
+                                    labelStyle={CHART_TT.labelStyle}
+                                />
                                 <Bar dataKey="value" radius={[4, 4, 0, 0]}>
                                     {waterfallData.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={entry.fill} />
@@ -210,9 +215,14 @@ export function ProForma() {
                     <ResponsiveContainer width="100%" height="100%">
                         <AreaChart data={cashFlowData} onClick={(data: any) => data && setChartSel(data.activePayload?.[0]?.payload)}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={GRID_STROKE} />
-                            <XAxis dataKey="month" stroke={AXIS_TICK} fontSize={10} axisLine={false} tickLine={false} />
+                            <XAxis dataKey="month" stroke={AXIS_TICK.fill} tick={AXIS_TICK} axisLine={false} tickLine={false} />
                             <YAxis hide />
-                            <Tooltip contentStyle={CHART_TT} />
+                            <Tooltip
+                                contentStyle={CHART_TT.contentStyle}
+                                itemStyle={CHART_TT.itemStyle}
+                                labelStyle={CHART_TT.labelStyle}
+                                cursor={CHART_TT.cursor as any}
+                            />
                             <Area type="monotone" dataKey="balance" stroke="var(--c-gold)" fill="var(--c-gold)" fillOpacity={0.1} />
                         </AreaChart>
                     </ResponsiveContainer>

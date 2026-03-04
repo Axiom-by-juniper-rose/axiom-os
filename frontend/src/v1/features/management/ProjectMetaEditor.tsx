@@ -1,6 +1,5 @@
-import React from "react";
 import { useProject } from "../../context/ProjectContext";
-import { Card, Field, Button } from "../../components/ui/components";
+import { Field, Button } from "../../components/ui/components";
 
 export function ProjectMetaEditor({ onClose }: { onClose: () => void }) {
     const { project, setProject } = useProject() as any;

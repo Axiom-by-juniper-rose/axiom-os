@@ -1,4 +1,4 @@
-import { AgentHub } from "./AgentHub";
+import { AgentHub } from "../output/AgentHub";
 import { NeuralNet } from "./NeuralNet";
 import { Copilot } from "./Copilot";
 import { Tabs } from "../../components/ui/layout";
