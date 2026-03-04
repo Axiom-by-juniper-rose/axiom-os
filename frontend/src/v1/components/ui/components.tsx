@@ -3,7 +3,7 @@ import "./theme.css";
 import { importCSV, RC } from "../../lib/utils";
 
 
-export function Card({ title, children, action, className = "" }: { title: string, children: React.ReactNode, action?: React.ReactNode, className?: string }) {
+export function Card({ title, children, action, className = "" }: { title: React.ReactNode, children: React.ReactNode, action?: React.ReactNode, className?: string }) {
     return (
         <div className={`axiom-card axiom-animate-slide-up ${className}`}>
             <div className="axiom-card-header">
