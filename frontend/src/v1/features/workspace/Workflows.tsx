@@ -66,7 +66,7 @@ export function Workflows() {
             {/* ─ Active Workflows ─ */}
             <div>
                 <div className="axiom-grid-4" style={{ marginBottom: 14 }}>
-                    <KPI label="Total Workflows" value={(workflows as Workflow[]).length} />
+                    <KPI label="Total Workflows" value={(workflows as Workflow[]).length} color="var(--c-blue)" />
                     <KPI label="Active" value={(workflows as Workflow[]).filter(w => w.status === "Active").length} color="var(--c-green)" />
                     <KPI label="Total Runs" value={(workflows as Workflow[]).reduce((s, w) => s + w.runs, 0)} color="var(--c-gold)" />
                     <KPI label="Last Run" value={sorted[0]?.lastRun || "Never"} color="var(--c-dim)" />
