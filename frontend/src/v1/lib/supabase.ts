@@ -11,11 +11,13 @@ const getLocalString = (key: string) => {
     } catch { return ""; }
 };
 
-export const SUPA_URL =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) || getLocalString("axiom_supa_url");
+let rawUrl = (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_URL) || getLocalString("axiom_supa_url") || "";
+rawUrl = rawUrl.trim().replace(/\/+$/, "");
+if (rawUrl && !rawUrl.startsWith("http")) rawUrl = `https://${rawUrl}`;
+export const SUPA_URL = rawUrl;
 
 export const SUPA_KEY =
-    (typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) || getLocalString("axiom_supa_key");
+    ((typeof import.meta !== "undefined" && import.meta.env?.VITE_SUPABASE_ANON_KEY) || getLocalString("axiom_supa_key") || "").trim();
 
 if (!SUPA_URL || !SUPA_KEY) {
     console.warn(
@@ -54,15 +56,28 @@ class SupabaseClient {
 
     async auth(email: string, password?: string, isSignUp = false) {
         const endpoint = isSignUp ? "signup" : "token?grant_type=password";
-        const r = await fetch(`${this.url}/auth/v1/${endpoint}`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json", apikey: this.key },
-            body: JSON.stringify({ email, password }),
-        });
-        const data = await r.json();
+        const fetchUrl = `${this.url}/auth/v1/${endpoint}`;
+        let r;
+        try {
+            r = await fetch(fetchUrl, {
+                method: "POST",
+                headers: { "Content-Type": "application/json", apikey: this.key },
+                body: JSON.stringify({ email, password }),
+            });
+        } catch (err: any) {
+            throw new Error(`Network Error: Failed to reach ${fetchUrl}. Is the URL correct? ${err.message}`);
+        }
+
+        let data;
+        try {
+            data = await r.json();
+        } catch (err: any) {
+            throw new Error(`Invalid JSON response from ${fetchUrl}. Ensure this is a valid Supabase project URL.`);
+        }
+
         if (!r.ok)
             throw new Error(
-                data.error_description || data.msg || data.message || "Auth failed"
+                data.error_description || data.msg || data.message || `Auth failed with status ${r.status}`
             );
         this.token = data.access_token;
         localStorage.setItem("axiom_supa_token", data.access_token);
