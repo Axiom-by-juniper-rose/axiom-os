@@ -43,6 +43,8 @@ import { supa } from "./lib/supabase";
 import { useAuth } from "./context/AuthContext";
 import { useProject } from "./context/ProjectContext";
 import { DataExplorerModal } from "./components/ui/components";
+import { CommandPalette } from "./components/ui/CommandPalette";
+import { useEffect } from "react";
 import "./components/ui/theme.css";
 
 // ─── NAV STRUCTURE (matches V20 groups) ──────────────────────
@@ -318,7 +320,20 @@ function renderView(view: string, activeProjectId: string) {
 function AppContent() {
     const [view, setView] = useState("dashboard");
     const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [cpOpen, setCpOpen] = useState(false);
     const { activeProjectId, chartSel, setChartSel } = useProject() as any;
+
+    // ─── ⌘K / Ctrl+K keyboard shortcut ──────────────────────
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+                e.preventDefault();
+                setCpOpen(prev => !prev);
+            }
+        };
+        window.addEventListener("keydown", handler);
+        return () => window.removeEventListener("keydown", handler);
+    }, []);
 
     const sidebarWidth = sidebarCollapsed ? 54 : 220;
 
@@ -369,6 +384,28 @@ function AppContent() {
                     </button>
                 </div>
 
+                {/* ⌘K Search trigger */}
+                {!sidebarCollapsed && (
+                    <button
+                        onClick={() => setCpOpen(true)}
+                        title="Search Axiom OS (Ctrl+K / ⌘K)"
+                        style={{
+                            display: "flex", alignItems: "center", gap: 8,
+                            margin: "8px 10px", padding: "6px 10px",
+                            background: "var(--c-bg3)", border: "1px solid var(--c-border)",
+                            borderRadius: 4, cursor: "pointer", width: "calc(100% - 20px)",
+                            color: "var(--c-dim)", fontSize: 11, textAlign: "left",
+                            transition: "border-color 0.15s", flexShrink: 0,
+                        }}
+                        onMouseEnter={e => (e.currentTarget.style.borderColor = "var(--c-border2)")}
+                        onMouseLeave={e => (e.currentTarget.style.borderColor = "var(--c-border)")}
+                    >
+                        <span style={{ fontSize: 13 }}>⌕</span>
+                        <span style={{ flex: 1 }}>Search...</span>
+                        <kbd style={{ fontSize: 9, background: "var(--c-bg)", border: "1px solid var(--c-border2)", borderRadius: 2, padding: "1px 5px", color: "var(--c-dim)", fontFamily: "inherit" }}>⌘K</kbd>
+                    </button>
+                )}
+
                 {/* Nav */}
                 <nav style={{ flex: 1, overflowY: "auto", padding: "10px 0", overflowX: "hidden" }}>
                     {NAV_GROUPS.map(g => (
@@ -406,6 +443,13 @@ function AppContent() {
 
             {/* Global Modals */}
             {chartSel && <DataExplorerModal data={chartSel} onClose={() => setChartSel(null)} />}
+
+            {/* Global Command Palette */}
+            <CommandPalette
+                open={cpOpen}
+                onClose={() => setCpOpen(false)}
+                onNavigate={(id) => { setView(id); setCpOpen(false); }}
+            />
         </div>
     );
 }

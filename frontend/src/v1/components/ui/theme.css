@@ -1353,3 +1353,340 @@ textarea::placeholder {
 .border-bottom {
     border-bottom: 1px solid var(--c-border);
 }
+
+/* ─── Command Palette ──────────────────────────────────────────── */
+.axiom-cp-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    backdrop-filter: blur(4px);
+    z-index: 1000;
+    animation: cpFadeIn 0.15s ease-out;
+}
+
+.axiom-cp-container {
+    position: fixed;
+    top: 15%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: min(640px, 92vw);
+    background: rgba(17, 19, 24, 0.97);
+    border: 1px solid var(--c-border2);
+    border-radius: 8px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(212, 168, 67, 0.08);
+    z-index: 1001;
+    overflow: hidden;
+    animation: cpSlideIn 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+    font-family: 'Inter', sans-serif;
+}
+
+@keyframes cpFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes cpSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(-12px) scale(0.97);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+.axiom-cp-input-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+}
+
+.axiom-cp-icon {
+    font-size: 18px;
+    color: var(--c-dim);
+    flex-shrink: 0;
+    line-height: 1;
+}
+
+.axiom-cp-input {
+    flex: 1;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    font-size: 16px;
+    color: var(--c-text);
+    font-family: 'Inter', sans-serif;
+    caret-color: var(--c-gold);
+}
+
+.axiom-cp-input::placeholder {
+    color: var(--c-dim);
+    opacity: 0.5;
+}
+
+.axiom-cp-clear {
+    background: none;
+    border: none;
+    color: var(--c-dim);
+    font-size: 12px;
+    cursor: pointer;
+    padding: 2px 6px;
+    border-radius: 3px;
+    transition: color 0.15s;
+}
+
+.axiom-cp-clear:hover {
+    color: var(--c-text);
+}
+
+.axiom-cp-esc {
+    font-size: 10px;
+    color: var(--c-dim);
+    background: var(--c-bg3);
+    border: 1px solid var(--c-border);
+    border-radius: 3px;
+    padding: 2px 6px;
+    font-family: 'Inter', sans-serif;
+    flex-shrink: 0;
+}
+
+.axiom-cp-divider {
+    height: 1px;
+    background: var(--c-border);
+}
+
+.axiom-cp-results {
+    max-height: 360px;
+    overflow-y: auto;
+    padding: 6px;
+}
+
+.axiom-cp-empty {
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--c-dim);
+}
+
+.axiom-cp-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.1s;
+    user-select: none;
+}
+
+.axiom-cp-item:hover,
+.axiom-cp-item--active {
+    background: var(--c-bg4);
+}
+
+.axiom-cp-item--active .axiom-cp-item-label {
+    color: var(--c-gold);
+}
+
+.axiom-cp-item--active .axiom-cp-item-arrow {
+    opacity: 1;
+    color: var(--c-gold);
+}
+
+.axiom-cp-item-icon {
+    font-size: 13px;
+    color: var(--c-gold);
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.axiom-cp-item-label {
+    flex: 1;
+    font-size: 14px;
+    color: var(--c-text);
+    font-weight: 500;
+}
+
+.axiom-cp-item-group {
+    font-size: 10px;
+    color: var(--c-dim);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+}
+
+.axiom-cp-item-arrow {
+    font-size: 14px;
+    color: var(--c-dim);
+    opacity: 0;
+    transition: opacity 0.1s;
+}
+
+.axiom-cp-item:hover .axiom-cp-item-arrow {
+    opacity: 1;
+}
+
+.axiom-cp-footer {
+    display: flex;
+    gap: 16px;
+    padding: 8px 16px;
+    border-top: 1px solid var(--c-border);
+    background: var(--c-bg2);
+}
+
+.axiom-cp-footer span {
+    font-size: 11px;
+    color: var(--c-dim);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.axiom-cp-footer kbd {
+    font-size: 10px;
+    background: var(--c-bg3);
+    border: 1px solid var(--c-border2);
+    border-radius: 3px;
+    padding: 1px 5px;
+    color: var(--c-text);
+    font-family: 'Inter', sans-serif;
+}
+
+/* ─── Connector Cards (1.2) ────────────────────────────────────── */
+.axiom-connector-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+}
+
+.axiom-connector-card {
+    background: var(--c-bg3);
+    border: 1px solid var(--c-border);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    transition: border-color 0.2s;
+}
+
+.axiom-connector-card:hover {
+    border-color: var(--c-border2);
+}
+
+.axiom-connector-card--connected {
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.axiom-connector-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.axiom-connector-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--c-text);
+}
+
+.axiom-connector-badge {
+    font-size: 9px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 3px;
+    border: 1px solid;
+}
+
+.axiom-connector-badge--connected {
+    color: var(--c-green);
+    border-color: rgba(34, 197, 94, 0.4);
+    background: rgba(34, 197, 94, 0.08);
+}
+
+.axiom-connector-badge--disconnected {
+    color: var(--c-dim);
+    border-color: var(--c-border);
+    background: transparent;
+}
+
+.axiom-connector-desc {
+    font-size: 11px;
+    color: var(--c-dim);
+    line-height: 1.5;
+}
+
+/* ─── Storage Toggle (1.3) ──────────────────────────────────────── */
+.axiom-storage-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    overflow: hidden;
+    width: fit-content;
+}
+
+.axiom-storage-option {
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    color: var(--c-dim);
+    background: transparent;
+    border: none;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+}
+
+.axiom-storage-option--active {
+    background: var(--c-bg4);
+    color: var(--c-gold);
+}
+
+/* ─── File Attachment (1.3) ─────────────────────────────────────── */
+.axiom-file-attach-zone {
+    border: 1px dashed var(--c-border2);
+    border-radius: 4px;
+    padding: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    font-size: 12px;
+    color: var(--c-dim);
+}
+
+.axiom-file-attach-zone:hover,
+.axiom-file-attach-zone--dragging {
+    border-color: var(--c-gold);
+    background: rgba(212, 168, 67, 0.04);
+    color: var(--c-text);
+}
+
+.axiom-file-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.axiom-file-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 10px;
+    background: var(--c-bg3);
+    border: 1px solid var(--c-border);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--c-text);
+}
