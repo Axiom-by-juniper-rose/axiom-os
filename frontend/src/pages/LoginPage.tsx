@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Shield, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import { IS_APP_DOMAIN } from '../App';
 
 export const LoginPage: React.FC = () => {
     const navigate = useNavigate();
@@ -24,7 +25,13 @@ export const LoginPage: React.FC = () => {
             setError(error.message);
             setLoading(false);
         } else {
-            navigate(`/dashboard${window.location.search}`);
+            // On the app domain → navigate to root (AuthGate renders AxiomModular).
+            // On marketing domain → hard-redirect to app domain.
+            if (IS_APP_DOMAIN) {
+                navigate(`/${window.location.search}`);
+            } else {
+                window.location.href = 'https://app.buildaxiom.dev';
+            }
         }
     };
 

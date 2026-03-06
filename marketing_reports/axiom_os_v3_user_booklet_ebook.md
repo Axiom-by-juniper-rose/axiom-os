@@ -16,7 +16,7 @@
 
 ### Part II: The Core Modules (Instructions for Use)
 
-4. **Module A:** The Control Node (Dashboard Navigation & Setup)
+1. **Module A:** The Control Node (Dashboard Navigation & Setup)
 2. **Module B:** Field Intelligence (Mobile Operations & Offline Sync)
 3. **Module C:** Spatial Command (3D Rendering & Mapbox GIS)
 4. **Module D:** Financial Engine (Zoning-to-Deal Pipeline)
@@ -24,7 +24,7 @@
 
 ### Part III: Numerous Examples of Use (Case Studies)
 
-9. **Case Study 1:** The 48-Hour Multi-Family Land Acquisition.
+1. **Case Study 1:** The 48-Hour Multi-Family Land Acquisition.
 2. **Case Study 2:** Navigating Institutional Bureaucracy with the Audit Log.
 3. **Case Study 3:** Uncovering Off-Market Retail Sites via Polygon Querying.
 
@@ -88,5 +88,15 @@ This module is optimized for iPad Pro and high-end mobile devices.
 2. You utilize the `SiteMap` to drop pins in massive geographic funnels. Axiom pulls GIS data continuously.
 3. *(Note on Marketing: Axiom can export its own data. If you are a brokerage using Axiom, you can export these 3D models and automated prose directly to your email campaigns, generating a custom "micropage" for 50 different buyers simultaneously).*
 
+## 🚀 Ready to Elevate Your Deal Flow?
+
+Axiom OS V3 is currently in a limited private beta. We are prioritizing firms with active deal pipelines in the Sunbelt and major metropolitan hubs.
+
+**Your Next Steps:**
+
+1. **Apply for Beta Access:** Visit [axiom.co/apply](/) to join the waitlist.
+2. **Book a Demo:** Our Managing Partners conduct live architecture reviews showing Axiom running on your specific target assets.
+3. **The 48-Hour Challenge:** Give us an address. We'll give you a 10-year pro-forma, 3D massing, and full zoning heuristics in under an hour.
+
 ---
-*(End of Module Extract. Full PDF includes 80 additional pages of deep-dive tutorials, keyboard shortcut maps, API integration troubleshooting, and advanced Copilot prompt engineering.)*
+*© 2026 Axiom OS. The information contained herein is proprietary and confidential. Spatial Intelligence is the future of CRE—don't be left holding the spreadsheet.*

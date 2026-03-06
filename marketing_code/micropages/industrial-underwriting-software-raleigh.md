@@ -1,12 +1,12 @@
 ---
 title: "Industrial Underwriting & Zoning Software in Raleigh | Axiom OS"
-seo_description: "Automate Industrial zoning calculations, 3D massing, and 10-year pro-formas in Raleigh. Save 8 hours per deal with Axiom OS."
+seo_description: "Automate Industrial zoning calculations, 3D massing, and 10-year pro-formas in Raleigh. Save 10 hours per deal with Axiom OS."
 slug: "/use-cases/industrial-underwriting-software-raleigh"
 ---
 
 # Industrial Underwriting & Spatial Analysis in Raleigh
 
-Are your analysts still spending 8 hours pulling zoning codes and comps for Industrial deals in 
+Are your analysts still spending 10 hours pulling zoning codes and comps for Industrial deals in 
 
 In the highly competitive Raleigh commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 

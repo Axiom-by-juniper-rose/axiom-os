@@ -1,6 +1,5 @@
 import { AuthProvider, TierProvider } from "./context/AuthContext";
 import { ProjectProvider } from "./context/ProjectContext";
-import { useState } from "react";
 import { Dashboard } from "./features/dashboard/Dashboard";
 import { Contacts } from "./features/crm/Contacts";
 import { Deals } from "./features/deals/Deals";
@@ -52,7 +51,7 @@ import { FloatingToolbar } from "./components/ui/FloatingToolbar";
 import { MeetingRecorder } from "./components/ui/MeetingRecorder";
 import { FloatingPanel } from "./components/ui/FloatingPanel";
 import { Dialer } from "./components/ui/components";
-import React, { useState, useEffect, useMemo, useRef } from "react";
+import { useState, useEffect, useRef } from "react";
 import "./components/ui/theme.css";
 
 // ─── NAV STRUCTURE (matches V20 groups) ──────────────────────

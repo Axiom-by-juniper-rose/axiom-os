@@ -1,12 +1,12 @@
 ---
 title: "Retail Underwriting & Zoning Software in Austin | Axiom OS"
-seo_description: "Automate Retail zoning calculations, 3D massing, and 10-year pro-formas in Austin. Save 9 hours per deal with Axiom OS."
+seo_description: "Automate Retail zoning calculations, 3D massing, and 10-year pro-formas in Austin. Save 11 hours per deal with Axiom OS."
 slug: "/use-cases/retail-underwriting-software-austin"
 ---
 
 # Retail Underwriting & Spatial Analysis in Austin
 
-Are your analysts still spending 9 hours pulling zoning codes and comps for Retail deals in 
+Are your analysts still spending 11 hours pulling zoning codes and comps for Retail deals in 
 
 In the highly competitive Austin commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 

@@ -1,12 +1,12 @@
 ---
 title: "Office Underwriting & Zoning Software in Atlanta | Axiom OS"
-seo_description: "Automate Office zoning calculations, 3D massing, and 10-year pro-formas in Atlanta. Save 12 hours per deal with Axiom OS."
+seo_description: "Automate Office zoning calculations, 3D massing, and 10-year pro-formas in Atlanta. Save 11 hours per deal with Axiom OS."
 slug: "/use-cases/office-underwriting-software-atlanta"
 ---
 
 # Office Underwriting & Spatial Analysis in Atlanta
 
-Are your analysts still spending 12 hours pulling zoning codes and comps for Office deals in 
+Are your analysts still spending 11 hours pulling zoning codes and comps for Office deals in 
 
 In the highly competitive Atlanta commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 

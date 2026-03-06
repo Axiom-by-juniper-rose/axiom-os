@@ -1,12 +1,12 @@
 ---
 title: "Multi-Family Underwriting & Zoning Software in Nashville | Axiom OS"
-seo_description: "Automate Multi-Family zoning calculations, 3D massing, and 10-year pro-formas in Nashville. Save 11 hours per deal with Axiom OS."
+seo_description: "Automate Multi-Family zoning calculations, 3D massing, and 10-year pro-formas in Nashville. Save 12 hours per deal with Axiom OS."
 slug: "/use-cases/multi-family-underwriting-software-nashville"
 ---
 
 # Multi-Family Underwriting & Spatial Analysis in Nashville
 
-Are your analysts still spending 11 hours pulling zoning codes and comps for Multi-Family deals in 
+Are your analysts still spending 12 hours pulling zoning codes and comps for Multi-Family deals in 
 
 In the highly competitive Nashville commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 

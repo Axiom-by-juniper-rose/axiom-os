@@ -1,12 +1,12 @@
 ---
 title: "Mixed-Use Underwriting & Zoning Software in Austin | Axiom OS"
-seo_description: "Automate Mixed-Use zoning calculations, 3D massing, and 10-year pro-formas in Austin. Save 13 hours per deal with Axiom OS."
+seo_description: "Automate Mixed-Use zoning calculations, 3D massing, and 10-year pro-formas in Austin. Save 14 hours per deal with Axiom OS."
 slug: "/use-cases/mixed-use-underwriting-software-austin"
 ---
 
 # Mixed-Use Underwriting & Spatial Analysis in Austin
 
-Are your analysts still spending 13 hours pulling zoning codes and comps for Mixed-Use deals in 
+Are your analysts still spending 14 hours pulling zoning codes and comps for Mixed-Use deals in 
 
 In the highly competitive Austin commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 

@@ -1,12 +1,12 @@
 ---
 title: "Industrial Underwriting & Zoning Software in Atlanta | Axiom OS"
-seo_description: "Automate Industrial zoning calculations, 3D massing, and 10-year pro-formas in Atlanta. Save 14 hours per deal with Axiom OS."
+seo_description: "Automate Industrial zoning calculations, 3D massing, and 10-year pro-formas in Atlanta. Save 10 hours per deal with Axiom OS."
 slug: "/use-cases/industrial-underwriting-software-atlanta"
 ---
 
 # Industrial Underwriting & Spatial Analysis in Atlanta
 
-Are your analysts still spending 14 hours pulling zoning codes and comps for Industrial deals in 
+Are your analysts still spending 10 hours pulling zoning codes and comps for Industrial deals in 
 
 In the highly competitive Atlanta commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 

@@ -681,11 +681,23 @@ body {
     border-radius: 3px;
     color: var(--c-text);
     font-size: 13px;
+    font-weight: 500;
     padding: 6px 9px;
     width: 100%;
     font-family: inherit;
     outline: none;
     box-sizing: border-box;
+    transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.axiom-input::placeholder {
+    color: color-mix(in srgb, var(--c-text) 40%, transparent);
+    font-weight: 400;
+}
+
+.axiom-input:focus {
+    border-color: var(--c-gold);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--c-gold) 30%, transparent);
 }
 
 .axiom-select {
@@ -694,6 +706,7 @@ body {
     border-radius: 3px;
     color: var(--c-text);
     font-size: 13px;
+    font-weight: 500;
     padding: 6px 9px;
     width: 100%;
     font-family: inherit;
@@ -1121,7 +1134,7 @@ body {
     gap: 0;
     overflow: hidden;
     /* High-density override for split screens */
-    font-size: 0.95em; 
+    font-size: 0.95em;
     /* Main area doesn't scroll, panels do */
 }
 
@@ -1227,11 +1240,12 @@ body {
 }
 
 .axiom-label {
-    font-size: 9px;
-    color: var(--c-dim);
-    letter-spacing: 2px;
+    font-size: 10.5px;
+    color: var(--c-sub);
+    letter-spacing: 1.5px;
     text-transform: uppercase;
-    margin-bottom: 3px;
+    font-weight: 600;
+    margin-bottom: 5px;
     display: block;
 }
 
@@ -3298,21 +3312,22 @@ textarea::placeholder {
         padding: 12px 16px;
         font-size: 14px;
     }
-    
+
     .axiom-btn {
         padding: 10px 20px;
         font-size: 11px;
     }
-    
-    .axiom-input, .axiom-select {
+
+    .axiom-input,
+    .axiom-select {
         padding: 10px 12px;
         font-size: 14px;
     }
-    
+
     .axiom-td {
         padding: 12px 8px;
     }
-    
+
     .axiom-card {
         padding: 20px;
     }
@@ -3322,16 +3337,18 @@ textarea::placeholder {
     .axiom-layout {
         flex-direction: column;
     }
-    
+
     /* Audit layout classes for mobile stacks */
-    .axiom-grid-2, .axiom-grid-3, .axiom-grid-4 {
+    .axiom-grid-2,
+    .axiom-grid-3,
+    .axiom-grid-4 {
         grid-template-columns: 1fr;
     }
-    
+
     .axiom-text-64-bold {
         font-size: 32px;
     }
-    
+
     .axiom-nav-section-label {
         font-size: 11px;
         letter-spacing: 1.5px;
@@ -3340,10 +3357,13 @@ textarea::placeholder {
 
 /* Global Touch Target Overrides for Mobile/Tablet */
 @media (pointer: coarse) {
-    .axiom-btn, .axiom-nav-item, .axiom-checkbox-item {
+
+    .axiom-btn,
+    .axiom-nav-item,
+    .axiom-checkbox-item {
         min-height: var(--tap-target);
     }
-    
+
     .axiom-tab-item {
         padding: 12px 20px;
         min-height: var(--tap-target);
@@ -3384,4 +3404,3 @@ textarea::placeholder {
     color: var(--c-amber);
     border-color: var(--c-amber);
 }
-

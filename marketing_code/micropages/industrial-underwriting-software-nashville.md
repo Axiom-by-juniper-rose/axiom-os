@@ -1,12 +1,12 @@
 ---
 title: "Industrial Underwriting & Zoning Software in Nashville | Axiom OS"
-seo_description: "Automate Industrial zoning calculations, 3D massing, and 10-year pro-formas in Nashville. Save 13 hours per deal with Axiom OS."
+seo_description: "Automate Industrial zoning calculations, 3D massing, and 10-year pro-formas in Nashville. Save 14 hours per deal with Axiom OS."
 slug: "/use-cases/industrial-underwriting-software-nashville"
 ---
 
 # Industrial Underwriting & Spatial Analysis in Nashville
 
-Are your analysts still spending 13 hours pulling zoning codes and comps for Industrial deals in 
+Are your analysts still spending 14 hours pulling zoning codes and comps for Industrial deals in 
 
 In the highly competitive Nashville commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 

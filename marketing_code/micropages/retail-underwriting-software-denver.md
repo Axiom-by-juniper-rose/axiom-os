@@ -1,12 +1,12 @@
 ---
 title: "Retail Underwriting & Zoning Software in Denver | Axiom OS"
-seo_description: "Automate Retail zoning calculations, 3D massing, and 10-year pro-formas in Denver. Save 8 hours per deal with Axiom OS."
+seo_description: "Automate Retail zoning calculations, 3D massing, and 10-year pro-formas in Denver. Save 12 hours per deal with Axiom OS."
 slug: "/use-cases/retail-underwriting-software-denver"
 ---
 
 # Retail Underwriting & Spatial Analysis in Denver
 
-Are your analysts still spending 8 hours pulling zoning codes and comps for Retail deals in 
+Are your analysts still spending 12 hours pulling zoning codes and comps for Retail deals in 
 
 In the highly competitive Denver commercial real estate market, speed to Letter of Intent (LOI) dictates deal-flow capture. The friction between the physical asset and the financial model is where deals die.
 
