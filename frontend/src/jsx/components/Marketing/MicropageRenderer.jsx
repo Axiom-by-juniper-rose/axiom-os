@@ -11,6 +11,7 @@ export default function MicropageRenderer() {
     useEffect(() => {
         // In a real app, this would fetch from a CMS or local MD files
         // For this prototype, we'll simulate the content based on the slug
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setLoading(true);
         setTimeout(() => {
             const parts = slug.split('-');
