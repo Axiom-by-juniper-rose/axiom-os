@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useProject } from "../../context/ProjectContext";
 import { Card, Button } from "../../components/ui/components";
 import { buildMonthlyCashFlows } from "../../lib/math";
@@ -11,6 +11,79 @@ const LAYERS = [
     { id: "output", name: "Output Layer", nodes: ["Deal Score", "Go/No-Go", "Optimal Price", "Timeline", "Risk Rating"], color: "var(--c-gold)", desc: "Final deal intelligence with confidence intervals" },
 ];
 
+const TICKER_TEXT = "● ANALYZING COMPS... ● COMPUTING IRR... ● CALIBRATING RISK... ● SCORING DEAL... ● SYNCING MARKET DATA... ● ANALYZING COMPS... ● COMPUTING IRR... ● CALIBRATING RISK... ● SCORING DEAL... ● SYNCING MARKET DATA...";
+
+// SVG connection lines between layers
+function ConnectionLines({ pulseNode, activeNode }: { pulseNode: string | null; activeNode: string | null }) {
+    const svgRef = useRef<SVGSVGElement>(null);
+
+    const lines = useMemo(() => {
+        const result: { x1: number; y1: number; x2: number; y2: number; fromNode: string; toNode: string; key: string }[] = [];
+        const totalLayers = LAYERS.length;
+        // Divide SVG width into totalLayers columns
+        // Column centers: 1/(totalLayers*2), 3/(totalLayers*2), ...
+        for (let li = 0; li < totalLayers - 1; li++) {
+            const layerA = LAYERS[li];
+            const layerB = LAYERS[li + 1];
+            const xA = ((li * 2 + 1) / (totalLayers * 2)) * 100; // percent
+            const xB = (((li + 1) * 2 + 1) / (totalLayers * 2)) * 100;
+
+            layerA.nodes.forEach((nodeA, ni) => {
+                const yA = ((ni + 1) / (layerA.nodes.length + 1)) * 100;
+                layerB.nodes.forEach((nodeB, nj) => {
+                    const yB = ((nj + 1) / (layerB.nodes.length + 1)) * 100;
+                    result.push({
+                        x1: xA,
+                        y1: yA,
+                        x2: xB,
+                        y2: yB,
+                        fromNode: nodeA,
+                        toNode: nodeB,
+                        key: `${li}-${ni}-${nj}`,
+                    });
+                });
+            });
+        }
+        return result;
+    }, []);
+
+    return (
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+            <style>{`
+                @keyframes axiom-dash {
+                    to { stroke-dashoffset: -16; }
+                }
+                .axiom-conn-line {
+                    animation: axiom-dash 1.4s linear infinite;
+                }
+                @keyframes axiom-ticker-scroll {
+                    0% { transform: translateX(0); }
+                    100% { transform: translateX(-50%); }
+                }
+            `}</style>
+            <svg ref={svgRef} width="100%" height="100%" style={{ display: "block" }}>
+                {lines.map((line) => {
+                    const isHighlighted = line.fromNode === pulseNode || line.toNode === pulseNode || line.fromNode === activeNode || line.toNode === activeNode;
+                    return (
+                        <line
+                            key={line.key}
+                            className="axiom-conn-line"
+                            x1={`${line.x1}%`}
+                            y1={`${line.y1}%`}
+                            x2={`${line.x2}%`}
+                            y2={`${line.y2}%`}
+                            stroke="var(--c-gold)"
+                            strokeWidth={isHighlighted ? 1.2 : 0.5}
+                            strokeOpacity={isHighlighted ? 0.6 : 0.15}
+                            strokeDasharray="4 4"
+                        />
+                    );
+                })}
+            </svg>
+        </div>
+    );
+}
+
 export function NeuralNet() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { project, fin } = useProject() as any;
@@ -19,6 +92,7 @@ export function NeuralNet() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [nodeData, setNodeData] = useState<any>(null);
     const [isGenerating, setIsGenerating] = useState(false);
+    const [pulseNode, setPulseNode] = useState<string | null>(null);
 
     const loc = project.state ? (project.municipality ? `${project.municipality}, ${project.state}` : project.state) : "your market";
 
@@ -45,6 +119,19 @@ export function NeuralNet() {
         const filled = fields.filter(f => f && f !== 0 && f !== "").length;
         return Math.round((filled / fields.length) * 100) || 75;
     }, [fin, project]);
+
+    // Auto-pulse effect: randomly activates a node every 1200ms to simulate "thinking"
+    useEffect(() => {
+        const interval = setInterval(() => {
+            const layerIdx = Math.floor(Math.random() * LAYERS.length);
+            const layer = LAYERS[layerIdx];
+            const nodeIdx = Math.floor(Math.random() * layer.nodes.length);
+            const node = layer.nodes[nodeIdx];
+            setPulseNode(node);
+            setTimeout(() => setPulseNode(null), 600);
+        }, 1200);
+        return () => clearInterval(interval);
+    }, []);
 
     const handleNodeClick = (layerId: string, nodeName: string) => {
         if (activeNode === nodeName) {
@@ -103,16 +190,41 @@ export function NeuralNet() {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const NeuronNode = ({ label, color, active, activeGlobal, onClick }: any) => (
+    const NeuronNode = ({ label, color, active, activeGlobal, isPulsing, onClick }: any) => (
         <div
             onClick={onClick}
             className={`axiom-neuron ${active ? "active" : ""}`}
-            style={{ color: active ? color : (activeGlobal ? "var(--c-dim)" : "var(--c-text)") }}
+            style={{
+                color: active ? color : (activeGlobal ? "var(--c-dim)" : "var(--c-text)"),
+                boxShadow: isPulsing ? `0 0 12px ${color}` : active ? `0 0 8px ${color}88` : "none",
+                transition: "box-shadow 0.3s ease, color 0.2s ease",
+                position: "relative",
+                zIndex: 1,
+            }}
         >
             {active && <div className="axiom-neuron-indicator" style={{ color }} />}
+            {isPulsing && !active && (
+                <div style={{
+                    position: "absolute",
+                    inset: 0,
+                    borderRadius: "inherit",
+                    background: `${color}22`,
+                    pointerEvents: "none",
+                    animation: "none",
+                }} />
+            )}
             {label}
         </div>
     );
+
+    // KPI bar fill values
+    const kpiCards = [
+        { label: "Deal Score", value: dealScore + "/100", color: dealScore > 70 ? "var(--c-green)" : dealScore > 50 ? "var(--c-amber)" : "var(--c-red)", fillPct: dealScore },
+        { label: "Confidence", value: confidence + "%", color: "var(--c-blue)", fillPct: confidence },
+        { label: "Risk Level", value: dealScore > 70 ? "Low" : dealScore > 50 ? "Medium" : "High", color: dealScore > 70 ? "var(--c-green)" : dealScore > 50 ? "var(--c-amber)" : "var(--c-red)", fillPct: dealScore > 70 ? 85 : dealScore > 50 ? 50 : 20 },
+        { label: "Feasibility", value: dealScore > 60 ? "Viable" : "Review", color: dealScore > 60 ? "var(--c-green)" : "var(--c-amber)", fillPct: dealScore > 60 ? dealScore : 45 },
+        { label: "Recommendation", value: dealScore > 70 ? "GO" : dealScore > 50 ? "CONDITIONS" : "NO-GO", color: dealScore > 70 ? "var(--c-green)" : dealScore > 50 ? "var(--c-amber)" : "var(--c-red)", fillPct: dealScore > 70 ? 90 : dealScore > 50 ? 55 : 15 },
+    ];
 
     return (
         <div className="axiom-mx-auto axiom-max-w-1200">
@@ -121,9 +233,12 @@ export function NeuralNet() {
                     Visual neural network showing how deal intelligence is computed through feature extraction and pattern recognition layers.
                 </div>
 
-                {/* Visual Neural Network Container (Restored V20 glow effect & layout) */}
-                <div className="axiom-neural-container">
+                {/* Visual Neural Network Container with connection lines */}
+                <div className="axiom-neural-container" style={{ position: "relative" }}>
                     <div className="axiom-neural-glow" />
+
+                    {/* SVG connection lines layer */}
+                    <ConnectionLines pulseNode={pulseNode} activeNode={activeNode} />
 
                     {LAYERS.map((layer) => (
                         <div key={layer.id} className="axiom-flex-1 axiom-flex-column axiom-items-center axiom-gap-8 axiom-px-12 axiom-z-1">
@@ -137,6 +252,7 @@ export function NeuralNet() {
                                     color={layer.color}
                                     active={activeNode === node}
                                     activeGlobal={!!activeNode}
+                                    isPulsing={pulseNode === node}
                                     onClick={() => handleNodeClick(layer.id, node)}
                                 />
                             ))}
@@ -144,7 +260,34 @@ export function NeuralNet() {
                     ))}
                 </div>
 
-                {/* Node Output Display (Restored V20 specific layout & computation UI) */}
+                {/* Typing ticker — scrolling status marquee */}
+                <div style={{
+                    overflow: "hidden",
+                    whiteSpace: "nowrap",
+                    marginBottom: "12px",
+                    marginTop: "8px",
+                    padding: "6px 0",
+                    borderTop: "1px solid var(--c-border)",
+                    borderBottom: "1px solid var(--c-border)",
+                    background: "color-mix(in srgb, var(--c-gold) 4%, transparent)",
+                }}>
+                    <span
+                        className="axiom-ticker-scroll"
+                        style={{
+                            display: "inline-block",
+                            fontSize: "10px",
+                            letterSpacing: "0.08em",
+                            color: "var(--c-gold)",
+                            opacity: 0.75,
+                            animation: "axiom-ticker-scroll 18s linear infinite",
+                            willChange: "transform",
+                        }}
+                    >
+                        {TICKER_TEXT}
+                    </span>
+                </div>
+
+                {/* Node Output Display */}
                 {activeNode && (
                     <div className="axiom-bg-2 axiom-radius-6 axiom-mb-16 axiom-overflow-hidden axiom-transition-3 axiom-border-default" style={{ borderColor: `${LAYERS.find(l => l.id === activeLayer)?.color}44` }}>
                         <div className="axiom-telemetry-header" style={{ background: `color-mix(in srgb, ${LAYERS.find(l => l.id === activeLayer)?.color} 15%, transparent)`, borderBottom: `1px solid ${LAYERS.find(l => l.id === activeLayer)?.color}33` }}>
@@ -198,17 +341,36 @@ export function NeuralNet() {
                     </div>
                 )}
 
+                {/* KPI Cards with animated fill bars */}
                 <div className="axiom-grid-5 axiom-gap-12">
-                    {[
-                        ["Deal Score", dealScore + "/100", dealScore > 70 ? "var(--c-green)" : dealScore > 50 ? "var(--c-amber)" : "var(--c-red)"],
-                        ["Confidence", confidence + "%", "var(--c-blue)"],
-                        ["Risk Level", dealScore > 70 ? "Low" : dealScore > 50 ? "Medium" : "High", dealScore > 70 ? "var(--c-green)" : dealScore > 50 ? "var(--c-amber)" : "var(--c-red)"],
-                        ["Feasibility", dealScore > 60 ? "Viable" : "Review", dealScore > 60 ? "var(--c-green)" : "var(--c-amber)"],
-                        ["Recommendation", dealScore > 70 ? "GO" : dealScore > 50 ? "CONDITIONS" : "NO-GO", dealScore > 70 ? "var(--c-green)" : dealScore > 50 ? "var(--c-amber)" : "var(--c-red)"]
-                    ].map(([l, v, c]: any, i) => (
-                        <div key={i} className="axiom-p-12 axiom-radius-4 axiom-text-center axiom-border-1" style={{ background: `color-mix(in srgb, ${c} 10%, transparent)`, borderColor: `color-mix(in srgb, ${c} 30%, transparent)` }}>
-                            <div className="axiom-text-10-dim-caps axiom-mb-6">{l}</div>
-                            <div className="axiom-text-20-bold" style={{ color: c }}>{v}</div>
+                    {kpiCards.map(({ label, value, color, fillPct }, i) => (
+                        <div
+                            key={i}
+                            className="axiom-p-12 axiom-radius-4 axiom-text-center axiom-border-1"
+                            style={{
+                                background: `color-mix(in srgb, ${color} 10%, transparent)`,
+                                borderColor: `color-mix(in srgb, ${color} 30%, transparent)`,
+                            }}
+                        >
+                            <div className="axiom-text-10-dim-caps axiom-mb-6">{label}</div>
+                            <div className="axiom-text-20-bold" style={{ color }}>{value}</div>
+                            {/* Animated fill bar */}
+                            <div style={{
+                                marginTop: "8px",
+                                height: "3px",
+                                borderRadius: "2px",
+                                background: `color-mix(in srgb, ${color} 20%, transparent)`,
+                                overflow: "hidden",
+                            }}>
+                                <div style={{
+                                    height: "100%",
+                                    width: `${fillPct}%`,
+                                    borderRadius: "2px",
+                                    background: color,
+                                    transition: "width 1s ease-out",
+                                    opacity: 0.85,
+                                }} />
+                            </div>
                         </div>
                     ))}
                 </div>

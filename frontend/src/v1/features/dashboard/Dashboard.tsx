@@ -8,7 +8,7 @@ import { buildMonthlyCashFlows, calcIRR } from "../../lib/math";
 import { CHART_TT, CHART_TT_BAR } from "../../lib/chartTheme";
 import {
     AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+    XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, ReferenceLine,
 } from "recharts";
 
 interface Props { projectId: string; }
@@ -66,7 +66,7 @@ export function Dashboard({ projectId }: Props) {
             margin: Math.round(((s.revenue * 0.97 - s.cost) / s.revenue) * 100),
         }));
 
-        return { totalCost, revenue, profit, margin, irr, constMonths, costBreakdown, cashFlowData, scenarios };
+        return { totalCost, revenue, profit, margin, irr, constMonths, landCost, costBreakdown, cashFlowData, scenarios };
     }, [fin]);
 
     const openRisks = risks.filter((r: any) => r.status === "Open").length;
@@ -78,6 +78,14 @@ export function Dashboard({ projectId }: Props) {
         { name: "High", value: risks.filter((r: any) => r.severity === "High").length, color: "var(--c-red)" },
         { name: "Critical", value: risks.filter((r: any) => r.severity === "Critical").length, color: "var(--c-purple)" },
     ].filter(r => r.value > 0);
+
+    // ── Last 30 Days Activity stats ───────────────────────────
+    const avgMonthlyCF = snap.cashFlowData.length > 0
+        ? Math.round(snap.cashFlowData.reduce((s, d) => s + d.cashFlow, 0) / snap.cashFlowData.length)
+        : 0;
+    const totalReturnPct = snap.landCost > 0
+        ? ((snap.profit / snap.landCost) * 100).toFixed(1)
+        : "0.0";
 
     return (
         <div className="axiom-stack-32">
@@ -115,18 +123,43 @@ export function Dashboard({ projectId }: Props) {
                 <KPI label="Profit Margin" value={fmt.pct(snap.margin)} color={snap.margin > 15 ? "var(--c-green)" : "var(--c-gold)"} sub="net margin" />
             </div>
 
+            {/* ── Last 30 Days Activity Strip ──────────────────────── */}
+            <div className="axiom-p-12 axiom-bg-3 axiom-radius-4 axiom-border-default" style={{ display: "flex", alignItems: "center", gap: 0 }}>
+                <div style={{ flex: 1, textAlign: "center", padding: "0 16px", borderRight: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div style={{ fontSize: 10, color: "var(--c-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Avg Monthly CF</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: avgMonthlyCF >= 0 ? "var(--c-green)" : "var(--c-red)" }}>
+                        ${Math.abs(avgMonthlyCF).toLocaleString()}K
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--c-dim)", marginTop: 2 }}>per month · 24-mo view</div>
+                </div>
+                <div style={{ flex: 1, textAlign: "center", padding: "0 16px", borderRight: "1px solid rgba(255,255,255,0.07)" }}>
+                    <div style={{ fontSize: 10, color: "var(--c-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Construction Timeline</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: "var(--c-gold)" }}>
+                        {snap.constMonths} mo
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--c-dim)", marginTop: 2 }}>estimated build phase</div>
+                </div>
+                <div style={{ flex: 1, textAlign: "center", padding: "0 16px" }}>
+                    <div style={{ fontSize: 10, color: "var(--c-dim)", textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 4 }}>Total Return on Land</div>
+                    <div style={{ fontSize: 18, fontWeight: 700, color: Number(totalReturnPct) >= 0 ? "var(--c-blue)" : "var(--c-red)" }}>
+                        {totalReturnPct}%
+                    </div>
+                    <div style={{ fontSize: 10, color: "var(--c-dim)", marginTop: 2 }}>profit / land cost</div>
+                </div>
+            </div>
+
             <div className="axiom-grid-2">
                 <Card title="Monthly Cash Flow — 24 Month View">
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={280}>
                         <AreaChart data={snap.cashFlowData} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: "pointer" }}>
                             <defs>
                                 <linearGradient id="cfGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="var(--c-gold)" stopOpacity={0.25} />
-                                    <stop offset="95%" stopColor="var(--c-gold)" stopOpacity={0.02} />
+                                    <stop offset="5%" stopColor="var(--c-gold)" stopOpacity={0.4} />
+                                    <stop offset="95%" stopColor="var(--c-gold)" stopOpacity={0.05} />
                                 </linearGradient>
                                 <linearGradient id="cumGrad" x1="0" y1="0" x2="0" y2="1">
-                                    <stop offset="5%" stopColor="var(--c-blue)" stopOpacity={0.2} />
-                                    <stop offset="95%" stopColor="var(--c-blue)" stopOpacity={0.02} />
+                                    <stop offset="5%" stopColor="var(--c-blue)" stopOpacity={0.35} />
+                                    <stop offset="95%" stopColor="var(--c-blue)" stopOpacity={0.05} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
@@ -134,8 +167,32 @@ export function Dashboard({ projectId }: Props) {
                             <YAxis tick={AXIS_STYLE} tickFormatter={v => `$${v}K`} />
                             <Tooltip {...CHART_TT} formatter={(v: any) => [`$${Number(v).toLocaleString()}K`, ""]} />
                             <Legend wrapperStyle={{ fontSize: 10, color: "var(--c-dim)" }} />
-                            <Area type="monotone" dataKey="cashFlow" stroke="var(--c-gold)" fill="url(#cfGrad)" strokeWidth={2} dot={false} name="Monthly" />
-                            <Area type="monotone" dataKey="cumulative" stroke="var(--c-blue)" fill="url(#cumGrad)" strokeWidth={2} dot={false} name="Cumulative" />
+                            <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" strokeDasharray="3 3" />
+                            <Area
+                                type="monotone"
+                                dataKey="cashFlow"
+                                stroke="var(--c-gold)"
+                                fill="url(#cfGrad)"
+                                strokeWidth={2.5}
+                                dot={false}
+                                activeDot={{ r: 5, strokeWidth: 2, stroke: "var(--c-gold)" }}
+                                name="Monthly"
+                                isAnimationActive={true}
+                                animationDuration={1200}
+                                animationEasing="ease-out"
+                            />
+                            <Area
+                                type="monotone"
+                                dataKey="cumulative"
+                                stroke="var(--c-blue)"
+                                fill="url(#cumGrad)"
+                                strokeWidth={2.5}
+                                dot={false}
+                                name="Cumulative"
+                                isAnimationActive={true}
+                                animationDuration={1200}
+                                animationEasing="ease-out"
+                            />
                         </AreaChart>
                     </ResponsiveContainer>
                 </Card>
@@ -151,6 +208,11 @@ export function Dashboard({ projectId }: Props) {
                                     dataKey="value"
                                     onClick={(e) => { if (e && e.name) setSelectedSlice(e.name); setChartSel(e); }}
                                     style={{ cursor: "pointer" }}
+                                    isAnimationActive={true}
+                                    animationDuration={800}
+                                    animationBegin={0}
+                                    paddingAngle={2}
+                                    strokeWidth={0}
                                 >
                                     {snap.costBreakdown.map((_, i) => (
                                         <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} opacity={selectedSlice && _.name !== selectedSlice ? 0.4 : 1} />
@@ -177,14 +239,15 @@ export function Dashboard({ projectId }: Props) {
 
             <div className="axiom-grid-2">
                 <Card title="Scenario Analysis — Profit Comparison">
-                    <ResponsiveContainer width="100%" height={200}>
+                    <ResponsiveContainer width="100%" height={220}>
                         <BarChart data={snap.scenarios} onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: "pointer" }}>
                             <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
                             <XAxis dataKey="name" tick={AXIS_STYLE} />
                             <YAxis tick={AXIS_STYLE} tickFormatter={v => `$${v}K`} />
                             <Tooltip {...CHART_TT_BAR} formatter={(v: any) => [`$${Number(v).toLocaleString()}K`, "Profit"]} />
                             <Legend wrapperStyle={{ fontSize: 10, color: "var(--c-dim)" }} />
-                            <Bar dataKey="profit" name="Profit">
+                            <ReferenceLine y={0} stroke="rgba(255,255,255,0.1)" />
+                            <Bar dataKey="profit" name="Profit" isAnimationActive={true} animationDuration={900} radius={[4, 4, 0, 0]}>
                                 {snap.scenarios.map((s, i) => (
                                     <Cell key={i} fill={s.profit >= 0 ? ["var(--c-amber)", "var(--c-gold)", "var(--c-green)"][i] || "var(--c-gold)" : "var(--c-red)"} />
                                 ))}
@@ -198,7 +261,16 @@ export function Dashboard({ projectId }: Props) {
                         <div className="axiom-flex axiom-items-center axiom-gap-16">
                             <ResponsiveContainer width={140} height={180}>
                                 <PieChart onClick={(e: any) => { if (e && e.activePayload && e.activePayload[0]) setChartSel(e.activePayload[0]); }} style={{ cursor: 'pointer' }}>
-                                    <Pie data={riskSeverity} cx="50%" cy="50%" outerRadius={65} dataKey="value">
+                                    <Pie
+                                        data={riskSeverity}
+                                        cx="50%" cy="50%"
+                                        outerRadius={65}
+                                        dataKey="value"
+                                        isAnimationActive={true}
+                                        animationDuration={700}
+                                        paddingAngle={3}
+                                        strokeWidth={0}
+                                    >
                                         {riskSeverity.map((item, i) => (
                                             <Cell key={i} fill={item.color} />
                                         ))}

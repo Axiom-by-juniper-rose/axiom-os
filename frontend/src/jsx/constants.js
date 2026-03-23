@@ -17,43 +17,60 @@ export const US_STATES = ["", "Alabama", "Alaska", "Arizona", "Arkansas", "Calif
 export const ST_ABBR = { "": "", "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR", "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE", "District of Columbia": "DC", "Florida": "FL", "Georgia": "GA", "Hawaii": "HI", "Idaho": "ID", "Illinois": "IL", "Indiana": "IN", "Iowa": "IA", "Kansas": "KS", "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD", "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS", "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV", "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY", "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH", "Oklahoma": "OK", "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC", "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT", "Vermont": "VT", "Virginia": "VA", "Washington": "WA", "West Virginia": "WV", "Wisconsin": "WI", "Wyoming": "WY" };
 
 export const NAV = [
+    // Overview
     { id: "dashboard", label: "Command Center", group: "Overview" },
-    { id: "connectors", label: "Connectors & APIs", group: "Overview" },
-    { id: "contacts", label: "Contacts", group: "CRM" },
-    { id: "pipeline", label: "Deal Pipeline", group: "CRM" },
-    { id: "analyzer", label: "Deal Analyzer", group: "CRM" },
+
+    // Intelligence
+    { id: "market", label: "Market Intelligence", group: "Intelligence" },
+    { id: "dataintel", label: "Data & Intel", group: "Intelligence" },
+    { id: "juris", label: "Jurisdiction Intel", group: "Intelligence" },
+    { id: "mls", label: "MLS & Listings", group: "Intelligence" },
+    { id: "tax_intel", label: "Tax Intelligence", group: "Intelligence" },
+
+    // Deals
+    { id: "pipeline", label: "Deal Pipeline", group: "Deals" },
+    { id: "analyzer", label: "Deal Analyzer", group: "Deals" },
+    { id: "contacts", label: "Contacts", group: "Deals" },
+
+    // Finance
     { id: "financial", label: "Financial Engine", group: "Finance" },
-    { id: "invoices", label: "Invoices & Payments", group: "Finance" },
     { id: "calchub", label: "Calculator Hub", group: "Finance" },
+    { id: "invoices", label: "Invoices & Payments", group: "Finance" },
+
+    // Site
     { id: "site", label: "Site & Entitlements", group: "Site" },
     { id: "infrastructure", label: "Infrastructure", group: "Site" },
     { id: "design", label: "Concept & Design", group: "Site" },
     { id: "network", label: "Professional Network", group: "Site" },
-    { id: "market", label: "Market Intelligence", group: "Market" },
-    { id: "mls", label: "MLS & Listings", group: "Market" },
-    { id: "dataintel", label: "Data & Intel", group: "Market" },
-    { id: "juris", label: "Jurisdiction Intel", group: "Market" },
+    { id: "site_map_3d", label: "Site Map 3D", group: "Site" },
+
+    // Execution
     { id: "process", label: "Process Control", group: "Execution" },
     { id: "sitemgmt", label: "Site Management", group: "Execution" },
     { id: "risk", label: "Risk Command", group: "Execution" },
+    { id: "risk_calibration", label: "Risk Calibration", group: "Execution" },
+
+    // AI Engine
+    { id: "agents", label: "AI Agent Hub", group: "AI Engine" },
+    { id: "agent_pipeline", label: "Agent Pipeline", group: "AI Engine" },
+    { id: "neural", label: "Neural Intelligence", group: "AI Engine" },
+    { id: "copilot", label: "Copilot", group: "AI Engine" },
+    { id: "portfolio_governance", label: "Portfolio Gov", group: "AI Engine" },
+
+    // Workspace
     { id: "notes", label: "Notes", group: "Workspace" },
     { id: "calendar", label: "Calendar", group: "Workspace" },
     { id: "email", label: "Email", group: "Workspace" },
     { id: "sheets", label: "Spreadsheets", group: "Workspace" },
     { id: "workflows", label: "Workflows", group: "Workspace" },
+    { id: "reports", label: "Reports & Binder", group: "Workspace" },
     { id: "resources", label: "Resource Center", group: "Workspace" },
-    { id: "reports", label: "Reports & Binder", group: "Output" },
-    { id: "agents", label: "AI Agent Hub", group: "Output" },
-    { id: "copilot", label: "Copilot", group: "Output" },
-    { id: "neural", label: "Neural Intelligence", group: "Output" },
+
+    // System
+    { id: "connectors", label: "Connectors & APIs", group: "System" },
     { id: "billing", label: "Billing & Plans", group: "System" },
     { id: "legal", label: "Legal & Compliance", group: "System" },
     { id: "settings", label: "Settings", group: "System" },
-    { id: "agent_pipeline", label: "Agent Pipeline", icon: "🤖", group: "V5", tier: "core" },
-    { id: "risk_calibration", label: "Risk Intelligence", icon: "⚡", group: "V5", tier: "core" },
-    { id: "tax_intel", label: "Tax Intelligence", icon: "💰", group: "V5", tier: "core" },
-    { id: "portfolio_governance", label: "Portfolio Gov", icon: "🏛", group: "V5", tier: "core" },
-    { id: "site_map_3d", label: "3D Site Map", icon: "🗺", group: "V5", tier: "core" },
 ];
 
 // Derived from NAV — maps each module id to its display title for the top bar.
