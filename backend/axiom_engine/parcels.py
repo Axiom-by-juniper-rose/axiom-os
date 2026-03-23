@@ -1,7 +1,10 @@
 import csv
 import json
+import logging
 from pathlib import Path
 from typing import Dict, Any, List, Optional
+
+logger = logging.getLogger(__name__)
 
 # Adjust base dir to point effectively to backend/
 BASE_DIR = Path(__file__).resolve().parents[1]  # axiom_engine -> backend
@@ -49,18 +52,15 @@ def normalize_row(row: Dict[str, Any], mapping: Dict[str, str], defaults: Dict[s
 
 def ingest_csv(file_path: Path, mapping: Dict[str, str], defaults: Dict[str, Any]) -> Dict[str, Any]:
     count = 0
-    # Ensure PARCELS_PATH parent exists? Backend dir should exist.
-    
-    # print(f"DEBUG: ingest_csv reading {file_path}")
+    logger.info(f"ingest_csv: reading {file_path}")
     with open(file_path, newline="", encoding="utf-8", errors="ignore") as f, open(PARCELS_PATH, "a", encoding="utf-8") as out:
         reader = csv.DictReader(f)
-        # print(f"DEBUG: CSV fieldnames: {reader.fieldnames}")
+        logger.debug(f"CSV fieldnames: {reader.fieldnames}")
         for row in reader:
-            # print(f"DEBUG: Processing row: {row}")
             rec = normalize_row(row, mapping, defaults)
             out.write(json.dumps(rec) + "\n")
             count += 1
-    # print(f"DEBUG: Ingested {count} rows")
+    logger.info(f"Ingested {count} rows → {PARCELS_PATH}")
     return {"ok": True, "ingested": count, "parcels_path": str(PARCELS_PATH)}
 
 def _read_all(limit: int = 50000) -> List[Dict[str, Any]]:

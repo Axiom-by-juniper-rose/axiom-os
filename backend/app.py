@@ -7,6 +7,7 @@ from axiom_engine.connectors.rates import get_10yr_treasury
 from axiom_engine.connectors.census import get_demographics
 from routers import auth, admin, parcels, deals, calc, copilot_v2
 from axiom_engine import scenarios
+from axiom_engine.tax import router as tax_router
 from axiom_engine.db import load_db, save_db
 from axiom_engine.stripe_verify import verify_stripe_signature
 from fastapi.middleware.cors import CORSMiddleware
@@ -14,14 +15,14 @@ from fastapi.responses import JSONResponse
 from fastapi import FastAPI, Request, Header
 import os
 import sys
+import logging
 from dotenv import load_dotenv
 load_dotenv()  # Load env vars before any other imports
 
-
-# Routers
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="AXIOM Shared Engine MVP")
-print("DEBUG: RELOADING APP.PY", file=sys.stderr)
+logger.info("AXIOM app initialized")
 
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET", "")
 
@@ -88,6 +89,7 @@ app.include_router(parcels.router)
 app.include_router(calc.router)
 app.include_router(copilot_v2.router)
 app.include_router(scenarios.router)
+app.include_router(tax_router)
 
 # Stripe Webhook (kept in app.py or moved? Let's keep it here or misc. It's unique.)
 # It depends on load_db/save_db. Let's keep it in app.py for now to avoid over-fragmentation,
@@ -107,9 +109,9 @@ async def stripe_webhook(request: Request, stripe_signature: str | None = Header
         # FAILSAFE FOR LOCAL TESTING: If using the placeholder secret, allow it but log warning
         # This allows developers to test webhook logic without a real Stripe CLI tunnel if needed,
         # or if the secret in .env is just a placeholder.
-        if STRIPE_WEBHOOK_SECRET.startswith("whsec_your-stripe"):
-            print(
-                f"WARNING: Signature failed ({e}) but allowing due to DEV PREVIEW secret.")
+    except Exception as e:
+        logger.warning(f"Stripe webhook signature failed: {e} — DEV secret in use, allowing.")
+
         else:
             return JSONResponse(status_code=400, content={"error": "SIGNATURE_VERIFY_FAILED", "detail": str(e)})
 
@@ -124,7 +126,7 @@ async def stripe_webhook(request: Request, stripe_signature: str | None = Header
         result = handle_subscription_change(event_type, payload)
         return JSONResponse(status_code=200, content=result)
     except Exception as e:
-        print(f"Webhook Error: {e}")
+        logger.error(f"Webhook handler error: {e}")
         return JSONResponse(status_code=500, content={"error": "Handler Error", "detail": str(e)})
 
 # Market Intel (Small enough to keep here or move to deals? Let's keep for now)

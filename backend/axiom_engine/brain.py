@@ -1,6 +1,9 @@
 import os
 import json
+import logging
 from openai import OpenAI
+
+logger = logging.getLogger(__name__)
 
 # Initialize OpenAI Client
 client = None
@@ -16,7 +19,7 @@ def call_llm(system_prompt: str, user_prompt: str, json_mode: bool = True) -> st
 
     is_mock = str(os.getenv("MOCK_LLM")).lower() == "true"
     if is_mock:
-        print(f"DEBUG: [Brain] Mocking LLM Call. Prompt len: {len(user_prompt)}")
+        logger.debug(f"[Brain] Mock LLM call. Prompt len: {len(user_prompt)}")
         if json_mode:
             return json.dumps({
                 "analysis": "Internal MOCK Analysis.",
@@ -42,7 +45,7 @@ def call_llm(system_prompt: str, user_prompt: str, json_mode: bool = True) -> st
             return f"MOCK RESPONSE {echo_str} based on: {user_prompt[:200]}..."
 
     try:
-        print(f"DEBUG: [Brain] Proceeding to REAL LLM CALL (Mock inactive).", file=sys.stderr)
+        logger.debug("[Brain] Real LLM call in progress.")
         kwargs = {
             "model": "gpt-4o",
             "messages": [
@@ -58,7 +61,7 @@ def call_llm(system_prompt: str, user_prompt: str, json_mode: bool = True) -> st
         return response.choices[0].message.content
         
     except Exception as e:
-        print(f"OpenAI Error: {e}")
+        logger.error(f"LLM call error: {e}")
         return json.dumps({"error": str(e)}) if json_mode else f"Error: {str(e)}"
 
 def analyze_deal(deal_data: dict, user_notes: str = "") -> dict:

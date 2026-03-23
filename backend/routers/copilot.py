@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-import sys
+import logging
 from typing import Dict, Any
 from pydantic import BaseModel
 from axiom_engine.dependencies import get_ctx
@@ -26,10 +26,8 @@ def copilot_interpret(payload: CopilotIn):
 def copilot_execute(payload: Dict[str, Any]):
     return execute(payload)
 
-# New Analyze Endpoint
-print("DEBUG: Importing brain...", file=sys.stderr)
+# Analyze Endpoint
 from axiom_engine.brain import analyze_deal
-print("DEBUG: Imported brain.", file=sys.stderr)
 
 class AnalyzeIn(BaseModel):
     deal_data: Dict[str, Any]
@@ -38,7 +36,6 @@ class AnalyzeIn(BaseModel):
 @router.post("/analyze")
 def copilot_analyze(payload: AnalyzeIn):
     return analyze_deal(payload.deal_data, payload.user_notes)
-print("DEBUG: Added /analyze route", file=sys.stderr)
 
 @router.post("/find_and_run")
 def copilot_find_and_run(

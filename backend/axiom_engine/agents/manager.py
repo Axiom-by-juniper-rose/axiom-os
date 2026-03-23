@@ -1,9 +1,10 @@
-import sys
 import os
+import logging
 from apscheduler.schedulers.background import BackgroundScheduler
 from supabase import create_client, Client
 
-# Global supabase client (lazy initialized)
+logger = logging.getLogger(__name__)
+
 supabase: Client = None
 
 def get_supabase() -> Client:
@@ -18,40 +19,36 @@ def get_supabase() -> Client:
 scheduler = BackgroundScheduler()
 
 def watch_due_diligence():
-    """
-    Poller for deals in Due Diligence.
-    """
+    """Poll deals in Due Diligence and dispatch agents on unprocessed ones."""
     sb = get_supabase()
     if not sb:
-        print("DEBUG: [Agent Manager] Supabase not configured.", file=sys.stderr)
+        logger.warning("[Agent Manager] Supabase not configured — skipping poll.")
         return
-
-    # print("DEBUG: [Agent Manager] Scanning for deals in Due Diligence...", file=sys.stderr) # noisy logs
     try:
-        # Fetch deals in due_diligence
-        response = sb.table("deals").select("*").eq("stage", "due_diligence").execute()
+        response = sb.table("deals").select("id").eq("stage", "due_diligence").execute()
         deals = response.data or []
-        
-        # dynamic import to avoid circular dependency if orchestrator imports anything
+
+        # Import here to avoid circular dependency
         from .orchestrator import process_deal
-        
+
         for deal in deals:
-            # Check if processed
-            notes = deal.get("notes") or ""
-            if "** Investment Committee Memo **" not in notes:
-                print(f"DEBUG: [Agent Manager] Found new deal {deal['id']}. Dispatching Agents.", file=sys.stderr)
-                process_deal(deal['id'])
-                
+            # V5: check deal_analyses table instead of notes blob
+            existing = sb.table("deal_analyses").select("id").eq(
+                "deal_id", deal["id"]).eq("agent_type", "analyst").limit(1).execute()
+            if not existing.data:
+                logger.info(f"[Agent Manager] Dispatching agents for deal {deal['id']}")
+                process_deal(deal["id"])
+
     except Exception as e:
-        print(f"DEBUG: [Agent Manager] Error scanning: {e}", file=sys.stderr)
+        logger.error(f"[Agent Manager] Poll error: {e}")
 
 def start_agents():
     if not scheduler.running:
-        scheduler.add_job(watch_due_diligence, 'interval', seconds=15, id='analyst_watch') # 15s for faster testing
+        scheduler.add_job(watch_due_diligence, "interval", seconds=60, id="analyst_watch")
         scheduler.start()
-        print("DEBUG: [Agent Manager] Scheduler Started", file=sys.stderr)
+        logger.info("[Agent Manager] Scheduler started — polling every 60s")
 
 def stop_agents():
     if scheduler.running:
         scheduler.shutdown()
-        print("DEBUG: [Agent Manager] Scheduler Stopped", file=sys.stderr)
+        logger.info("[Agent Manager] Scheduler stopped")
