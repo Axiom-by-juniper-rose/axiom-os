@@ -2,29 +2,46 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  // include .js files so that JSX inside src/jsx/*.js (constants, utils) is processed correctly
   plugins: [react({ include: /\.(jsx?|tsx?)$/ })],
   server: {
     port: 8008,
   },
   build: {
-    // Raise limit to account for v1 legacy bundle (axiom modules are now lazy-split)
-    chunkSizeWarningLimit: 3500,
+    chunkSizeWarningLimit: 600,
+    minify: 'esbuild',
+    sourcemap: false,
+    target: 'es2020',
+    // Inline small assets directly — reduces HTTP round trips
+    assetsInlineLimit: 4096,
     rollupOptions: {
       output: {
-        manualChunks: {
-          // Split vendor libraries for better caching
-          'vendor-react': ['react', 'react-dom', 'react-router-dom'],
-          'vendor-charts': ['recharts'],
-          'vendor-supabase': ['@supabase/supabase-js'],
-          'vendor-pdf': ['jspdf'],
+        manualChunks(id) {
+          // React core — always cached separately
+          if (id.includes('node_modules/react/') || id.includes('node_modules/react-dom/') || id.includes('node_modules/react-router-dom/')) {
+            return 'vendor-react';
+          }
+          // Recharts split into its own chunk — only loaded when a chart renders
+          if (id.includes('node_modules/recharts') || id.includes('node_modules/d3-') || id.includes('node_modules/victory-')) {
+            return 'vendor-charts';
+          }
+          // Supabase — only loaded when auth/db is needed
+          if (id.includes('node_modules/@supabase')) {
+            return 'vendor-supabase';
+          }
+          // PDF — only needed for report export
+          if (id.includes('node_modules/jspdf')) {
+            return 'vendor-pdf';
+          }
+          // Anthropic/OpenAI SDKs — only in AI sections
+          if (id.includes('node_modules/@anthropic') || id.includes('node_modules/openai')) {
+            return 'vendor-ai';
+          }
+          // All other node_modules get their own named chunk for better caching
+          if (id.includes('node_modules')) {
+            return 'vendor-misc';
+          }
         },
       },
     },
-    // Minification
-    minify: 'esbuild',
-    sourcemap: false,
-    // Target modern browsers
-    target: 'es2020',
   },
 })

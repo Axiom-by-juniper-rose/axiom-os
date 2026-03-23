@@ -74,8 +74,12 @@ const SECTIONS = {
 };
 
 const ModuleFallback = () => (
-    <div style={{ padding: 40, textAlign: "center", color: C.dim, fontSize: 13 }}>
-        Loading…
+    <div style={{ padding: 24 }}>
+        <div style={{ height: 32, width: 200, background: 'var(--c-bg3)', borderRadius: 4, marginBottom: 16, animation: 'axiom-shimmer 1.4s ease-in-out infinite' }} />
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 12, marginBottom: 20 }}>
+            {[1,2,3,4].map(i => <div key={i} style={{ height: 72, background: 'var(--c-bg3)', borderRadius: 4, animation: `axiom-shimmer 1.4s ease-in-out ${i * 0.1}s infinite` }} />)}
+        </div>
+        <div style={{ height: 260, background: 'var(--c-bg3)', borderRadius: 4, animation: 'axiom-shimmer 1.4s ease-in-out 0.4s infinite' }} />
     </div>
 );
 

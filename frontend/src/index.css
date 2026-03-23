@@ -11,3 +11,9 @@ body,
 .progress-fill {
   width: var(--progress-width, 0%);
 }
+
+@keyframes axiom-shimmer {
+  0%   { opacity: 0.4; }
+  50%  { opacity: 0.7; }
+  100% { opacity: 0.4; }
+}
