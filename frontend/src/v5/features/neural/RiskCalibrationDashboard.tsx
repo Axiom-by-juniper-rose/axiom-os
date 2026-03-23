@@ -27,7 +27,7 @@ interface Props {
   supabase: any;
 }
 
-export function RiskCalibrationDashboard({ orgId, supabase }: Props) {
+export function RiskCalibrationDashboard({ orgId: _orgId, supabase }: Props) {
   const [events, setEvents] = useState<RiskEvent[]>([]);
   const [avgBrier, setAvgBrier] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);

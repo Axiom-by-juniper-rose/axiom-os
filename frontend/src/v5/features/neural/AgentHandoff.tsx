@@ -4,7 +4,8 @@
  * Subscribes to v5_events via SwarmEngine.
  */
 import { useEffect, useState } from 'react';
-import { SwarmEngine, AgentTask, AgentStatus } from './SwarmEngine';
+import { SwarmEngine } from './SwarmEngine';
+import type { AgentTask, AgentStatus } from './SwarmEngine';
 
 const C = {
   bg: '#0d0d1a',
