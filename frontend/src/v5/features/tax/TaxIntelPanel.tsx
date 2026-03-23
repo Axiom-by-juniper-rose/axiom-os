@@ -9,7 +9,7 @@ const TABS = [{ id: 'codes' as Tab, label: 'Tax Codes' }, { id: 'property' as Ta
 
 const BACKEND_URL = (import.meta as any).env?.VITE_BACKEND_URL || 'http://localhost:8000';
 
-export function TaxIntelPanel({ dealId, projectId, lat, lng }: { dealId?: string; projectId?: string; lat?: number; lng?: number }) {
+export function TaxIntelPanel({ dealId, lat, lng }: { dealId?: string; projectId?: string; lat?: number; lng?: number }) {
   const [activeTab, setActiveTab] = useState<Tab>('codes');
   const [assessment, setAssessment] = useState<any>(null);
   const [macrs, setMacrs] = useState<any>(null);
