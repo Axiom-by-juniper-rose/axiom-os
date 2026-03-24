@@ -334,7 +334,11 @@ export default function BillingPlans() {
             )}
 
             <div style={{ textAlign: "center", fontSize: 10, color: C.dim }}>
-                <span style={{ color: C.gold }}>enterprise@buildaxiom.dev</span> · Axiom OS by Juniper Rose Investments & Holdings · Sarasota, FL
+                <a href="mailto:support@buildaxiom.dev" style={{ color: C.dim, textDecoration: "none" }}>support@buildaxiom.dev</a>
+                <span style={{ margin: "0 8px" }}>·</span>
+                <a href="mailto:enterprise@buildaxiom.dev" style={{ color: C.gold, textDecoration: "none" }}>enterprise@buildaxiom.dev</a>
+                <span style={{ margin: "0 8px" }}>·</span>
+                Axiom OS by Juniper Rose Intelligence · Sarasota, FL
             </div>
         </div>
     );
