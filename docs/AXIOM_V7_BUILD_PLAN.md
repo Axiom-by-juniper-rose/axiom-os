@@ -7,7 +7,7 @@
 
 ## Build Rating
 
-**Overall Score: 8.8 / 10**
+**Overall Score: 9.0 / 10** *(revised from 8.8 — BYOD legal review and Marketplace cold-start gaps patched)*
 
 | Dimension | Score | Notes |
 |---|---|---|
@@ -16,7 +16,7 @@
 | Risk calibration | 7.5 | The autonomous commitment engine is the live grenade. The hallucination guardrails are essential but need real legal review before production. BYOD has GDPR/CCPA surface area that isn't fully addressed yet. |
 | Sequencing logic | 8.5 | Correct instinct to do cost modeling before marketplace — you don't want to launch a marketplace and immediately get killed by token bills. Hallucination guardrails should ship before autonomous commitments, full stop. |
 | Monetization leverage | 9.5 | Marketplace royalty split + BYOD as Enterprise+ lock-in + autonomous engine as Boutique+ gate = three distinct revenue expansion vectors on top of the base subscription ladder. |
-| Completeness | 8.0 | Missing: error recovery strategies for the ingestion pipeline at scale, rate limit handling for Procore/Yardi APIs, marketplace agent versioning/deprecation policy, and a rollback plan if autonomous LOI submission misfires. |
+| Completeness | 8.7 | BYOD GDPR/CCPA legal review and Marketplace cold-start strategy added in revision. Remaining gaps: error recovery for ingestion pipeline at scale, rate limit handling for Procore/Yardi APIs, marketplace agent versioning/deprecation policy, and rollback plan if autonomous LOI submission misfires. |
 
 **What makes this a strong v7 and not just a roadmap wish list:** every feature has a defined acceptance criteria, a named schema, and specific files to touch. These are executable plans, not product visions.
 
@@ -35,6 +35,10 @@
 5. [Bring-Your-Own-Data (BYOD) — Firm-Level Intelligence](#5-bring-your-own-data-byod--firm-level-intelligence)
 6. [The Agent Marketplace](#6-the-agent-marketplace)
 7. [API Cost Modeling & Semantic Cache Layer](#7-api-cost-modeling--semantic-cache-layer)
+
+**Appendix**
+- [Recommended Ship Order](#recommended-ship-order)
+- [Current Build — Potential Updates & Upgrades](#current-build--potential-updates--upgrades)
 
 ---
 
@@ -709,6 +713,17 @@ CREATE TABLE firm_intelligence_profile (
 | `frontend/src/jsx/components/BYOD/CorpusUploader.jsx` | **Create** |
 | `frontend/src/jsx/components/BYOD/IngestionProgress.jsx` | **Create** |
 
+### Legal & privacy requirements
+
+BYOD introduces a new risk surface: enterprise clients uploading proprietary deal data — including legally sensitive documents such as loan agreements, IC memos, and appraisals — into a third-party SaaS platform. This requires formal legal review before any enterprise customer is onboarded.
+
+**Required before launch:**
+- [ ] **Privacy counsel review** of the BYOD data processing agreement — specifically: who is the data controller vs data processor, what is the retention obligation, and whether Axiom's current Privacy Policy adequately covers firm-uploaded document data
+- [ ] **GDPR compliance review** — EU-based REPE firms uploading historical deal data triggers GDPR Article 28 (data processor) obligations; a Data Processing Addendum (DPA) template must exist before any EU customer is onboarded to BYOD
+- [ ] **CCPA compliance review** — confirm whether deal document data constitutes "personal information" under CCPA and if so, what disclosure obligations apply
+- [ ] **Contractual protection** — BYOD terms of service addendum must explicitly state: (1) Axiom does not train its global model on firm-uploaded data, (2) data is isolated per org, (3) deletion is executed within 24 hours of account close, (4) Anthropic's API processes prompts that may include excerpts from uploaded documents (already disclosed in Privacy Policy, confirm BYOD extends this)
+- [ ] **Vendor sub-processor disclosure** — Supabase (pgvector storage), Railway (ingestion worker), and Anthropic (entity extraction LLM calls) must all be listed as sub-processors in the DPA
+
 ### Acceptance criteria
 
 - [ ] 2015 PDF IC memo correctly extracts deal name, vintage, IRR, EM, and outcome
@@ -717,6 +732,9 @@ CREATE TABLE firm_intelligence_profile (
 - [ ] Full corpus wipe completes within 60 seconds with zero residual vectors
 - [ ] Agent citation names a specific comparable deal when similarity > 0.85
 - [ ] Ingestion worker handles a 10,000-document upload without memory crash
+- [ ] **Privacy counsel has reviewed and signed off on the BYOD data processing agreement before first enterprise customer is onboarded**
+- [ ] DPA template drafted and available for enterprise customer signature
+- [ ] EU customer onboarding flow includes explicit DPA execution step (not just checkbox)
 
 ---
 
@@ -854,6 +872,47 @@ CREATE TABLE marketplace_reviews (id, agent_id, user_id, rating, review_text, ve
 | `frontend/src/jsx/components/Marketplace/DeveloperPortal.jsx` | **Create** |
 | `frontend/src/jsx/components/Marketplace/AgentRunButton.jsx` | **Create** |
 
+### Cold-start launch strategy
+
+A marketplace with three agents is worse than no marketplace — sparse catalogs signal abandonment and erode trust. The marketplace must have critical mass on day one or it should not open publicly at all.
+
+**Pre-launch: Seeded developer cohort (8–10 weeks before public launch)**
+
+Recruit 6–8 developer-partners before the SDK is publicly available. These are not random developers — they are licensed CRE professionals or firms who already have the domain expertise the marketplace needs:
+
+| Target cohort | Agent they would build |
+|---|---|
+| Florida real estate law firm | FL Entitlement & Zoning Specialist |
+| LIHTC consultant / syndicator | Low-Income Housing Tax Credit Specialist |
+| CPA specializing in OZ deals | Opportunity Zone Structuring Agent |
+| Environmental engineering firm | Phase I/II ESA Risk Analyzer |
+| HUD-approved lender | FHA 221(d)(4) Underwriting Agent |
+| Title company | Title Risk & Exceptions Analyzer |
+
+Each seed partner receives:
+- Early SDK access + direct Slack channel with Axiom engineering
+- 90% revenue share for first 12 months (vs standard 70%) — explicit in writing
+- "Founding Developer" badge on their marketplace profile in perpetuity
+- No listing fee or approval fee for initial submission
+
+**Minimum viable catalog before public launch: 8 approved agents across at least 3 taxonomy categories.** If this threshold isn't met, delay the public launch. A sparse marketplace is a reputational risk, not a neutral state.
+
+**Launch sequencing:**
+```
+Week -10:  SDK private beta — seed cohort only, NDA required
+Week -6:   First agents in review pipeline
+Week -4:   Marketplace UI live but invite-only (seed users + select Enterprise accounts)
+Week -2:   Soft launch — visible to all Boutique+ users, not marketed
+Week 0:    Public launch — press, in-app announcement, developer blog post
+Week +4:   Open developer applications — anyone can apply to build
+```
+
+**Developer acquisition flywheel post-launch:**
+- Publish monthly "top agents" leaderboard with earnings transparency (opt-in for developers)
+- Axiom hosts a quarterly virtual CRE-tech developer summit — showcase top agent builders
+- GitHub templates for the 5 most common agent patterns lower barrier to entry
+- "Agent Bounty" program: Axiom posts $500–$2,000 bounties for high-demand agents with no current supply
+
 ### Acceptance criteria
 
 - [ ] Sandbox blocks filesystem access and unapproved outbound HTTP
@@ -862,6 +921,9 @@ CREATE TABLE marketplace_reviews (id, agent_id, user_id, rating, review_text, ve
 - [ ] Output schema type mismatch caught at runtime — agent cannot write wrong types
 - [ ] Review pipeline catches prompt injection attempts in agent code
 - [ ] Marketplace agent cannot read deal data from a different org
+- [ ] **Minimum 8 approved agents across 3+ taxonomy categories exist before public launch**
+- [ ] **Seed developer agreements signed with 90% rev-share terms documented**
+- [ ] Invite-only soft launch completes with zero sandbox violations before public open
 
 ---
 
@@ -1035,6 +1097,99 @@ Week 11–15: Agent Marketplace                     ← requires cost layer + st
 Week 16+:   Autonomous Commitments                ← last, after legal review is complete
 Ongoing:    Bundle Splitting                      ← low priority, can slot anywhere
 ```
+
+---
+
+## Current Build — Potential Updates & Upgrades
+
+> Review of the existing production codebase (as of commit `be446ad`, March 23 2026).
+> These are not v7 features — they are improvements to what is already shipped.
+> Organized by severity: **P0** (broken or blocking), **P1** (significant improvement), **P2** (polish).
+
+---
+
+### P0 — Fix Now
+
+**Beta request form does not capture leads**
+`VanguardLanding.jsx` — the hero email form `onSubmit` does `console.log()` and `alert()`. It writes nothing to Supabase, sends no email, and no record is kept of who requested beta access. Every inbound lead from the landing page is currently lost.
+Fix: wire `handleRequestBeta` to insert into a `beta_requests` table in Supabase and trigger a notification email to `enterprise@buildaxiom.dev`.
+
+**Service worker registration references a file that may not exist**
+`main.tsx` registers `/service-worker.js` on load. If this file is absent from the Vite build output (it likely is — there is no `vite-plugin-pwa` in `package.json`), every page load logs a silent SW registration failure. Not user-visible but pollutes the console and signals broken intent.
+Fix: either add `vite-plugin-pwa` and implement the service worker properly (aligns with the "offline sync" feature described in Field Mode marketing copy), or remove the registration call until it is ready.
+
+**Dependabot: 1 critical, 6 high, 2 moderate vulnerabilities**
+These are flagged on the GitHub default branch as of the last push. The critical vulnerability in particular cannot sit. Review with `npm audit`, resolve via package updates or overrides, confirm the build still passes.
+
+**Supervisor agent webhook URL points to localhost**
+Flagged in a prior session as a P0. Any agent that posts to a localhost webhook in production silently fails. Confirm the correct production Railway URL is set in all relevant environment variables and edge function configs.
+
+---
+
+### P1 — Significant Improvement
+
+**LeadForm e-book download is not wired**
+`VanguardLanding.jsx` renders `<LeadForm title="Instant Access" subtitle="Download V3 Handbook" />`. There is no PDF attached, no delivery mechanism, and no confirmation. Either wire it to deliver a real asset or replace it with a waitlist capture until the asset exists. A form that collects nothing is worse than no form.
+
+**DebugErrorBoundary is not production-appropriate**
+`DebugErrorBoundary.tsx` renders a raw component stack trace in a styled div using Tailwind classes. This is correct for development but exposes internal architecture details in production. Add an `IS_PRODUCTION` check: in production, show a clean "Something went wrong — our team has been notified" UI with a reload button and no stack trace. Send the error details to a logging service (Sentry or a Supabase `error_log` table) instead of displaying them.
+
+**No rate limiting on the backend API**
+`backend/routers/` has no request rate limiting middleware. A single compromised account or a malicious automated client can exhaust the Railway instance or burn the Anthropic API budget. Add `slowapi` (FastAPI rate limiter) at the router level with per-user and per-org limits that match the tier plan definitions in `plans.py`.
+
+**TypeScript suppression debt in JSX imports**
+`App.tsx` and several other files use `// @ts-expect-error: JSX module, not typed` for every JSX import. This suppresses legitimate type errors in addition to the intended one. The correct fix is to add `*.jsx` module declarations to `src/types/` or convert the most-used JSX files (starting with `AxiomApp`, `VanguardLanding`) to `.tsx`. Each suppression is a blind spot.
+
+**Annual billing not implemented**
+`TermsOfService.tsx` references annual plans ("Annual plan fees after the first 14 days") and `BillingPlans.jsx` has no annual toggle. Either remove the reference from the ToS or implement the annual option. A legal document that describes a billing mode that doesn't exist creates a compliance gap.
+
+**LandingPage `/v1` route is orphaned**
+The v1 landing page lives at `/v1` and is accessible but is not linked from anywhere in the current navigation. It uses different component structure and pricing copy than `VanguardLanding`. Either deprecate it (redirect `/v1` → `/`) or document it as a deliberate A/B test target. An unlinked page with old pricing copy is a liability if indexed by Google.
+
+**MicropageRenderer has no content**
+`/use-cases/:slug` renders `MicropageRenderer` but there are no use-case slugs defined, no CMS driving the content, and no marketing copy written for any slug. Visiting any `/use-cases/anything` URL likely renders a blank or broken state. Add at minimum a 404-style fallback within the renderer and define 2–3 real slug routes before this route is in production.
+
+**Stripe webhook has no signature verification timeout**
+`supabase/functions/stripe-webhook/index.ts` should enforce Stripe's recommended 300-second tolerance on webhook timestamp verification to prevent replay attacks. Confirm this is set — the default in the Stripe SDK is 300s but it should be explicit in the code, not assumed.
+
+---
+
+### P2 — Polish & Hardening
+
+**VanguardLanding mobile layout**
+The hero section uses `padding: '140px 48px 100px'` and the feature grid uses `minmax(340px, 1fr)`. On viewports below 768px the grid collapses correctly but the hero padding and 72px `h1` become cramped. Add a CSS media query breakpoint for the hero text size and padding, and test on iPhone 14 / Pixel 8 viewport.
+
+**Footer `/pricing` link is dead**
+`VanguardLanding.jsx` footer has `<a href="/pricing">Pricing</a>`. There is no `/pricing` route in `App.tsx`. It hits the catch-all and redirects to `/`. Either add a pricing route (a static page derived from the ToS plan table) or point the link to the correct destination.
+
+**No `robots.txt` or `sitemap.xml`**
+`www.buildaxiom.dev` has no `robots.txt` or `sitemap.xml` in the Vite public directory. Google will crawl the site but without a sitemap it will not efficiently discover `/privacy`, `/terms`, `/refund`, or `/use-cases/`. Add both to `frontend/public/`.
+
+**`AuthProvider` 5-second timeout is too long for first impressions**
+`AuthContext.tsx` forces `loading = false` after 5 seconds if Supabase hangs. On a slow connection this means 5 seconds of spinner before the login page is usable. Reduce to 3 seconds and add an exponential backoff retry on the Supabase session fetch before giving up.
+
+**No `<meta>` OG tags on the landing page**
+`index.html` has a generic title and no Open Graph or Twitter Card meta tags. Any link shared on LinkedIn, Twitter/X, or Slack will render as a plain URL with no preview image, no description, and no branding. Add `og:title`, `og:description`, `og:image` (a 1200×630 branded card), and `twitter:card` to the marketing entry point.
+
+**Console noise in production**
+`main.tsx` logs `'Axiom: mounting router shell'` and `AuthContext.tsx` logs `'AuthProvider: Initializing...'` on every page load. These are useful in development but visible to any user who opens DevTools in production. Gate all `console.log` calls behind `import.meta.env.DEV`.
+
+**Supabase RLS audit**
+The `underwriting_audit`, `autonomous_commitments`, `api_cost_ledger`, and `platform_events` tables planned in v7 all need RLS policies from day one. More urgently, all *existing* tables in the current schema should be audited to confirm `auth.uid()` or `auth.jwt()` scoping is present. An unauthenticated direct Supabase client call to any table missing RLS is a data exposure.
+
+---
+
+### Upgrade candidates — external dependencies
+
+| Dependency | Current state | Recommended action |
+|---|---|---|
+| `@supabase/supabase-js` | Check version | Upgrade to latest — auth helpers and RLS behavior improved significantly in v2.x point releases |
+| `react-router-dom` | v6 | Stay on v6 for now — v7 is out but has breaking changes; schedule migration for a quiet sprint |
+| `recharts` | Current | Evaluate replacing with `tremor` or `shadcn/ui` charts — better TypeScript support, smaller bundle, more financial chart primitives out of the box |
+| `lucide-react` | Current | Pin to a specific version — lucide does not follow semver strictly and icon renames between minor versions have broken builds before |
+| `@vercel/analytics` | Current | Add `@vercel/speed-insights` alongside it — free on Vercel Pro, gives Core Web Vitals per-route without any additional config |
+| Vite | Current | Confirm on Vite 5.x — Vite 6 is in RC with improved chunk splitting that would directly benefit the bundle splitting work |
+| Python / FastAPI backend | Current | Add `pydantic v2` if not already present — 5–10x validation speedup, required for the financial validator bounds checking at the call volumes v7 implies |
 
 ---
 
