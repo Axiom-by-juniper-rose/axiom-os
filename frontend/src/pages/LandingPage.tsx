@@ -106,8 +106,9 @@ export const LandingPage: React.FC = () => {
                 <p>&copy; 2026 Axiom OS by Juniper Rose Intelligence. All rights reserved.</p>
                 <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginTop: 16 }}>
                     <a href="#" style={{ color: '#666', textDecoration: 'none' }}>Download E-Book</a>
-                    <a href="#" style={{ color: '#666', textDecoration: 'none' }}>Privacy Policy</a>
-                    <a href="#" style={{ color: '#666', textDecoration: 'none' }}>Terms of Service</a>
+                    <a href="/privacy" style={{ color: '#666', textDecoration: 'none' }}>Privacy Policy</a>
+                    <a href="/terms" style={{ color: '#666', textDecoration: 'none' }}>Terms of Service</a>
+                    <a href="/refund" style={{ color: '#666', textDecoration: 'none' }}>Refund Policy</a>
                     <a href="mailto:support@buildaxiom.dev" style={{ color: '#666', textDecoration: 'none' }}>Support</a>
                     <a href="mailto:enterprise@buildaxiom.dev" style={{ color: '#666', textDecoration: 'none' }}>Contact Sales</a>
                 </div>

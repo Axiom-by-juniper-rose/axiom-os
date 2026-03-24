@@ -3,6 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom';
 import { AuthGate } from './components/Auth/AuthGate';
 import { LoginPage } from './pages/LoginPage';
 import { LandingPage } from './pages/LandingPage';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
+import { TermsOfService } from './pages/TermsOfService';
+import { RefundPolicy } from './pages/RefundPolicy';
 
 // Modular AxiomOS app (JSX architecture)
 // @ts-expect-error: JSX module, not typed
@@ -67,6 +70,9 @@ export const App: React.FC = () => {
       <Route path="/" element={<VanguardLanding />} />
       <Route path="/v1" element={<LandingPage />} />
       <Route path="/use-cases/:slug" element={<MicropageRenderer />} />
+      <Route path="/privacy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsOfService />} />
+      <Route path="/refund" element={<RefundPolicy />} />
 
       {/* If someone lands on /login on the marketing domain,
           hard-redirect to the app domain's login page. */}

@@ -184,20 +184,25 @@ export default function VanguardLanding() {
                     <div style={{ display: 'flex', gap: 80 }}>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Product</span>
-                            <a href="#" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Features</a>
-                            <a href="#" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>ROI Calculator</a>
-                            <a href="#" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>V3 Beta</a>
+                            <a href="#features" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Features</a>
+                            <a href="https://app.buildaxiom.dev" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Launch App</a>
+                            <a href="/pricing" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Pricing</a>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                            <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Resources</span>
-                            <a href="#" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>E-Book</a>
-                            <a href="#" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Use Cases</a>
-                            <a href="#" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Pricing</a>
+                            <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Support</span>
+                            <a href="mailto:support@buildaxiom.dev" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>support@buildaxiom.dev</a>
+                            <a href="mailto:enterprise@buildaxiom.dev" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Contact Sales</a>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            <span style={{ color: '#fff', fontWeight: 600, fontSize: 14 }}>Legal</span>
+                            <a href="/privacy" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Privacy Policy</a>
+                            <a href="/terms" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Terms of Service</a>
+                            <a href="/refund" style={{ color: '#64748B', textDecoration: 'none', fontSize: 14 }}>Refund Policy</a>
                         </div>
                     </div>
                 </div>
                 <div style={{ maxWidth: 1200, margin: '48px auto 0', paddingTop: 32, borderTop: '1px solid #1A1A1A', textAlign: 'center', color: '#334155', fontSize: 12, letterSpacing: 1 }}>
-                    © 2026 AXIOM OS · SPATIAL INTELLIGENCE PLATFORM
+                    © 2026 AXIOM OS · JUNIPER ROSE INTELLIGENCE LLC · SARASOTA, FL 34236
                 </div>
             </footer>
 
