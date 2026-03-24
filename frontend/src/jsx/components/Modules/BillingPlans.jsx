@@ -194,7 +194,7 @@ export default function BillingPlans() {
         if (tier.id === "free") return;
         // Enterprise+ → sales/white glove only
         if (["enterprise_plus"].includes(tier.id)) {
-            window.open(`mailto:enterprise@axiom-os.com?subject=${encodeURIComponent(tier.name + ' Inquiry — Axiom OS')}`, "_blank");
+            window.open(`mailto:enterprise@buildaxiom.dev?subject=${encodeURIComponent(tier.name + ' Inquiry — Axiom OS')}`, "_blank");
             return;
         }
         setError(null); setLoading(tier.id);
@@ -205,7 +205,7 @@ export default function BillingPlans() {
             if (e) throw new Error(e.message);
             if (data?.url) { window.location.href = data.url; return; }
         } catch { /* fall through to email */ }
-        window.open(`mailto:enterprise@axiom-os.com?subject=${encodeURIComponent(tier.name + ' Access — Axiom OS')}`, "_blank");
+        window.open(`mailto:enterprise@buildaxiom.dev?subject=${encodeURIComponent(tier.name + ' Access — Axiom OS')}`, "_blank");
         setLoading(null);
     };
 
@@ -322,7 +322,7 @@ export default function BillingPlans() {
                     <span style={{ fontSize: 11, fontWeight: 700, color: C.text }}>Data Marketplace </span>
                     <span style={{ fontSize: 11, color: C.dim }}>— ATTOM / CoStar / Anthropic compute billed at cost + 15% passthrough. No seat charge, usage-based.</span>
                 </div>
-                <button style={{ ...S.btn(), fontSize: 9, whiteSpace: "nowrap" }} onClick={() => window.open("mailto:enterprise@axiom-os.com?subject=Data%20Marketplace", "_blank")}>Learn More</button>
+                <button style={{ ...S.btn(), fontSize: 9, whiteSpace: "nowrap" }} onClick={() => window.open("mailto:enterprise@buildaxiom.dev?subject=Data%20Marketplace", "_blank")}>Learn More</button>
             </div>
 
             {profile?.stripe_customer_id && current !== "free" && (
@@ -334,7 +334,7 @@ export default function BillingPlans() {
             )}
 
             <div style={{ textAlign: "center", fontSize: 10, color: C.dim }}>
-                <span style={{ color: C.gold }}>enterprise@axiom-os.com</span> · Axiom OS by Juniper Rose Investments & Holdings · Sarasota, FL
+                <span style={{ color: C.gold }}>enterprise@buildaxiom.dev</span> · Axiom OS by Juniper Rose Investments & Holdings · Sarasota, FL
             </div>
         </div>
     );

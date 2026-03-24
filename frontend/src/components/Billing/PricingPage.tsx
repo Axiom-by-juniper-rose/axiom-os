@@ -248,7 +248,7 @@ export const PricingPage: React.FC = () => {
             {/* Footer note */}
             <div style={{ textAlign: 'center', marginTop: 40, fontSize: 11, color: 'var(--c-dim)' }}>
                 All plans include 256-bit encryption, SOC2-aligned data handling, and dedicated uptime SLAs.<br />
-                Questions? <a href="mailto:enterprise@axiom-os.com" style={{ color: 'var(--c-gold)' }}>enterprise@axiom-os.com</a>
+                Questions? <a href="mailto:enterprise@buildaxiom.dev" style={{ color: 'var(--c-gold)' }}>enterprise@buildaxiom.dev</a>
             </div>
         </div>
     );
