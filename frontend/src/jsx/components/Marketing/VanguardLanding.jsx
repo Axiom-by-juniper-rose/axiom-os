@@ -202,7 +202,7 @@ export default function VanguardLanding() {
                     </div>
                 </div>
                 <div style={{ maxWidth: 1200, margin: '48px auto 0', paddingTop: 32, borderTop: '1px solid #1A1A1A', textAlign: 'center', color: '#334155', fontSize: 12, letterSpacing: 1 }}>
-                    © 2026 AXIOM OS · JUNIPER ROSE INTELLIGENCE LLC · SARASOTA, FL 34236
+                    © 2026 AXIOM OS · JUNIPER ROSE INTELLIGENCE LLC · SARASOTA, FL 34233
                 </div>
             </footer>
 

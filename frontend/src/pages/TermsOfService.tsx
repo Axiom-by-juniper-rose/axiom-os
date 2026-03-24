@@ -101,7 +101,7 @@ export const TermsOfService: React.FC = () => (
             <h2 style={S.h2}>12. Contact</h2>
             <p style={S.p}>
                 Juniper Rose Intelligence LLC<br />
-                Sarasota, FL 34236<br />
+                Sarasota, FL 34233<br />
                 Email: <a href="mailto:support@buildaxiom.dev" style={{ color: '#D4A843' }}>support@buildaxiom.dev</a><br />
                 Enterprise: <a href="mailto:enterprise@buildaxiom.dev" style={{ color: '#D4A843' }}>enterprise@buildaxiom.dev</a>
             </p>

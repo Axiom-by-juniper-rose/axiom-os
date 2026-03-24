@@ -79,7 +79,7 @@ export const PrivacyPolicy: React.FC = () => (
             <h2 style={S.h2}>10. Contact</h2>
             <p style={S.p}>
                 Juniper Rose Intelligence LLC<br />
-                Sarasota, FL 34236<br />
+                Sarasota, FL 34233<br />
                 Email: <a href="mailto:support@buildaxiom.dev" style={{ color: '#D4A843' }}>support@buildaxiom.dev</a>
             </p>
         </div>
