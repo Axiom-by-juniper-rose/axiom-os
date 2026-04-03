@@ -1,43 +1,57 @@
 import { AuthProvider, TierProvider } from "./context/AuthContext";
 import { ProjectProvider } from "./context/ProjectContext";
-import { Dashboard } from "./features/dashboard/Dashboard";
-import { Contacts } from "./features/crm/Contacts";
-import { Deals } from "./features/deals/Deals";
-import { DealAnalyzer } from "./features/financials/DealAnalyzer";
-import { NeuralNet } from "./features/agents/NeuralNet";
-import { Copilot } from "./features/agents/Copilot";
-import { Financials } from "./features/financials/Financials";
-import { CalcHub } from "./features/financials/CalcHub";
-import { Invoices } from "./features/financials/Invoices";
-import { SiteAnalysis } from "./features/analysis/SiteAnalysis";
-import { Entitlements } from "./features/analysis/Entitlements";
-import { Infrastructure } from "./features/analysis/Infrastructure";
-import { ConceptDesign } from "./features/analysis/ConceptDesign";
-import { SiteMap } from "./features/analysis/SiteMap";
-import { MLSListings } from "./features/analysis/MLSListings";
-import { DataIntel } from "./features/analysis/DataIntel";
-import { ProjectManagement } from "./features/management/ProjectManagement";
-import { RiskRegistry } from "./features/management/RiskRegistry";
-import { SiteManagement } from "./features/management/SiteManagement";
-import { VendorNetwork } from "./features/management/VendorNetwork";
-import { ProfessionalNetwork } from "./features/management/ProfessionalNetwork";
-import { MarketIntel } from "./features/analysis/MarketIntel";
-import { AgentHub } from "./features/output/AgentHub";
-import { Reports } from "./features/output/Reports";
-import { Settings } from "./features/system/Settings";
-import { Connectors } from "./features/system/Connectors";
-import { Billing } from "./features/system/Billing";
-import { LegalCompliance } from "./features/system/LegalCompliance";
-import { AuditLog } from "./features/security/AuditLog";
-import { Notes } from "./features/workspace/Notes";
-import { CalendarView } from "./features/workspace/CalendarView";
-import { Email } from "./features/workspace/Email";
-import { Spreadsheets } from "./features/workspace/Spreadsheets";
-import { WorkflowHub } from "./features/agents/WorkflowHub";
-import { ResourceCenter } from "./features/workspace/ResourceCenter";
-import { JurisdictionIntel } from "./features/analysis/JurisdictionIntel";
-import { ProspectingEngine } from "./features/prospecting/ProspectingEngine";
-import FieldDashboard from "./features/field/FieldDashboard";
+
+// All feature modules are lazy-loaded — each becomes a separate chunk (~3-15 KB)
+// downloaded only when the user navigates to that module.
+import { lazy, Suspense, useState, useEffect, useRef } from "react";
+
+const Dashboard = lazy(() => import("./features/dashboard/Dashboard").then(m => ({ default: m.Dashboard })));
+const Contacts = lazy(() => import("./features/crm/Contacts").then(m => ({ default: m.Contacts })));
+const Deals = lazy(() => import("./features/deals/Deals").then(m => ({ default: m.Deals })));
+const DealAnalyzer = lazy(() => import("./features/financials/DealAnalyzer").then(m => ({ default: m.DealAnalyzer })));
+const NeuralNet = lazy(() => import("./features/agents/NeuralNet").then(m => ({ default: m.NeuralNet })));
+const Copilot = lazy(() => import("./features/agents/Copilot").then(m => ({ default: m.Copilot })));
+const Financials = lazy(() => import("./features/financials/Financials").then(m => ({ default: m.Financials })));
+const CalcHub = lazy(() => import("./features/financials/CalcHub").then(m => ({ default: m.CalcHub })));
+const Invoices = lazy(() => import("./features/financials/Invoices").then(m => ({ default: m.Invoices })));
+const SiteAnalysis = lazy(() => import("./features/analysis/SiteAnalysis").then(m => ({ default: m.SiteAnalysis })));
+const Entitlements = lazy(() => import("./features/analysis/Entitlements").then(m => ({ default: m.Entitlements })));
+const Infrastructure = lazy(() => import("./features/analysis/Infrastructure").then(m => ({ default: m.Infrastructure })));
+const ConceptDesign = lazy(() => import("./features/analysis/ConceptDesign").then(m => ({ default: m.ConceptDesign })));
+const SiteMap = lazy(() => import("./features/analysis/SiteMap").then(m => ({ default: m.SiteMap })));
+const MLSListings = lazy(() => import("./features/analysis/MLSListings").then(m => ({ default: m.MLSListings })));
+const DataIntel = lazy(() => import("./features/analysis/DataIntel").then(m => ({ default: m.DataIntel })));
+const ProjectManagement = lazy(() => import("./features/management/ProjectManagement").then(m => ({ default: m.ProjectManagement })));
+const RiskRegistry = lazy(() => import("./features/management/RiskRegistry").then(m => ({ default: m.RiskRegistry })));
+const SiteManagement = lazy(() => import("./features/management/SiteManagement").then(m => ({ default: m.SiteManagement })));
+const VendorNetwork = lazy(() => import("./features/management/VendorNetwork").then(m => ({ default: m.VendorNetwork })));
+const ProfessionalNetwork = lazy(() => import("./features/management/ProfessionalNetwork").then(m => ({ default: m.ProfessionalNetwork })));
+const MarketIntel = lazy(() => import("./features/analysis/MarketIntel").then(m => ({ default: m.MarketIntel })));
+const AgentHub = lazy(() => import("./features/output/AgentHub").then(m => ({ default: m.AgentHub })));
+const Reports = lazy(() => import("./features/output/Reports").then(m => ({ default: m.Reports })));
+const Settings = lazy(() => import("./features/system/Settings").then(m => ({ default: m.Settings })));
+const Connectors = lazy(() => import("./features/system/Connectors").then(m => ({ default: m.Connectors })));
+const Billing = lazy(() => import("./features/system/Billing").then(m => ({ default: m.Billing })));
+const LegalCompliance = lazy(() => import("./features/system/LegalCompliance").then(m => ({ default: m.LegalCompliance })));
+const AuditLog = lazy(() => import("./features/security/AuditLog").then(m => ({ default: m.AuditLog })));
+const Notes = lazy(() => import("./features/workspace/Notes").then(m => ({ default: m.Notes })));
+const CalendarView = lazy(() => import("./features/workspace/CalendarView").then(m => ({ default: m.CalendarView })));
+const Email = lazy(() => import("./features/workspace/Email").then(m => ({ default: m.Email })));
+const Spreadsheets = lazy(() => import("./features/workspace/Spreadsheets").then(m => ({ default: m.Spreadsheets })));
+const WorkflowHub = lazy(() => import("./features/agents/WorkflowHub").then(m => ({ default: m.WorkflowHub })));
+const ResourceCenter = lazy(() => import("./features/workspace/ResourceCenter").then(m => ({ default: m.ResourceCenter })));
+const JurisdictionIntel = lazy(() => import("./features/analysis/JurisdictionIntel").then(m => ({ default: m.JurisdictionIntel })));
+const ProspectingEngine = lazy(() => import("./features/prospecting/ProspectingEngine").then(m => ({ default: m.ProspectingEngine })));
+const FieldDashboard = lazy(() => import("./features/field/FieldDashboard"));
+
+// V5 feature sections
+const AgentPipelineSection = lazy(() => import("../v5/features/neural/AgentHandoff").then(m => ({ default: m.AgentHandoff })));
+const RiskCalibrationDashboard = lazy(() => import("../v5/features/neural/RiskCalibrationDashboard").then(m => ({ default: m.RiskCalibrationDashboard })));
+const TaxIntelPanel = lazy(() => import("../v5/features/tax/TaxIntelPanel").then(m => ({ default: m.TaxIntelPanel })));
+const PortfolioGovernance = lazy(() => import("../v5/features/governance/PortfolioGovernance").then(m => ({ default: m.PortfolioGovernance })));
+const SiteMap3D = lazy(() => import("../v5/features/gis/SiteMap3D").then(m => ({ default: m.SiteMap3D })));
+
+// UI components — kept static: always needed, small
 import { TopNav } from "./components/layout/TopNav";
 import { AuthGate, OnboardingWizard } from "./components/auth/AuthGate";
 import { supa } from "./lib/supabase";
@@ -51,15 +65,7 @@ import { FloatingToolbar } from "./components/ui/FloatingToolbar";
 import { MeetingRecorder } from "./components/ui/MeetingRecorder";
 import { FloatingPanel } from "./components/ui/FloatingPanel";
 import { Dialer } from "./components/ui/components";
-import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import "./components/ui/theme.css";
-
-// V5 feature sections — lazy-loaded to avoid bloating the main bundle
-const AgentPipelineSection = lazy(() => import("../v5/features/neural/AgentHandoff").then(m => ({ default: m.AgentHandoff })));
-const RiskCalibrationDashboard = lazy(() => import("../v5/features/neural/RiskCalibrationDashboard").then(m => ({ default: m.RiskCalibrationDashboard })));
-const TaxIntelPanel = lazy(() => import("../v5/features/tax/TaxIntelPanel").then(m => ({ default: m.TaxIntelPanel })));
-const PortfolioGovernance = lazy(() => import("../v5/features/governance/PortfolioGovernance").then(m => ({ default: m.PortfolioGovernance })));
-const SiteMap3D = lazy(() => import("../v5/features/gis/SiteMap3D").then(m => ({ default: m.SiteMap3D })));
 
 // ─── NAV STRUCTURE (matches V20 groups) ──────────────────────
 const NAV_GROUPS = [
@@ -220,6 +226,19 @@ function NavSection({
     );
 }
 
+// ─── MODULE LOADING SHIMMER ─────────────────────────────────
+function ModuleShimmer() {
+    return (
+        <div style={{ padding: 24 }}>
+            <div style={{ height: 32, width: 200, background: "var(--c-bg3)", borderRadius: 4, marginBottom: 16, animation: "axiom-shimmer 1.4s ease-in-out infinite" }} />
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 12, marginBottom: 20 }}>
+                {[1,2,3,4].map(i => <div key={i} style={{ height: 72, background: "var(--c-bg3)", borderRadius: 4, animation: `axiom-shimmer 1.4s ease-in-out ${i * 0.1}s infinite` }} />)}
+            </div>
+            <div style={{ height: 200, background: "var(--c-bg3)", borderRadius: 4, animation: "axiom-shimmer 1.4s ease-in-out 0.5s infinite" }} />
+        </div>
+    );
+}
+
 // ─── PLACEHOLDER FOR STUB SCREENS ───────────────────────────
 function ComingSoon({ name }: { name: string }) {
     return (
@@ -280,12 +299,12 @@ function renderView(view: string, activeProjectId: string) {
         case "audit": return <div className="axiom-p-0"><AuditLog /></div>;
         // ─── INTEL ───────────────────────────────────────
         case "jurisdintel": return <JurisdictionIntel />;
-        case "taxintel": return <Suspense fallback={<ComingSoon name="Tax Intelligence" />}><TaxIntelPanel /></Suspense>;
+        case "taxintel": return <TaxIntelPanel />;
         // ─── V5 ──────────────────────────────────────────
-        case "riskcal": return <Suspense fallback={<ComingSoon name="Risk Calibration" />}><RiskCalibrationDashboard supabase={supa} /></Suspense>;
-        case "sitemap3d": return <Suspense fallback={<ComingSoon name="Site Map 3D" />}><SiteMap3D /></Suspense>;
-        case "agentpipe": return <Suspense fallback={<ComingSoon name="Agent Pipeline" />}><AgentPipelineSection dealId="" /></Suspense>;
-        case "governance": return <Suspense fallback={<ComingSoon name="Portfolio Governance" />}><PortfolioGovernance orgId="" supabase={supa} /></Suspense>;
+        case "riskcal": return <RiskCalibrationDashboard supabase={supa} />;
+        case "sitemap3d": return <SiteMap3D />;
+        case "agentpipe": return <AgentPipelineSection dealId="" />;
+        case "governance": return <PortfolioGovernance orgId="" supabase={supa} />;
         // ─── WORKSPACE ───────────────────────────────────
         case "notes": return <Notes />;
         case "calendar": return <CalendarView />;
@@ -425,10 +444,14 @@ function AppContent() {
                     onDetach={() => setFloatingPanels((prev: any) => [...prev, view])}
                 />
                 <div ref={contentRef} className={`axiom-main-content-area ${isSplit ? 'split' : ''}`}>
-                    {renderView(view, activeProjectId || "default")}
+                    <Suspense fallback={<ModuleShimmer />}>
+                        {renderView(view, activeProjectId || "default")}
+                    </Suspense>
                     {isSplit && (
                         <div className="axiom-split-pane">
-                            {renderView(splitView, activeProjectId || "default")}
+                            <Suspense fallback={<ModuleShimmer />}>
+                                {renderView(splitView, activeProjectId || "default")}
+                            </Suspense>
                         </div>
                     )}
                 </div>
