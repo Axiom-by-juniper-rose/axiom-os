@@ -6,6 +6,10 @@
   "installCommand": "echo skip",
   "rewrites": [
     {
+      "source": "/beta.html",
+      "destination": "/beta.html"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

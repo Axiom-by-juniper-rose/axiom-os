@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AXIOM OS — Beta Intelligence Package 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --black:  #050608;
+    --deep:   #07090D;
+    --dark:   #0C1018;
+    --panel:  #111723;
+    --card:   #141C28;
+    --border: rgba(212,168,67,.12);
+    --brite:  rgba(212,168,67,.28);
+    --gold:   #D4A843;
+    --gold2:  #E8C55A;
+    --goldf:  rgba(212,168,67,.75);
+    --white:  #F2EFE8;
+    --dim:    rgba(242,239,232,.82);
+    --faint:  rgba(242,239,232,.52);
+    --green:  #4ECFA0;
+    --ggrad:  linear-gradient(135deg,#D4A843 0%,#F0CC6A 55%,#A87A20 100%);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box}
+
+  body{
+    background:var(--black);
+    color:var(--white);
+    font-family:'DM Sans',sans-serif;
+    overflow-x:hidden;
+  }
+
+  /* honeycomb */
+  body::before{
+    content:'';
+    position:fixed;inset:0;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='97'%3E%3Cpolygon points='28,2 54,16 54,44 28,58 2,44 2,16' fill='none' stroke='rgba(212,168,67,0.18)' stroke-width='1'/%3E%3Cpolygon points='28,49 54,63 54,91 28,105 2,91 2,63' fill='none' stroke='rgba(212,168,67,0.18)' stroke-width='1'/%3E%3Cpolygon points='0,25 26,39 26,67 0,81' fill='none' stroke='rgba(212,168,67,0.18)' stroke-width='1'/%3E%3Cpolygon points='56,25 82,39 82,67 56,81' fill='none' stroke='rgba(212,168,67,0.18)' stroke-width='1'/%3E%3C/svg%3E");
+    background-size:56px 97px;
+    pointer-events:none;
+    z-index:0;
+  }
+
+
+  /* honeycomb shimmer */
+  @keyframes hc-shimmer {
+    0%   { transform: translateX(-120%) skewX(-15deg); opacity: 0; }
+    10%  { opacity: 1; }
+    90%  { opacity: 1; }
+    100% { transform: translateX(120vw) skewX(-15deg); opacity: 0; }
+  }
+  @keyframes hc-shimmer2 {
+    0%   { transform: translateX(-120%) skewX(-15deg); opacity: 0; }
+    10%  { opacity: 0.6; }
+    90%  { opacity: 0.6; }
+    100% { transform: translateX(120vw) skewX(-15deg); opacity: 0; }
+  }
+  .hc-shimmer-wrap {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    overflow: hidden;
+  }
+  .hc-shimmer-beam {
+    position: absolute;
+    top: -20%;
+    left: 0;
+    width: 80px;
+    height: 140%;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(212,168,67,0.03) 20%,
+      rgba(232,197,90,0.09) 50%,
+      rgba(212,168,67,0.03) 80%,
+      transparent 100%
+    );
+    animation: hc-shimmer 8s ease-in-out infinite;
+  }
+  .hc-shimmer-beam:nth-child(2) {
+    width: 40px;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(232,197,90,0.05) 50%,
+      transparent 100%
+    );
+    animation: hc-shimmer2 8s ease-in-out 3.5s infinite;
+  }
+  .hc-shimmer-beam:nth-child(3) {
+    width: 120px;
+    animation: hc-shimmer 8s ease-in-out 1.2s infinite;
+  }
+
+  /* glow orb behind hero */
+  body::after{
+    content:'';
+    position:fixed;
+    top:20%;left:50%;
+    transform:translateX(-50%);
+    width:700px;height:500px;
+    background:radial-gradient(ellipse,rgba(212,168,67,.05) 0%,transparent 68%);
+    pointer-events:none;
+    z-index:0;
+  }
+
+  /* ── NAV ── */
+  nav{
+    position:fixed;top:0;left:0;right:0;
+    z-index:200;
+    height:54px;
+    background:rgba(5,6,8,.94);
+    backdrop-filter:blur(18px);
+    border-bottom:1px solid var(--border);
+    display:flex;align-items:center;
+    padding:0 36px;gap:0;
+    justify-content:space-between;
+  }
+  .nav-logo{
+    font-family:'Cormorant Garamond',serif;
+    font-size:17px;font-weight:600;letter-spacing:5px;
+    background:var(--ggrad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    text-transform:uppercase;white-space:nowrap;
+  }
+  .nav-links{display:flex;gap:2px;list-style:none;}
+  .nav-links a{
+    color:var(--faint);text-decoration:none;
+    font-size:10.5px;font-weight:500;letter-spacing:1.2px;text-transform:uppercase;
+    padding:5px 12px;border-radius:2px;
+    transition:color .18s,background .18s;cursor:pointer;
+  }
+  .nav-links a:hover{color:var(--gold);background:rgba(212,168,67,.07);}
+  .nav-links a.active{color:var(--gold);background:rgba(212,168,67,.09);}
+  .nav-pill{
+    font-family:'JetBrains Mono',monospace;font-size:9.5px;
+    color:var(--gold);border:1px solid var(--brite);
+    padding:3px 11px;border-radius:20px;letter-spacing:1px;white-space:nowrap;
+  }
+
+  /* ── SECTIONS ── */
+  .section{display:none;min-height:100vh;padding-top:54px;position:relative;z-index:1;}
+  .section.active{display:block;}
+
+  /* ── PAGE WRAPPER ── */
+  .pw{max-width:1160px;margin:0 auto;padding:72px 36px;}
+  .pw-narrow{max-width:840px;margin:0 auto;padding:72px 36px;}
+
+  /* ── HERO ── */
+  .hero{
+    min-height:100vh;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;
+    text-align:center;padding:100px 36px 72px;
+  }
+  .h-eye{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;letter-spacing:3.5px;color:var(--gold);
+    text-transform:uppercase;margin-bottom:22px;
+    opacity:0;animation:fu .7s .15s forwards;
+  }
+  .h-title{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(52px,7.5vw,88px);font-weight:300;
+    line-height:1.0;letter-spacing:-.5px;margin-bottom:20px;
+    opacity:0;animation:fu .7s .3s forwards;
+  }
+  .h-title em{
+    font-style:italic;font-weight:600;
+    background:var(--ggrad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  }
+  .h-sub{
+    font-size:11px;color:var(--faint);letter-spacing:3px;
+    text-transform:uppercase;margin-bottom:40px;
+    opacity:0;animation:fu .7s .45s forwards;
+  }
+  .h-tag{
+    font-family:'Cormorant Garamond',serif;
+    font-size:clamp(16px,2vw,22px);font-weight:300;font-style:italic;
+    color:var(--dim);max-width:640px;line-height:1.65;margin-bottom:56px;
+    opacity:0;animation:fu .7s .6s forwards;
+  }
+  .h-stats{
+    display:flex;gap:40px;align-items:center;flex-wrap:wrap;justify-content:center;
+    opacity:0;animation:fu .7s .75s forwards;
+  }
+  .h-stat-v{
+    font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;
+    background:var(--ggrad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;
+    line-height:1;
+  }
+  .h-stat-l{font-size:9.5px;color:var(--faint);letter-spacing:2px;text-transform:uppercase;margin-top:5px;}
+  .h-div{width:1px;height:36px;background:var(--brite);}
+  .h-ctas{
+    display:flex;gap:14px;margin-top:44px;
+    opacity:0;animation:fu .7s .9s forwards;
+  }
+  @keyframes fu{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+  /* ── BUTTONS ── */
+  .btn-p{
+    background:var(--ggrad);color:#04050A;
+    border:none;padding:13px 30px;
+    font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;
+    letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;
+    transition:transform .25s,box-shadow .25s;
+  }
+  .btn-p:hover{transform:translateY(-2px);box-shadow:0 8px 28px rgba(212,168,67,.28);}
+  .btn-o{
+    background:transparent;color:var(--gold);
+    border:1px solid var(--brite);padding:13px 30px;
+    font-family:'DM Sans',sans-serif;font-size:11px;font-weight:500;
+    letter-spacing:1.8px;text-transform:uppercase;cursor:pointer;border-radius:2px;
+    transition:background .25s,transform .25s;
+  }
+  .btn-o:hover{background:rgba(212,168,67,.07);transform:translateY(-2px);}
+
+  /* ── SECTION HEADER ── */
+  .sh{margin-bottom:56px;}
+  .sh-eye{font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3.5px;color:var(--gold);text-transform:uppercase;margin-bottom:14px;}
+  .sh-title{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4.5vw,52px);font-weight:300;line-height:1.08;}
+  .sh-title em{font-style:italic;color:var(--gold);font-weight:400;}
+  .sh-body{font-size:14px;color:var(--dim);line-height:1.8;max-width:620px;margin-top:16px;}
+
+  /* ── GRIDS ── */
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .g4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+
+  /* ── CARD ── */
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);border-radius:3px;
+    padding:26px;position:relative;overflow:hidden;
+    transition:border-color .25s;
+  }
+  .card:hover{border-color:var(--brite);}
+  .card::after{
+    content:'';position:absolute;top:0;left:0;right:0;height:1px;
+    background:var(--ggrad);opacity:0;transition:opacity .25s;
+  }
+  .card:hover::after{opacity:1;}
+  .c-icon{
+    width:36px;height:36px;background:rgba(212,168,67,.07);
+    border:1px solid var(--border);border-radius:6px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;margin-bottom:14px;
+  }
+  .c-title{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;margin-bottom:9px;}
+  .c-body{font-size:12.5px;color:var(--dim);line-height:1.72;}
+  .c-stat{font-family:'Cormorant Garamond',serif;font-size:38px;font-weight:600;background:var(--ggrad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:5px;}
+  .c-label{font-size:9.5px;letter-spacing:2px;text-transform:uppercase;color:var(--faint);}
+
+  /* ── TABLE ── */
+  .tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .tbl th{
+    text-align:left;font-family:'JetBrains Mono',monospace;
+    font-size:9.5px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--goldf);padding:11px 14px;border-bottom:1px solid var(--border);
+  }
+  .tbl td{padding:13px 14px;border-bottom:1px solid rgba(212,168,67,.04);color:var(--dim);vertical-align:top;}
+  .tbl tr:hover td{background:rgba(212,168,67,.025);color:var(--white);}
+
+  /* ── TAGS ── */
+  .tag{display:inline-block;padding:2px 8px;border-radius:2px;font-size:9.5px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;}
+  .tg{background:rgba(78,207,160,.13);color:#4ECFA0;}
+  .ty{background:rgba(212,168,67,.13);color:var(--gold);}
+  .tb{background:rgba(100,160,255,.13);color:#64A0FF;}
+  .tr{background:rgba(255,90,90,.13);color:#FF6060;}
+
+  /* ── DIVIDER ── */
+  .div{height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);margin:56px 0;opacity:.22;}
+
+  /* ── PROGRESS ── */
+  .prg-row{margin-bottom:18px;}
+  .prg-lr{display:flex;justify-content:space-between;margin-bottom:5px;font-size:12px;color:var(--dim);}
+  .prg-v{font-family:'JetBrains Mono',monospace;color:var(--gold);}
+  .prg-t{height:3px;background:rgba(255,255,255,.05);border-radius:2px;overflow:hidden;}
+  .prg-f{height:100%;background:var(--ggrad);border-radius:2px;transition:width 1.4s cubic-bezier(.4,0,.2,1);}
+
+  /* ── TIMELINE ── */
+  .tline{position:relative;padding-left:38px;}
+  .tline::before{content:'';position:absolute;left:7px;top:0;bottom:0;width:1px;background:linear-gradient(180deg,var(--gold) 0%,transparent 100%);}
+  .tl-item{position:relative;margin-bottom:38px;}
+  .tl-dot{position:absolute;left:-33px;top:5px;width:14px;height:14px;border-radius:50%;background:var(--gold);border:2px solid var(--black);box-shadow:0 0 0 1px var(--gold);}
+  .tl-dot.fut{background:var(--card);border-color:var(--goldf);}
+  .tl-q{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);letter-spacing:2px;margin-bottom:5px;}
+  .tl-t{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:600;margin-bottom:7px;}
+  .tl-b{font-size:12.5px;color:var(--dim);line-height:1.72;}
+
+  /* ── STATUS ── */
+  .live{display:inline-flex;align-items:center;gap:5px;font-size:10px;color:var(--green);font-family:'JetBrains Mono',monospace;letter-spacing:1px;}
+  .dot{width:5px;height:5px;border-radius:50%;background:var(--green);box-shadow:0 0 5px var(--green);animation:pulse 2s infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+
+  /* ── QUOTE ── */
+  .q{border-left:2px solid var(--gold);padding:22px 28px;margin:44px 0;background:rgba(212,168,67,.035);border-radius:0 3px 3px 0;}
+  .q-t{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:300;font-style:italic;line-height:1.55;color:var(--white);margin-bottom:10px;}
+  .q-a{font-size:10px;color:var(--goldf);letter-spacing:2px;text-transform:uppercase;}
+
+  /* ── INFRA BOX ── */
+  .ib{background:var(--panel);border:1px solid var(--border);border-radius:3px;padding:18px 20px;}
+  .ib-l{font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--goldf);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+  .ib-v{font-size:13px;color:var(--white);font-weight:500;}
+  .ib-s{font-size:11px;color:var(--faint);margin-top:3px;}
+
+  /* ── MARKET BARS ── */
+  .mb-row{display:flex;align-items:center;gap:14px;margin-bottom:12px;}
+  .mb-lbl{width:168px;font-size:11.5px;color:var(--dim);flex-shrink:0;text-align:right;}
+  .mb-t{flex:1;height:26px;background:rgba(255,255,255,.03);border-radius:2px;overflow:hidden;position:relative;}
+  .mb-f{height:100%;background:linear-gradient(90deg,rgba(212,168,67,.28),rgba(212,168,67,.68));border-radius:2px;display:flex;align-items:center;padding-right:10px;justify-content:flex-end;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold2);transition:width 1.6s;}
+
+  /* ── TIER TABLE ── */
+  .tier-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px;}
+  .tier-card{
+    background:var(--panel);border:1px solid var(--border);border-radius:3px;
+    padding:22px 18px;text-align:center;
+    transition:border-color .25s,transform .25s;
+  }
+  .tier-card:hover{border-color:var(--brite);transform:translateY(-2px);}
+  .tier-card.rec{border-color:var(--brite);}
+  .tier-name{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;margin-bottom:4px;}
+  .tier-price{font-family:'JetBrains Mono',monospace;font-size:26px;color:var(--gold);margin-bottom:2px;}
+  .tier-cadence{font-size:10px;color:var(--faint);letter-spacing:1px;margin-bottom:14px;}
+  .tier-feat{font-size:11px;color:var(--dim);line-height:1.75;text-align:left;}
+  .tier-feat li{list-style:none;padding-left:14px;position:relative;margin-bottom:3px;}
+  .tier-feat li::before{content:'◆';position:absolute;left:0;color:var(--gold);font-size:7px;top:4px;}
+
+  /* ── EXPANSION CARD ── */
+  .exp{background:var(--card);border:1px solid var(--border);border-radius:3px;padding:22px;transition:all .25s;cursor:default;}
+  .exp:hover{border-color:var(--brite);transform:translateY(-2px);}
+  .exp-ico{font-size:28px;margin-bottom:10px;}
+  .exp-t{font-family:'Cormorant Garamond',serif;font-size:17px;font-weight:600;margin-bottom:4px;}
+  .exp-tam{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--gold);margin-bottom:9px;}
+  .exp-b{font-size:12px;color:var(--dim);line-height:1.65;}
+
+  /* ── EMAIL ── */
+  .email-wrap{background:var(--card);border:1px solid var(--border);border-radius:4px;overflow:hidden;max-width:660px;margin:0 auto;}
+  .em-hdr{background:var(--ggrad);padding:5px 22px;font-family:'JetBrains Mono',monospace;font-size:9px;color:#04050A;letter-spacing:2px;text-transform:uppercase;}
+  .em-meta{padding:18px 22px;border-bottom:1px solid var(--border);font-size:12px;color:var(--dim);line-height:1.8;}
+  .em-body{padding:30px 28px;}
+  .em-body p{font-size:13.5px;color:var(--dim);line-height:1.85;margin-bottom:15px;}
+  .em-body h3{font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--white);margin:22px 0 10px;}
+  .em-body ul{list-style:none;margin-bottom:14px;}
+  .em-body ul li{font-size:12.5px;color:var(--dim);line-height:1.75;padding-left:18px;position:relative;margin-bottom:5px;}
+  .em-body ul li::before{content:'◆';position:absolute;left:0;color:var(--gold);font-size:7px;top:5px;}
+  .em-sig{border-top:1px solid var(--border);padding-top:22px;margin-top:28px;font-size:12.5px;color:var(--dim);line-height:1.8;}
+  .em-sig strong{color:var(--gold);font-family:'Cormorant Garamond',serif;font-size:17px;}
+  .em-disc{font-size:10px;color:var(--faint);margin-top:16px;line-height:1.6;font-style:italic;}
+  .copy-btn{background:rgba(212,168,67,.08);border:1px solid var(--brite);color:var(--gold);padding:8px 20px;border-radius:2px;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;font-family:'DM Sans',sans-serif;transition:background .2s;margin-top:14px;display:block;}
+  .copy-btn:hover{background:rgba(212,168,67,.16);}
+
+  /* ── FOOTER ── */
+  .footer{background:var(--deep);border-top:1px solid var(--border);padding:28px 36px;display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--faint);letter-spacing:.8px;flex-wrap:wrap;gap:12px;}
+  .f-logo{font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;background:var(--ggrad);-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:4px;}
+
+  /* ── RESPONSIVE ── */
+  @media(max-width:800px){
+    .g2,.g3,.g4,.tier-grid{grid-template-columns:1fr;}
+    .h-div{display:none;}
+    .h-stats{gap:20px;}
+    nav{padding:0 16px;}
+    .nav-links{display:none;}
+    .pw,.pw-narrow{padding:56px 18px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<div class="hc-shimmer-wrap" aria-hidden="true">
+  <div class="hc-shimmer-beam"></div>
+  <div class="hc-shimmer-beam"></div>
+  <div class="hc-shimmer-beam"></div>
+</div>
+<nav>
+  <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="nav-logo" style="text-decoration:none">AXIOM OS</a>
+  <ul class="nav-links">
+    <li><a onclick="show('hero')" id="n-hero" class="active">Overview</a></li>
+    <li><a onclick="show('synopsis')" id="n-synopsis">Synopsis</a></li>
+    <li><a onclick="show('market')" id="n-market">Market</a></li>
+    <li><a onclick="show('build')" id="n-build">Build</a></li>
+    <li><a onclick="show('tiers')" id="n-tiers">Plans</a></li>
+    <li><a onclick="show('roadmap')" id="n-roadmap">Roadmap</a></li>
+    <li><a onclick="show('financial')" id="n-financial">Financials</a></li>
+    <li><a onclick="show('horizontal')" id="n-horizontal">Expansion</a></li>
+    <li><a onclick="show('email')" id="n-email">Beta Email</a></li>
+  </ul>
+  <div class="nav-pill">BETA 2026 · NDA</div>
+</nav>
+
+<!-- ═══════════════════════════════════════
+     HERO
+══════════════════════════════════════════ -->
+<div id="hero" class="section active">
+  <div class="hero">
+    <div class="h-eye">Private Beta · April 2026 · Confidential</div>
+    <h1 class="h-title">Intelligence for the<br><em>Land Developer</em></h1>
+    <div class="h-sub">Developer Acquisition Intelligence Platform</div>
+    <p class="h-tag">The first end-to-end AI operating system built for the land developer's complete lifecycle — from raw land sourcing through entitlement, construction finance, and exit.</p>
+
+    <div class="h-stats">
+      <div><div class="h-stat-v">$54B</div><div class="h-stat-l">PropTech 2026</div></div>
+      <div class="h-div"></div>
+      <div><div class="h-stat-v">16.4%</div><div class="h-stat-l">Market CAGR</div></div>
+      <div class="h-div"></div>
+      <div><div class="h-stat-v">v1.3</div><div class="h-stat-l">v1 Architecture</div></div>
+      <div class="h-div"></div>
+      <div><div class="h-stat-v">60+</div><div class="h-stat-l">DB Tables Live</div></div>
+      <div class="h-div"></div>
+      <div><div class="h-stat-v">B+</div><div class="h-stat-l">Platform Quality</div></div>
+      <div class="h-div"></div>
+      <div><div class="h-stat-v">12</div><div class="h-stat-l">AI Agents</div></div>
+    </div>
+
+    <div class="h-ctas">
+      <button class="btn-p" onclick="show('synopsis')">Read Synopsis</button>
+      <button class="btn-o" onclick="show('market')">Market Analysis</button>
+    </div>
+  </div>
+
+  <div class="pw" style="padding-top:0">
+    <div class="div"></div>
+    <div class="g3">
+      <div class="card">
+        <div class="c-icon">◈</div>
+        <div class="c-title">Full Lifecycle Coverage</div>
+        <div class="c-body">No competitor covers land sourcing → entitlements → construction finance → exit in one platform. Axiom OS is the only system built for the complete developer workflow.</div>
+      </div>
+      <div class="card">
+        <div class="c-icon">⬡</div>
+        <div class="c-title">Jurisdiction Intelligence</div>
+        <div class="c-body">Context-aware regulatory AI scoped to state and municipality. FL live at launch, 50-state roadmap. The deepest AI regulatory layer in the market — and the platform's primary moat.</div>
+      </div>
+      <div class="card">
+        <div class="c-icon">⟁</div>
+        <div class="c-title">Platform Infrastructure</div>
+        <div class="c-body">The agent orchestration layer and jurisdiction engine are being abstracted into service APIs — enabling horizontal expansion into energy, healthcare, insurance, and beyond at near-zero marginal cost.</div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div class="g4">
+      <div class="card" style="text-align:center">
+        <div class="c-stat">60+</div>
+        <div class="c-label">Tables · Full RLS</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="c-stat">4</div>
+        <div class="c-label">Edge Functions Live</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="c-stat">90%</div>
+        <div class="c-label">Deploy Pass Rate</div>
+      </div>
+      <div class="card" style="text-align:center">
+        <div class="c-stat">A–</div>
+        <div class="c-label">Build Grade</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>PRIVATE & CONFIDENTIAL · BETA PROGRAM 2026</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     SYNOPSIS
+══════════════════════════════════════════ -->
+<div id="synopsis" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Executive Synopsis</div>
+      <h2 class="sh-title">What Axiom OS Is —<br>and What It <em>Will Become</em></h2>
+      <p class="sh-body">A precise overview of the platform's architecture, competitive position, and the founding thesis behind every product decision.</p>
+    </div>
+
+    <div class="g2" style="gap:36px;align-items:start">
+      <div>
+        <div class="sh-eye" style="margin-bottom:18px">The Platform</div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="c-title">The Core Thesis</div>
+          <div class="c-body">Real estate land development is the last major industry vertical without a purpose-built AI operating system. Developers managing 2–20 deals annually rely on Excel, email chains, and tribal knowledge — an analog process in an era demanding digital intelligence.<br><br>Axiom OS is the category answer: a single AI-native workspace covering the complete developer lifecycle, from raw land sourcing through entitlement, construction finance, risk management, and exit.</div>
+        </div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="c-title">Architecture</div>
+          <div class="c-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+              <div class="ib"><div class="ib-l">Frontend</div><div class="ib-v">React + Vite</div><div class="ib-s">Modular, feature-folder</div></div>
+              <div class="ib"><div class="ib-l">Backend</div><div class="ib-v">Supabase</div><div class="ib-s">PostgreSQL 17 · RLS · 60+ tables</div></div>
+              <div class="ib"><div class="ib-l">Hosting</div><div class="ib-v">Vercel</div><div class="ib-s"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="color:var(--goldf);text-decoration:none">buildaxiom.dev</a> · 90% pass rate</div></div>
+              <div class="ib"><div class="ib-l">Payments</div><div class="ib-v">Stripe</div><div class="ib-s">6 tiers · Webhooks · Portal</div></div>
+            </div>
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:11.5px;color:var(--dim)"><strong style="color:var(--gold)">9 Operational Modules:</strong> Overview / Command Center · CRM & Prospecting · Finance Engine · Site & GIS · Intel & Market Data · Execution (Field Dashboard, DD, Risk) · Workspace · Output (Neural OS, Copilot) · System/Security</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="c-title">The 12 AI Agents</div>
+          <div class="c-body">Acquisition · Zoning & Entitlement · Appraisal & Valuation · Construction Estimating · Environmental · Permitting · Financial Underwriting · Title & Legal · Risk Assessment · Absorption Modeling · Deal Structuring · Closing Coordination<br><br>Each agent is context-injected with jurisdiction intelligence and deal-specific data — enabling responses that compete with senior practitioners in each domain.</div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="c-title">Beta Objectives</div>
+          <div class="c-body">
+            ◆ Validate the core deal intelligence workflow against live developer data<br>
+            ◆ Stress-test jurisdiction AI accuracy across FL micro-markets<br>
+            ◆ Calibrate financial modeling against real pro forma outcomes<br>
+            ◆ Collect structured feedback to prioritize the Q3 2026 sprint<br>
+            ◆ Establish the first cohort of paying Pro and Pro+ customers<br>
+            ◆ Generate testimonials and case study material for Series A
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sh-eye" style="margin-bottom:18px">Competitive Position</div>
+        <div class="card" style="margin-bottom:18px;border-color:var(--brite)">
+          <div class="c-title">Four Defensible Moats</div>
+          <div class="c-body">
+            <br>
+            <strong style="color:var(--gold)">1. Vertical Integration</strong><br>
+            No competitor covers the full lifecycle. Northspyre stops at construction budget management. We go further.<br><br>
+            <strong style="color:var(--gold)">2. Jurisdiction Intelligence Engine</strong><br>
+            Context-aware regulatory AI scoped to state and municipality. No competitor has an AI layer over planning data in the US. This is defensible IP.<br><br>
+            <strong style="color:var(--gold)">3. AI-Native Architecture</strong><br>
+            Built AI-first, not AI-bolted. The multi-agent hub and context injection system are at minimum 18 months ahead of any incumbent's roadmap.<br><br>
+            <strong style="color:var(--gold)">4. Platform Infrastructure Strategy</strong><br>
+            The jurisdiction engine and agent orchestration layer are being abstracted into APIs — enabling horizontal expansion at near-zero marginal cost per new vertical.
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:18px;border-left:2px solid var(--gold)">
+          <div class="c-title">How We Grade</div>
+          <div class="c-body">
+            Two separate grades appear in this package — they measure different things and neither contradicts the other.<br><br>
+            <strong style="color:var(--gold)">B+ / 88 — Platform Quality Grade</strong><br>
+            An external analyst conducted a live walkthrough of the deployed platform across all 9 modules and graded it on vision, feature depth, UI/UX, AI integration, data infrastructure, onboarding, mobile readiness, enterprise readiness, and beta polish. This is the <em>product's market-readiness score</em> — how Axiom OS stands as a platform relative to what a production SaaS should deliver. B+ reflects genuine depth with expected gaps at this stage: no live data feeds yet, onboarding friction, SOC 2 in progress.<br><br>
+            <strong style="color:var(--gold)">A– — Sprint Execution Grade</strong><br>
+            The internal engineering review of the v1.3 build sprint. Zero TypeScript errors, NaN bugs resolved, all components registered and rendering correctly, build passing in 10s. This grades <em>how well the code was written and the sprint was delivered</em> — not product maturity.<br><br>
+            <span style="font-size:11px;color:var(--faint)">A product can earn A– on engineering execution while being B+ on market readiness. That's exactly where Axiom OS is — and exactly where a well-run early-stage platform should be.</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="c-title">Target Market</div>
+          <div class="c-body">SMB real estate land development firms managing 2–20 active deals annually. Primary states: FL, TX, GA, NC, AZ. ICP: acquisition managers, development principals, and owner's reps at firms with $5M–$200M in annual deal volume. Currently underserved by every existing platform.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+
+    <div class="sh-eye" style="margin-bottom:20px">Vertical Scale · Horizontal Reach</div>
+
+    <div class="card" style="border-color:var(--brite);margin-bottom:20px">
+      <div class="c-title" style="font-size:22px;margin-bottom:16px">The Two-Axis Strategy</div>
+      <div class="c-body">
+        Axiom OS is built to grow in two directions simultaneously — and the architecture was designed from day one to support both without a rebuild.<br><br>
+        <strong style="color:var(--gold)">Vertical Scale</strong> means going deeper inside real estate land development: more jurisdictions, more intelligence layers, more workflow automation, tighter integration with the tools and data sources developers already use. Every sprint that adds a new FL county to the jurisdiction engine, improves the Neural OS scoring model, or closes a data partnership with ATTOM or CoStar is vertical scale. The moat deepens. Switching costs rise. The platform becomes harder to replicate with every deal closed inside it.<br><br>
+        <strong style="color:var(--gold)">Horizontal Reach</strong> means porting the underlying infrastructure — the agent orchestration layer, the jurisdiction intelligence engine, the deal pipeline framework, the financial modeling core — to adjacent industries that share the same fundamental workflow: identify an opportunity, evaluate it against complex regulatory and financial criteria, model the economics, manage execution, and close. The data domain changes. The architecture does not.
+      </div>
+    </div>
+
+    <div class="g2" style="gap:20px;margin-bottom:20px">
+      <div class="card">
+        <div class="sh-eye" style="margin-bottom:14px;font-size:9px">Vertical Scale — Going Deeper</div>
+        <div class="c-body">
+          Axiom OS currently serves SMB land developers in FL, TX, GA, NC, and AZ. Vertical scale is the deliberate deepening of that position before expanding outward.<br><br>
+          <strong style="color:var(--gold)">Depth levers:</strong><br>
+          ◆ 50-state jurisdiction intelligence coverage — every county, every zoning code, every entitlement pathway<br>
+          ◆ Live data integrations (ATTOM, CoStar, FEMA, MLS) replacing manual comp entry<br>
+          ◆ Neural OS feedback loops — the model improves with every deal that closes on platform<br>
+          ◆ National homebuilder enterprise deals — D.R. Horton, Lennar, PulteGroup each represent $500K–$2M ARR<br>
+          ◆ Lender and LP portal — two-sided marketplace connecting developers to capital within the platform<br>
+          ◆ Comparable sales data as a standalone product — license anonymized deal data to appraisers, lenders, and brokers<br><br>
+          Vertical scale is the first priority because it builds the network effects and proprietary data assets that make the platform defensible before any horizontal move is made.
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sh-eye" style="margin-bottom:14px;font-size:9px">Horizontal Reach — Adjacent Verticals</div>
+        <div class="c-body">
+          The platform's nine modules map cleanly onto any capital-intensive industry that follows the same deal lifecycle. The data domain changes. The infrastructure does not.<br><br>
+          <strong style="color:var(--gold)">Module-to-industry mapping:</strong><br>
+          ◆ <strong style="color:var(--white)">Energy / Renewables</strong> — Site data → irradiance/transmission. Deal Scorer → project viability. Permit tracker → FERC/PUC approvals<br>
+          ◆ <strong style="color:var(--white)">Cannabis Facilities</strong> — Jurisdiction intel → buffer/setback compliance. DD checklist → license-linked site requirements<br>
+          ◆ <strong style="color:var(--white)">Healthcare Development</strong> — Entitlements → CON filings. Absorption → patient volume modeling<br>
+          ◆ <strong style="color:var(--white)">Mining & Natural Resources</strong> — Prospecting Engine → geological prospecting. DD → NEPA, water rights, tailings permits<br>
+          ◆ <strong style="color:var(--white)">Data Center Siting</strong> — Infrastructure → power/fiber access. Neural OS → PUE and hyperscaler lease scoring<br>
+          ◆ <strong style="color:var(--white)">Agriculture / Land Investment</strong> — Zoning → soil/water rights. Absorption → crop yield modeling<br>
+          ◆ <strong style="color:var(--white)">Infrastructure / Public Works</strong> — Risk Command → FEMA/environmental. Vendor Network → contractor management<br>
+          ◆ <strong style="color:var(--white)">Hotel & Hospitality</strong> — Neural OS adds RevPAR comps, ADR projections, flag availability<br><br>
+          The horizontal expansion strategy begins with the jurisdiction intelligence engine and agent orchestration layer being abstracted into standalone service APIs — enabling each new vertical to be entered at near-zero marginal infrastructure cost.
+        </div>
+      </div>
+    </div>
+
+    <div class="div" style="margin:28px 0;opacity:.15"></div>
+
+    <div class="sh-eye" style="margin-bottom:20px;font-size:9px">Third Axis — Products, Buybacks &amp; Credits</div>
+
+    <div class="card" style="margin-bottom:20px;border-color:var(--brite)">
+      <div class="c-title" style="font-size:20px;margin-bottom:14px">Tracking the Credit &amp; Product Layer</div>
+      <div class="c-body">
+        Every capital-intensive vertical Axiom serves operates within a secondary market of tradeable instruments — credits, certificates, buybacks, and product positions that sit alongside the primary deal. These instruments affect deal economics, regulatory compliance, and exit valuation. They are currently tracked in spreadsheets, or not tracked at all. Axiom OS adds a dedicated credit and product tracking layer that operates across all verticals, surfacing these instruments within the deal workflow where they are most relevant.
+      </div>
+    </div>
+
+    <div class="g3" style="gap:16px;margin-bottom:20px">
+
+      <div class="card">
+        <div class="sh-eye" style="font-size:9px;margin-bottom:12px">Real Estate &amp; Cannabis</div>
+        <div class="c-body" style="font-size:12px;line-height:1.75">
+          <strong style="color:var(--gold)">Transferable Development Rights (TDRs)</strong> — track sending/receiving site designations, purchase agreements, and attached density credits within the deal model<br><br>
+          <strong style="color:var(--gold)">Opportunity Zone Investments</strong> — monitor QOZB qualification timelines, 10-year hold tracking, and deferred gain positions per deal<br><br>
+          <strong style="color:var(--gold)">1031 Exchange Tracking</strong> — identify replacement property timelines, boot calculations, and like-kind qualification status<br><br>
+          <strong style="color:var(--gold)">Impact Fee Credits</strong> — log credits earned through prior public infrastructure contributions against future development projects<br><br>
+          <strong style="color:var(--gold)">Cannabis License Transfers &amp; Buybacks</strong> — track license asset values, M&amp;A positions, excise tax credit balances, and seed-to-sale inventory positions by facility
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sh-eye" style="font-size:9px;margin-bottom:12px">Energy, Mining &amp; Agriculture</div>
+        <div class="c-body" style="font-size:12px;line-height:1.75">
+          <strong style="color:var(--gold)">Renewable Energy Certificates (RECs)</strong> — track REC generation, retirement, and sale positions by project; model REC revenue in the pro forma<br><br>
+          <strong style="color:var(--gold)">Solar Renewable Energy Credits (SRECs)</strong> — monitor SREC market prices and project-level generation forecasts by state<br><br>
+          <strong style="color:var(--gold)">Carbon Offsets &amp; Sequestration Credits</strong> — log verified carbon units (VCUs), registry status, buyer commitments, and credit retirement schedules<br><br>
+          <strong style="color:var(--gold)">Grid Capacity Buybacks</strong> — track power purchase agreement (PPA) terms, capacity buyback triggers, and interconnection queue positions<br><br>
+          <strong style="color:var(--gold)">Mineral Royalty Streams</strong> — model net royalty interest (NRI), overriding royalty interest (ORRI), and buyback option positions by lease
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="sh-eye" style="font-size:9px;margin-bottom:12px">Healthcare, Data Centers &amp; Infrastructure</div>
+        <div class="c-body" style="font-size:12px;line-height:1.75">
+          <strong style="color:var(--gold)">Certificate of Need (CON) Transfers</strong> — track CON asset values, transfer timelines, and regulatory approval status in healthcare facility acquisitions<br><br>
+          <strong style="color:var(--gold)">Power Capacity Contracts</strong> — monitor data center power reservation agreements, capacity buyback clauses, and PUE credit positions for green certification<br><br>
+          <strong style="color:var(--gold)">Carbon Offset Purchasing</strong> — track voluntary carbon market purchases against facility operational footprints for ESG reporting and green building certifications (LEED, BREEAM)<br><br>
+          <strong style="color:var(--gold)">Conservation Easement Credits</strong> — log donated easement valuations, IRS qualified appraisal status, and applicable tax deduction positions<br><br>
+          <strong style="color:var(--gold)">Water Rights Transfers</strong> — track adjudicated water right positions, transfer applications, and water credit market values by basin
+        </div>
+      </div>
+
+    </div>
+
+    <div class="card" style="border:1px solid rgba(212,168,67,0.2);background:rgba(212,168,67,0.025)">
+      <div class="c-body" style="font-size:12.5px;line-height:1.85">
+        <strong style="color:var(--gold)">How it integrates:</strong> The credit and product tracking layer is not a standalone module — it is woven into the existing deal workflow. Credits and buyback positions appear on the financial pro forma as line items, affecting IRR and equity return calculations. Regulatory credits (TDRs, CONs, water rights) appear in the entitlement and jurisdiction intelligence modules as deal-level attributes. Carbon and REC positions appear in the risk registry and IC memo outputs. Every instrument is tracked with position size, market value estimate, counterparty, timeline, and status — and the Neural OS factors active credit positions into its deal scoring model.<br><br>
+        This makes Axiom OS the only platform in any of these verticals that models the <em>full economic picture</em> of a deal — not just the bricks-and-mortar pro forma, but the complete instrument stack that sophisticated developers and institutional operators actually manage.
+      </div>
+    </div>
+
+
+    <div class="card" style="background:rgba(212,168,67,0.04);border-color:var(--brite)">
+      <div class="c-body" style="font-size:13px;line-height:1.85">
+        <strong style="color:var(--gold);font-size:15px">The Core Insight:</strong> Most enterprise SaaS platforms choose between vertical depth and horizontal breadth. They go deep into one industry or they build generic infrastructure for many. Axiom OS is structured to do both — in sequence, not simultaneously. Go deep enough in real estate development to build a genuinely defensible position and a proprietary dataset. Then abstract the infrastructure and port it outward. The dataset and the workflow lock-in stay in the vertical. The infrastructure cost of expansion stays near zero.
+      </div>
+    </div>
+
+
+    <div class="q">
+      <div class="q-t">"AI is no longer just an experimental tool — it is gradually becoming a practical driver of efficiency and performance across real estate, construction, and infrastructure."</div>
+      <div class="q-a">— PwC & MetaProp Global PropTech Confidence Index, 2026</div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>EXECUTIVE SYNOPSIS · BETA 2026</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MARKET
+══════════════════════════════════════════ -->
+<div id="market" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Market Intelligence</div>
+      <h2 class="sh-title">A $185B PropTech Market —<br>Plus <em>Seven Adjacent Verticals</em></h2>
+      <p class="sh-body">Full analysis spanning PropTech's vertical core, the seven adjacent industries where Axiom's infrastructure applies directly, and the cannabis facility development market — present and forecast through 2034.</p>
+    </div>
+
+    <div class="g4" style="margin-bottom:20px">
+      <div class="card" style="text-align:center"><div class="c-stat">$54B</div><div class="c-label">PropTech 2026</div></div>
+      <div class="card" style="text-align:center"><div class="c-stat">$185B</div><div class="c-label">PropTech 2034</div></div>
+      <div class="card" style="text-align:center"><div class="c-stat">16.4%</div><div class="c-label">CAGR</div></div>
+      <div class="card" style="text-align:center"><div class="c-stat">38%</div><div class="c-label">NA Share</div></div>
+      <div class="card" style="text-align:center;border-color:var(--brite)"><div class="c-stat" style="font-size:28px">B+ / 88</div><div class="c-label">Platform Grade (Live Audit)</div></div>
+    </div>
+
+    <div class="card" style="border-left:2px solid var(--gold);margin-bottom:44px;padding:20px 28px">
+      <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:12px;flex-wrap:wrap">
+        <div class="c-title" style="margin:0">What Moves This to Series A</div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:9.5px;color:var(--goldf);letter-spacing:1.5px">B+ / 88 → A / 94+ · FOUR CONDITIONS</div>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px">
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--gold);margin-bottom:5px">Data Infrastructure</div>
+          <div style="font-size:12px;color:var(--dim);line-height:1.65">Connect ATTOM, CoStar, or MLS for live comp pulls. Eliminates manual data entry and makes AI agent outputs verifiable against real market data.</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--gold);margin-bottom:5px">Onboarding Activation</div>
+          <div style="font-size:12px;color:var(--dim);line-height:1.65">Guided wizard with a pre-loaded sample deal. First-session activation rate is the single highest-leverage retention metric at this stage.</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--gold);margin-bottom:5px">First Paying Conversions</div>
+          <div style="font-size:12px;color:var(--dim);line-height:1.65">Stripe is live, gating is enforced. Ten paying Pro firms before the Series A deck goes out moves Monetization from readiness to revenue.</div>
+        </div>
+        <div>
+          <div style="font-size:11px;font-weight:600;color:var(--gold);margin-bottom:5px">Enterprise Readiness</div>
+          <div style="font-size:12px;color:var(--dim);line-height:1.65">SOC 2 Type II initiated + SSO/SAML added. Table-stakes for any Enterprise or homebuilder contract. Required before institutional buyers will sign.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sh-eye" style="margin-bottom:14px">Addressable Market by Vertical (2026)</div>
+    <div id="bars">
+      <div class="mb-row"><div class="mb-lbl">Real Estate Dev</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="36%">$19.4B</div></div></div>
+      <div class="mb-row"><div class="mb-lbl">Construction Tech</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="28%">$15.2B</div></div></div>
+      <div class="mb-row"><div class="mb-lbl">Energy / Grid Mgmt</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="24%">$12.8B</div></div></div>
+      <div class="mb-row"><div class="mb-lbl">Insurance & Risk</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="19%">$10.5B</div></div></div>
+      <div class="mb-row"><div class="mb-lbl">Healthcare Facilities</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="15%">$8.4B</div></div></div>
+      <div class="mb-row"><div class="mb-lbl">Urban Planning / Gov</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="11%">$6.1B</div></div></div>
+      <div class="mb-row"><div class="mb-lbl">Supply Chain Siting</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="9%">$4.8B</div></div></div>
+      <div class="mb-row"><div class="mb-lbl">Cannabis Facilities</div><div class="mb-t"><div class="mb-f" style="width:0" data-w="27%">$14.6B</div></div></div>
+    </div>
+
+    <div class="div"></div>
+
+    <div class="sh-eye" style="margin-bottom:18px">Competitive Landscape</div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Competitor</th><th>Category</th><th>Scale</th><th>Core Strength</th><th>Axiom Advantage</th></tr></thead>
+        <tbody>
+          <tr><td><strong style="color:var(--white)">Procore</strong></td><td>Construction OS</td><td><span class="tag tr">$6.7B Public</span></td><td>Construction execution, RFIs</td><td>Pre-construction intelligence + AI layer</td></tr>
+          <tr><td><strong style="color:var(--white)">Dealpath</strong></td><td>Deal Management</td><td><span class="tag tb">$43M Raised</span></td><td>CRE pipeline, IC memos</td><td>Land-specific workflow + jurisdiction AI</td></tr>
+          <tr><td><strong style="color:var(--white)">Northspyre</strong></td><td>Dev Intelligence</td><td><span class="tag tb">$25M Raised</span></td><td>Budget alerts, owner's rep</td><td>Full lifecycle vs. construction-only scope</td></tr>
+          <tr><td><strong style="color:var(--white)">Argus Enterprise</strong></td><td>Financial Modeling</td><td><span class="tag tr">Altus Group</span></td><td>DCF, valuation standards</td><td>AI-native + integrated deal intelligence</td></tr>
+          <tr><td><strong style="color:var(--white)">CoStar / LoopNet</strong></td><td>Market Data</td><td><span class="tag tr">$35B Market Cap</span></td><td>Deep comp database</td><td>Intelligence over data, not raw data alone</td></tr>
+          <tr><td><strong style="color:var(--white)">LandTech / Landstack</strong></td><td>Land Sourcing</td><td><span class="tag tb">£20M Raised</span></td><td>Site finding, planning data</td><td>US-market + full workflow + AI agents</td></tr>
+          <tr><td><strong style="color:var(--white)">Juniper Square</strong></td><td>Investment Mgmt</td><td><span class="tag tb">$115M Raised</span></td><td>LP reporting, fund mgmt</td><td>Acquisition-phase intelligence Juniper lacks</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="div"></div>
+    <div class="g3">
+      <div class="card">
+        <div class="c-icon">📈</div>
+        <div class="c-title">AI Adoption Inflection</div>
+        <div class="c-body">Gartner projects 80% of enterprises will have deployed GenAI applications by 2026, up from under 5% in 2023. PropTech's lag creates a first-mover opening for AI-native platforms built today.</div>
+      </div>
+      <div class="card">
+        <div class="c-icon">🏗️</div>
+        <div class="c-title">Housing Supply Crisis</div>
+        <div class="c-body">A 4–7 million unit US deficit is accelerating land development in FL, TX, GA, NC, and AZ — exactly Axiom's target states. Developers need speed and intelligence tools to keep pace.</div>
+      </div>
+      <div class="card">
+        <div class="c-icon">⚡</div>
+        <div class="c-title">Vertical SaaS Premium</div>
+        <div class="c-body">Category-leading vertical AI is commanding 15–25x ARR multiples in 2026. $1.1B in vertical AI funding was tracked in 2025 alone. Defensible domain intelligence is the most valued asset class in SaaS right now.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>MARKET INTELLIGENCE · APRIL 2026</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     BUILD STATUS
+══════════════════════════════════════════ -->
+<div id="build" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Build Status · v1.3 · April 2026</div>
+      <h2 class="sh-title">Production Grade.<br><em>Beta Ready.</em></h2>
+      <p class="sh-body">Live infrastructure audit. <a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none">buildaxiom.dev</a> is ACTIVE_HEALTHY. Current build: <strong style="color:var(--gold)">v1.3</strong> — modular React/TypeScript architecture (AppV1), 90%+ deployment pass rate.</p>
+    </div>
+
+    <div class="g2" style="gap:36px;align-items:start">
+      <div>
+        <div class="sh-eye" style="margin-bottom:18px">Infrastructure</div>
+        <div class="card" style="margin-bottom:18px">
+          <div class="c-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px">
+              <div class="ib"><div class="ib-l">Vercel Status</div><div class="ib-v" style="color:var(--green)">READY ✓</div><div class="ib-s">Latest deploy passing</div></div>
+              <div class="ib"><div class="ib-l">Supabase</div><div class="ib-v" style="color:var(--green)">ACTIVE_HEALTHY ✓</div><div class="ib-s">PostgreSQL 17 · us-west-2</div></div>
+              <div class="ib"><div class="ib-l">Pass Rate</div><div class="ib-v">90%</div><div class="ib-s">18 of 20 · v1.3 modular arch</div></div>
+              <div class="ib"><div class="ib-l">Edge Functions</div><div class="ib-v">4 Active</div><div class="ib-s">llm-proxy · stripe · market-data</div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="sh-eye" style="margin-bottom:14px">Live Database Counts</div>
+        <div class="card">
+          <div class="c-body">
+            <div class="prg-row"><div class="prg-lr"><span>Deal Analyses</span><span class="prg-v">243</span></div><div class="prg-t"><div class="prg-f" data-w="96%"></div></div></div>
+            <div class="prg-row"><div class="prg-lr"><span>Deals</span><span class="prg-v">28</span></div><div class="prg-t"><div class="prg-f" data-w="72%"></div></div></div>
+            <div class="prg-row"><div class="prg-lr"><span>Market Data Cache</span><span class="prg-v">57</span></div><div class="prg-t"><div class="prg-f" data-w="58%"></div></div></div>
+            <div class="prg-row"><div class="prg-lr"><span>Signals</span><span class="prg-v">18</span></div><div class="prg-t"><div class="prg-f" data-w="36%"></div></div></div>
+            <div class="prg-row"><div class="prg-lr"><span>Permits</span><span class="prg-v">9</span></div><div class="prg-t"><div class="prg-f" data-w="22%"></div></div></div>
+            <div class="prg-row"><div class="prg-lr"><span>Financial Models</span><span class="prg-v">8</span></div><div class="prg-t"><div class="prg-f" data-w="16%"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sh-eye" style="margin-bottom:18px">Quality Scorecard</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+          <div class="card" style="text-align:center"><div class="c-stat">9.5</div><div class="c-label">Feature Breadth</div></div>
+          <div class="card" style="text-align:center"><div class="c-stat" style="font-size:30px">A–</div><div class="c-label">Sprint Execution Grade</div></div>
+          <div class="card" style="text-align:center"><div class="c-stat">8.5</div><div class="c-label">AI Integration</div><div style="font-size:9.5px;color:var(--faint);margin-top:8px;line-height:1.5;padding:0 8px">Agent architecture &amp; context injection are strong. Score ceiling is gated by live data pipeline — ATTOM, CoStar, and MLS not yet connected; agents currently reason on user-entered data only.</div></div>
+          <div class="card" style="text-align:center"><div class="c-stat">8.0</div><div class="c-label">Monetization</div><div style="font-size:9.5px;color:var(--faint);margin-top:8px;line-height:1.5;padding:0 8px">Stripe billing infrastructure, tier gating, and webhooks are live. Score reflects readiness, not revenue — no paying customers yet. Moves to 9.5+ on first Pro conversion.</div></div>
+        </div>
+
+        <div class="card">
+          <div class="c-title">Latest Sprint Highlights</div>
+          <div class="c-body" style="margin-top:10px">
+            ◆ Portfolio Dashboard — sortable columns, revenue chart, stage filter, health badges<br>
+            ◆ Risk Registry — 6 defaults across all severity levels, NaN% guard<br>
+            ◆ Dashboard — NaN bug elimination + portfolio aggregation<br>
+            ◆ Landing — urgency banner, honeycomb background, mobile nav, JSON-LD SEO<br>
+            ◆ Email routing — all contacts consolidated to <a href="mailto:support@buildaxiom.dev" style="color:var(--goldf);text-decoration:none">support@buildaxiom.dev</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>BUILD STATUS · v1.3 · APRIL 2026</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     TIERS / PLANS
+══════════════════════════════════════════ -->
+<div id="tiers" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Plans & Pricing</div>
+      <h2 class="sh-title">Start Small.<br><em>Scale With Your Portfolio.</em></h2>
+      <p class="sh-body">Six tiers — from free exploration through sovereign fund-scale deployment. No hidden fees. Annual billing available with 20% savings.</p>
+    </div>
+
+    <div class="tier-grid" style="grid-template-columns:repeat(3,1fr);gap:12px">
+      <!-- FREE -->
+      <div class="tier-card">
+        <div class="tier-name">Free</div>
+        <div class="tier-price">$0</div>
+        <div class="tier-cadence">FOREVER FREE</div>
+        <ul class="tier-feat">
+          <li>3 Active Deals</li>
+          <li>5 AI Queries / day</li>
+          <li>Basic Calculators</li>
+          <li>Community Access</li>
+          <li>Deal Pipeline</li>
+        </ul>
+      </div>
+
+      <!-- PRO -->
+      <div class="tier-card">
+        <div class="tier-name">Pro</div>
+        <div class="tier-price">$100</div>
+        <div class="tier-cadence">PER MONTH · MOST POPULAR</div>
+        <ul class="tier-feat">
+          <li>50 Active Deals</li>
+          <li>All Calculators &amp; Models</li>
+          <li>PDF / Excel Exports</li>
+          <li>MLS Integration</li>
+          <li>Priority Support</li>
+        </ul>
+      </div>
+
+      <!-- PRO+ -->
+      <div class="tier-card rec">
+        <div style="font-size:9px;color:var(--gold);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px">Most Popular</div>
+        <div class="tier-name" style="background:var(--ggrad);-webkit-background-clip:text;-webkit-text-fill-color:transparent">Pro+</div>
+        <div class="tier-price">$200</div>
+        <div class="tier-cadence">PER MONTH · BEST VALUE</div>
+        <ul class="tier-feat">
+          <li>Unlimited Deals</li>
+          <li>3 Team Seats</li>
+          <li>AI Copilot Assistant</li>
+          <li>Advanced Analytics</li>
+          <li>API Access</li>
+        </ul>
+      </div>
+
+      <!-- BOUTIQUE -->
+      <div class="tier-card">
+        <div class="tier-name">Boutique</div>
+        <div class="tier-price">$500</div>
+        <div class="tier-cadence">PER MONTH</div>
+        <ul class="tier-feat">
+          <li>5 Team Seats</li>
+          <li>Agent Pipeline Automation</li>
+          <li>Tax Intelligence Suite</li>
+          <li>Field Mode (iPad)</li>
+          <li>Dedicated Onboarding</li>
+        </ul>
+      </div>
+
+      <!-- ENTERPRISE -->
+      <div class="tier-card" style="border-color:var(--brite)">
+        <div class="tier-name">Enterprise</div>
+        <div class="tier-price">$1,500</div>
+        <div class="tier-cadence">PER MONTH</div>
+        <ul class="tier-feat">
+          <li>10–25 Team Seats</li>
+          <li>Custom AI Model Tuning</li>
+          <li>99.9% SLA Guarantee</li>
+          <li>Full API &amp; Webhooks</li>
+          <li>Dedicated CSM</li>
+        </ul>
+      </div>
+
+      <!-- ENTERPRISE+ -->
+      <div class="tier-card">
+        <div class="tier-name">Enterprise+</div>
+        <div class="tier-price" style="font-size:20px;padding-top:6px">Custom</div>
+        <div class="tier-cadence">CONTACT SALES</div>
+        <ul class="tier-feat">
+          <li>Unlimited Seats</li>
+          <li>On-Premise Deployment</li>
+          <li>White-Glove Integration</li>
+          <li>Custom SLA &amp; Compliance</li>
+          <li>Dedicated Engineering</li>
+          <li>Sovereign Fund Scale</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px;border-color:rgba(212,168,67,.55)">
+      <div class="c-body" style="font-size:12px"><strong style="color:var(--gold)">Data Marketplace Passthrough:</strong> ATTOM / CoStar / Anthropic compute billed at cost + 15% on top of plan price. No markup beyond passthrough.</div>
+    </div>
+
+    <div class="div"></div>
+
+    <div class="sh-eye" style="margin-bottom:18px">Feature Matrix</div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead><tr><th>Feature</th><th>Free</th><th>Pro<br>$100</th><th>Pro+<br>$200</th><th>Boutique<br>$500</th><th>Enterprise<br>$1,500</th><th>Ent+<br>Custom</th></tr></thead>
+        <tbody>
+          <tr><td>Active Deals</td><td>5</td><td>20</td><td>50</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td>AI Sessions / day</td><td>3</td><td>15</td><td>50</td><td>Unlimited</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td>Exports (PDF/CSV)</td><td><span class="tag tr">✗</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td></tr>
+          <tr><td>IC Memo Generator</td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td></tr>
+          <tr><td>Jurisdiction Intel</td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td></tr>
+          <tr><td>Team Seats</td><td>1</td><td>1</td><td>1</td><td>10</td><td>Unlimited</td><td>Unlimited</td></tr>
+          <tr><td>API Access</td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td></tr>
+          <tr><td>Neural OS</td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td>Basic</td><td>Full</td><td>Full</td><td>White-Label</td></tr>
+          <tr><td>Custom AI Training</td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td><span class="tag tr">✗</span></td><td><span class="tag tg">✓</span></td><td><span class="tag tg">✓</span></td></tr>
+          <tr><td>SLA Uptime</td><td>—</td><td>—</td><td>—</td><td>—</td><td>99.9%</td><td>99.9%</td></tr>
+          <tr><td>Annual Discount</td><td>—</td><td>20% off</td><td>20% off</td><td>20% off</td><td>20% off</td><td>Negotiated</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>PLANS & PRICING · Annual billing saves 20%</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     ROADMAP
+══════════════════════════════════════════ -->
+<div id="roadmap" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Product Roadmap</div>
+      <h2 class="sh-title">8 Quarters to<br><em>Category Leadership</em></h2>
+      <p class="sh-body">Milestone-driven execution from private beta through Series B and full horizontal platform deployment — Q2 2026 through Q1 2028. Every quarter has a revenue trigger. Every capital event has a condition. This is the plan of a real market player, not an MVP.</p>
+    </div>
+
+    <div class="tline">
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-q">Q2 2026 — NOW</div>
+        <div class="tl-t">Private Beta · First Revenue</div>
+        <div class="tl-b">NDA-cleared beta cohort onboarded. Core deal intelligence validated against live FL developer data. Jurisdiction AI accuracy stress-tested across FL micro-markets. First Pro and Pro+ conversions from beta. Structured feedback loop driving Q3 sprint priorities. <strong style="color:var(--gold)">Target: $38K MRR · 75 paying firms · 3+ Pro conversions from beta.</strong></div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-q">Q3 2026</div>
+        <div class="tl-t">Feature Depth + Live Data Pipeline</div>
+        <div class="tl-b">ATTOM or CoStar data integration live — AI agents reason on real market data for the first time. IC memo generator (AI-drafted, human-refined). Guided onboarding wizard with pre-loaded sample deal. Mobile-responsive layout complete. 67 FL counties covered by jurisdiction AI. SOC 2 Type II audit initiated. <strong style="color:var(--gold)">Target: $95K MRR · 180 firms · AI Integration score moves to 9.5.</strong></div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot"></div>
+        <div class="tl-q">Q4 2026</div>
+        <div class="tl-t">Multi-State Expansion · Pre-Seed Close</div>
+        <div class="tl-b">TX, GA, NC, AZ jurisdiction intelligence live. Team collaboration: multi-seat orgs, role-based access, deal handoff workflows. LP Report automation. ATTOM + MLS connectors. First Boutique-tier firm converts. Pre-seed closes on strength of MRR trajectory and 2 enterprise LOIs. <strong style="color:var(--gold)">Target: $210K MRR · 350 firms · Pre-seed $500K–$1.5M closed.</strong></div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot fut"></div>
+        <div class="tl-q">Q1 2027</div>
+        <div class="tl-t">Commercial Launch · Developer API · Seed Round</div>
+        <div class="tl-b">Public commercial launch — no invite gate. Developer API released for enterprise integrations. Lender portal for draw management submissions live. SOC 2 Type II certification in final audit. First national homebuilder pilot initiated ($500K–$2M ARR opportunity). Seed round closes on $500K MRR milestone. <strong style="color:var(--gold)">Target: $420K MRR · 550 firms · Seed $3M–$6M closed.</strong></div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot fut"></div>
+        <div class="tl-q">Q2 2027</div>
+        <div class="tl-t">Platform Abstraction · First Horizontal Vertical</div>
+        <div class="tl-b">Jurisdiction intelligence engine extracted as standalone API service. Agent orchestration layer documented and exposed. First horizontal vertical enters beta — Energy/Infrastructure or Cannabis Facilities. API licensing first customers onboarded. Data marketplace beta: anonymized comp data licensed to first 3 lender partners. <strong style="color:var(--gold)">Target: $700K MRR · 800 firms · API revenue stream live.</strong></div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot fut"></div>
+        <div class="tl-q">Q3 2027</div>
+        <div class="tl-t">Series A · 3 Verticals Live · Institutional Data Partner</div>
+        <div class="tl-b">Series A closes at $1.5M MRR trigger — $15M–$25M raise. Three active verticals on platform infrastructure. First institutional data partnership executed (ATTOM, CoStar, or county recorder network). Healthcare facilities and insurance underwriting verticals enter beta. National homebuilder contract signed. <strong style="color:var(--gold)">Target: $1.1M MRR · 1,100 firms · Series A $15M–$25M closed · 15–30x ARR multiple.</strong></div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot fut"></div>
+        <div class="tl-q">Q4 2027</div>
+        <div class="tl-t">Market Leadership · 50-State Coverage · $1.8M MRR</div>
+        <div class="tl-b">50-state jurisdiction coverage complete. Urban planning/government vertical launched. Second national homebuilder or institutional development firm contracted. Conference presence: ULI, NAHB, CREtech. Data marketplace revenue crosses $1M ARR standalone. Neural OS feedback loops producing measurable deal outcome improvement over baseline. <strong style="color:var(--gold)">Target: $1.8M MRR · 1,500 firms · $21.6M ARR run rate · team of 15.</strong></div>
+      </div>
+
+      <div class="tl-item">
+        <div class="tl-dot fut"></div>
+        <div class="tl-q">Q1 2028</div>
+        <div class="tl-t">Series B · Platform Network Effects · International</div>
+        <div class="tl-b">Series B closes at $2.5M MRR — $40M–$80M raise targeting Fifth Wall, MetaProp, a16z RE fund. Axiom Intelligence Network live: anonymized comp, permit, and deal outcome data from 2,000+ firms becomes the most comprehensive development intelligence dataset in the US. International expansion initiated: Canada, UK, UAE. Six active verticals. API licensing at $120M+ ARR ceiling trajectory. <strong style="color:var(--gold)">Target: $2.5M MRR · 2,000 firms · $30M ARR · Series B $40M–$80M closed.</strong></div>
+      </div>
+
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>PRODUCT ROADMAP · Q2 2026 → Q1 2028</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div><div id="financial" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Financial Forecast · Platform Ceiling Model</div>
+      <h2 class="sh-title">Not an MVP.<br><em>A Market Leader.</em></h2>
+      <p class="sh-body">This platform displaces $50K–$200K per firm per year in tools, analyst headcount, and consulting fees — and adds intelligence none of those tools offer. The numbers below reflect what that value delivery actually justifies, not MVP conservatism. Three scenarios through 2030 with the ceiling modeled at full horizontal scale.</p>
+    </div>
+
+    <div class="g4" style="margin-bottom:36px">
+      <div class="card" style="text-align:center"><div class="c-stat">$42M</div><div class="c-label">2028 Aggressive ARR</div></div>
+      <div class="card" style="text-align:center"><div class="c-stat">$180M</div><div class="c-label">2030 Category Leader</div></div>
+      <div class="card" style="text-align:center;border-color:var(--brite)"><div class="c-stat">$500M+</div><div class="c-label">Platform Ceiling ARR</div></div>
+      <div class="card" style="text-align:center"><div class="c-stat">30x</div><div class="c-label">ARR Multiple (Procore Comp)</div></div>
+    </div>
+
+    <!-- ROW 1: 3-Scenario table FULL WIDTH | Value Displacement + Enterprise below -->
+    <div class="sh-eye" style="margin-bottom:14px">3-Scenario Revenue Model · 2026–2030</div>
+    <div class="card" style="margin-bottom:22px">
+      <div class="c-body">
+        <table class="tbl">
+          <tr><th>Period</th><th>Conservative</th><th>Base</th><th>Aggressive</th></tr>
+          <tr><td>2026 (Beta)</td><td style="color:var(--goldf)">$0.5M ARR</td><td style="color:var(--gold)">$1.2M ARR</td><td style="color:var(--gold2)">$2.7M ARR</td></tr>
+          <tr><td>2027</td><td style="color:var(--goldf)">$5M ARR</td><td style="color:var(--gold)">$8M ARR</td><td style="color:var(--gold2)">$13M ARR</td></tr>
+          <tr><td>2028</td><td style="color:var(--goldf)">$18M ARR</td><td style="color:var(--gold)">$28M ARR</td><td style="color:var(--gold2)">$42M ARR</td></tr>
+          <tr><td>2029</td><td style="color:var(--goldf)">$45M ARR</td><td style="color:var(--gold)">$65M ARR</td><td style="color:var(--gold2)">$95M ARR</td></tr>
+          <tr><td>2030</td><td style="color:var(--goldf)">$90M ARR</td><td style="color:var(--gold)">$140M ARR</td><td style="color:var(--gold2)">$200M ARR</td></tr>
+        </table>
+        <div style="font-size:10.5px;color:var(--faint);margin-top:12px;line-height:1.7">Conservative: RE vertical only, Boutique avg. Base: horizontal expansion + 2–3 Enterprise+ deals/year. Aggressive: national homebuilder contracts + API licensing.</div>
+      </div>
+    </div>
+
+    <div class="g2" style="gap:22px;align-items:start;margin-bottom:22px">
+      <div class="card" style="border-color:var(--brite)">
+        <div class="c-title">Value Displacement</div>
+        <div class="c-body">A mid-market developer running 5–10 deals/year currently spends $50K–$200K annually: Argus ($12K), CoStar ($20K+), CRM ($8K), Excel consultants, an acquisition analyst ($80K+), and a permit tracking service. Axiom OS replaces all of it — and adds intelligence none of those tools offer. At $500–$1,500/mo, Axiom delivers 10–40x ROI on day one. That's not a pricing argument — that's an analyst headcount compressed into software.</div>
+      </div>
+      <div class="card">
+        <div class="c-title">Enterprise Deal Economics</div>
+        <div class="c-body">A single national homebuilder contract (D.R. Horton, Lennar, PulteGroup, NVR) is worth $500K–$2M ARR. These firms manage 500–5,000 deals/year across 40+ states. Just 3 enterprise contracts in 2027 adds $1.5M–$6M ARR to the base model — closed by one deal team, delivered by the platform.<br><br>
+        <strong style="color:var(--gold)">Comparable exit valuations:</strong><br>
+        ◆ Procore — IPO'd ~25x ARR at $6.7B<br>
+        ◆ Dealpath — multi-hundred million on modest ARR<br>
+        ◆ Northspyre — $25M Series B at strong multiple<br>
+        ◆ Axiom justified: <strong style="color:var(--gold2)">15–30x ARR</strong> given full-stack differentiation</div>
+      </div>
+    </div>
+
+    <!-- HERO FEATURE WIDGET -->
+    <div style="position:relative;overflow:hidden;border-radius:4px;border:1px solid rgba(212,168,67,0.28);background:linear-gradient(135deg,#07090E 0%,#0D1420 50%,#070A0F 100%);padding:56px 40px;text-align:center;margin-bottom:22px">
+
+      <!-- honeycomb bg overlay -->
+      <div style="position:absolute;inset:0;background-image:url('data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%2256%22 height=%2297%22%3E%3Cpolygon points=%2228,2 54,16 54,44 28,58 2,44 2,16%22 fill=%22none%22 stroke=%22rgba(212,168,67,0.10)%22 stroke-width=%221%22/%3E%3Cpolygon points=%2228,49 54,63 54,91 28,105 2,91 2,63%22 fill=%22none%22 stroke=%22rgba(212,168,67,0.10)%22 stroke-width=%221%22/%3E%3C/svg%3E');background-size:56px 97px;pointer-events:none;opacity:0.9"></div>
+
+      <!-- diagonal light streak 1 -->
+      <div style="position:absolute;top:-20%;left:-10%;width:60px;height:180%;background:linear-gradient(90deg,transparent,rgba(212,168,67,0.06),transparent);transform:skewX(-20deg);animation:fin-beam1 6s ease-in-out infinite;pointer-events:none"></div>
+      <!-- diagonal light streak 2 -->
+      <div style="position:absolute;top:-20%;left:20%;width:30px;height:180%;background:linear-gradient(90deg,transparent,rgba(232,197,90,0.04),transparent);transform:skewX(-20deg);animation:fin-beam1 6s ease-in-out 2.5s infinite;pointer-events:none"></div>
+
+      <!-- glow ring behind icon -->
+      <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:220px;height:220px;border-radius:50%;background:radial-gradient(ellipse,rgba(212,168,67,0.12) 0%,transparent 70%);animation:fin-glow 3s ease-in-out infinite;pointer-events:none"></div>
+
+      <!-- orbiting stat pills -->
+      <div style="position:relative;display:inline-block">
+        <!-- stat: top-left -->
+        <div style="position:absolute;top:-28px;left:-130px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.25);border-radius:20px;padding:5px 14px;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(212,168,67,0.8);letter-spacing:1px;animation:fin-orbit1 4s ease-in-out infinite">12 AI AGENTS</div>
+        <!-- stat: top-right -->
+        <div style="position:absolute;top:-28px;right:-130px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.25);border-radius:20px;padding:5px 14px;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(212,168,67,0.8);letter-spacing:1px;animation:fin-orbit2 4s ease-in-out infinite">60+ DB TABLES</div>
+        <!-- stat: bottom-left -->
+        <div style="position:absolute;bottom:-28px;left:-140px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.25);border-radius:20px;padding:5px 14px;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(212,168,67,0.8);letter-spacing:1px;animation:fin-orbit2 4s ease-in-out 0.8s infinite">9 MODULES</div>
+        <!-- stat: bottom-right -->
+        <div style="position:absolute;bottom:-28px;right:-130px;background:rgba(212,168,67,0.08);border:1px solid rgba(212,168,67,0.25);border-radius:20px;padding:5px 14px;white-space:nowrap;font-family:'JetBrains Mono',monospace;font-size:10px;color:rgba(212,168,67,0.8);letter-spacing:1px;animation:fin-orbit1 4s ease-in-out 1.6s infinite">B+ / 88 GRADE</div>
+
+        <!-- the floating diamond -->
+        <div style="font-size:88px;line-height:1;animation:fin-float 3s ease-in-out infinite;display:block;filter:drop-shadow(0 0 28px rgba(212,168,67,0.55)) drop-shadow(0 0 8px rgba(212,168,67,0.9));background:linear-gradient(135deg,#D4A843,#F0CC6A,#A87A20);-webkit-background-clip:text;-webkit-text-fill-color:transparent">◈</div>
+      </div>
+
+      <!-- tagline -->
+      <div style="margin-top:48px;font-family:'Cormorant Garamond',serif;font-size:clamp(18px,2.5vw,28px);font-weight:300;font-style:italic;color:rgba(242,239,232,0.75);letter-spacing:0.3px;position:relative">
+        The first operating system built for the land developer's complete lifecycle.
+      </div>
+      <div style="margin-top:12px;font-family:'JetBrains Mono',monospace;font-size:10px;letter-spacing:3px;color:rgba(212,168,67,0.5);text-transform:uppercase;position:relative">
+        Developer Acquisition Intelligence Platform
+      </div>
+      <div style="margin-top:24px;position:relative">
+        <a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="display:inline-block;background:linear-gradient(135deg,#D4A843,#F0CC6A,#A87A20);color:#04050A;padding:12px 32px;border-radius:2px;text-decoration:none;font-family:'DM Sans',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;transition:transform 0.25s,box-shadow 0.25s" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 8px 28px rgba(212,168,67,0.32)'" onmouseout="this.style.transform='none';this.style.boxShadow='none'">Access the Platform →</a>
+      </div>
+
+      <style>
+        @keyframes fin-float {
+          0%,100% { transform: translateY(0px); }
+          50%      { transform: translateY(-14px); }
+        }
+        @keyframes fin-glow {
+          0%,100% { opacity:0.6; transform:translate(-50%,-50%) scale(1); }
+          50%      { opacity:1;   transform:translate(-50%,-50%) scale(1.18); }
+        }
+        @keyframes fin-beam1 {
+          0%   { transform:skewX(-20deg) translateX(-120%); opacity:0; }
+          15%  { opacity:1; }
+          85%  { opacity:1; }
+          100% { transform:skewX(-20deg) translateX(140vw); opacity:0; }
+        }
+        @keyframes fin-orbit1 {
+          0%,100% { transform:translateY(0px); }
+          50%      { transform:translateY(-5px); }
+        }
+        @keyframes fin-orbit2 {
+          0%,100% { transform:translateY(0px); }
+          50%      { transform:translateY(5px); }
+        }
+      </style>
+    </div>
+    <!-- END HERO FEATURE WIDGET -->
+
+    <!-- ROW 2: 8-Quarter execution (left) | Platform ceiling + Capital strategy (right) -->
+    <div class="g2" style="gap:22px;align-items:start;margin-bottom:22px">
+      <div>
+        <div class="sh-eye" style="margin-bottom:14px">8-Quarter Execution Model</div>
+        <div class="card">
+          <div class="c-body">
+            <table class="tbl">
+              <tr><th>Quarter</th><th>MRR</th><th>Firms</th><th>Avg Tier</th></tr>
+              <tr><td>Q2 2026</td><td style="color:var(--gold)">$38K</td><td>75</td><td>Pro ($100)</td></tr>
+              <tr><td>Q3 2026</td><td style="color:var(--gold)">$95K</td><td>180</td><td>Pro+ ($200 blended)</td></tr>
+              <tr><td>Q4 2026</td><td style="color:var(--gold)">$210K</td><td>350</td><td>Boutique ($400 blended)</td></tr>
+              <tr><td>Q1 2027</td><td style="color:var(--gold)">$420K</td><td>550</td><td>Boutique+ ($600 blended)</td></tr>
+              <tr><td>Q2 2027</td><td style="color:var(--gold)">$700K</td><td>800</td><td>Mix ($1,050 blended)</td></tr>
+              <tr><td>Q3 2027</td><td style="color:var(--gold)">$1.1M</td><td>1,100</td><td>Mix ($1,200 blended)</td></tr>
+              <tr><td>Q4 2027</td><td style="color:var(--gold)">$1.8M</td><td>1,500</td><td>Mix ($1,450 blended)</td></tr>
+              <tr><td>Q1 2028</td><td style="color:var(--gold)">$2.5M</td><td>2,000</td><td>Mix ($1,500 blended)</td></tr>
+            </table>
+            <div style="font-size:10.5px;color:var(--faint);margin-top:12px;line-height:1.7">Blended includes 1–2 Enterprise/Enterprise+ deals per quarter from Q4 2026, each contributing $18K–$120K ARR.</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="sh-eye" style="margin-bottom:14px">Platform Ceiling &amp; Capital Strategy</div>
+        <div class="card" style="margin-bottom:14px">
+          <div class="c-title">Platform Ceiling — 4 Revenue Streams</div>
+          <div class="c-body">
+            <strong style="color:var(--gold)">Stream 1 — SaaS:</strong> 5,000 firms × $3K/mo blended = <strong style="color:var(--white)">$180M ARR</strong><br><br>
+            <strong style="color:var(--gold)">Stream 2 — API &amp; Data Licensing:</strong> Jurisdiction Intelligence API licensed to banks, lenders, insurers. 500 API customers × $2K/mo = <strong style="color:var(--white)">$120M ARR</strong><br><br>
+            <strong style="color:var(--gold)">Stream 3 — Data Marketplace:</strong> Anonymized comp and permit data from 5,000+ contributing firms becomes a proprietary dataset. Licensed to appraisers, brokers, institutional capital = <strong style="color:var(--white)">$50–100M ARR</strong><br><br>
+            <strong style="color:var(--gold)">Stream 4 — Transaction Fees:</strong> Developer–lender matching, equity placement, title/escrow referrals. 1% of $5B facilitated deal volume = <strong style="color:var(--white)">$50M ARR</strong>
+          </div>
+        </div>
+        <div class="card">
+          <div class="c-title">Capital Strategy</div>
+          <div class="c-body">
+            <strong style="color:var(--gold)">Pre-Seed · $500K–$1.5M · Q4 2026</strong><br>
+            Trigger: $200K MRR + 2 enterprise LOIs<br>
+            Use: Engineering hire, 5-state expansion, sales motion<br><br>
+            <strong style="color:var(--gold)">Seed · $3M–$6M · Q1 2027</strong><br>
+            Trigger: $500K MRR + SOC 2 in progress + 350 paying firms<br>
+            Use: 50-state coverage, API platform, BD team<br><br>
+            <strong style="color:var(--gold)">Series A · $15M–$25M · Q3 2027</strong><br>
+            Trigger: $1.5M MRR + 3 verticals + institutional data partner<br>
+            Target: Fifth Wall, MetaProp, Navitas, a16z RE fund<br><br>
+            <strong style="color:var(--gold)">Series B · $40M–$80M · Q2 2028</strong><br>
+            Trigger: $2.5M MRR + API licensing live + 2,000 firms<br>
+            Use: International (Canada, UK, UAE) + data asset acquisitions
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div class="g3">
+      <div class="card" style="text-align:center"><div class="c-stat" style="font-size:22px">$50K–$200K</div><div class="c-label">Value Displaced / Firm / Year</div></div>
+      <div class="card" style="text-align:center"><div class="c-stat" style="font-size:22px">65–75%</div><div class="c-label">Gross Margin at Scale</div></div>
+      <div class="card" style="text-align:center"><div class="c-stat" style="font-size:22px">15–30x</div><div class="c-label">ARR Multiple (Comp)</div></div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>FINANCIAL FORECAST · PLATFORM CEILING MODEL</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     HORIZONTAL EXPANSION
+══════════════════════════════════════════ -->
+<div id="horizontal" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Platform Expansion</div>
+      <h2 class="sh-title">Beyond Real Estate.<br><em>Seven Adjacent Verticals.</em></h2>
+      <p class="sh-body">The Axiom jurisdiction intelligence engine and multi-agent orchestration layer are being abstracted into platform APIs — enabling horizontal expansion at near-zero marginal cost per new vertical. Combined adjacent TAM: $66.4B.</p>
+    </div>
+
+    <div class="q">
+      <div class="q-t">"What was once narrowly defined as software for real estate now extends across construction, infrastructure, climate, industrial IoT, and energy. These adjacent sectors are becoming fertile ground for innovation."</div>
+      <div class="q-a">— PwC Emerging Trends in Real Estate 2026</div>
+    </div>
+
+    <div class="g3" style="margin-top:44px">
+      <div class="exp">
+        <div class="exp-ico">⚡</div>
+        <div class="exp-t">Energy & Grid Development</div>
+        <div class="exp-tam">TAM: $12.8B · Entry: Q2 2027</div>
+        <div class="exp-b">Solar farms, substations, and battery storage all require permitting, jurisdictional approvals, environmental review, and financial modeling — identical to land development. The AI infrastructure buildout is driving unprecedented energy siting demand.</div>
+      </div>
+      <div class="exp">
+        <div class="exp-ico">🏥</div>
+        <div class="exp-t">Healthcare Facilities Development</div>
+        <div class="exp-tam">TAM: $8.4B · Entry: Q3 2027</div>
+        <div class="exp-b">Hospital systems and outpatient facilities face the most complex regulatory environments of any asset class — CON laws, health department approvals, and specialized zoning. Axiom's jurisdiction engine maps directly onto these workflows.</div>
+      </div>
+      <div class="exp">
+        <div class="exp-ico">🏛️</div>
+        <div class="exp-t">Urban Planning & Government</div>
+        <div class="exp-tam">TAM: $6.1B · Entry: Q4 2027</div>
+        <div class="exp-b">Municipal planning departments managing multi-year land use decisions need the same entitlement intelligence, absorption modeling, and financial pro forma tooling that serves private developers — with white-label potential for government contracts.</div>
+      </div>
+      <div class="exp">
+        <div class="exp-ico">🛡️</div>
+        <div class="exp-t">Insurance & Risk Underwriting</div>
+        <div class="exp-tam">TAM: $10.5B · Entry: Q1 2028</div>
+        <div class="exp-b">Commercial property underwriters face the same environmental, jurisdictional, and risk data challenges as developers. Axiom's risk registry, FEMA analysis, and absorption data apply directly to underwriting workflows.</div>
+      </div>
+      <div class="exp">
+        <div class="exp-ico">🏦</div>
+        <div class="exp-t">Construction Lending</div>
+        <div class="exp-tam">TAM: $9.2B · Entry: Q1 2028</div>
+        <div class="exp-b">Construction lenders and bridge lenders performing real estate due diligence require the same jurisdiction data, financial modeling, and risk analysis that Axiom provides to developers — from the capital provider's perspective.</div>
+      </div>
+      <div class="exp">
+        <div class="exp-ico">🚢</div>
+        <div class="exp-t">Industrial & Supply Chain Siting</div>
+        <div class="exp-tam">TAM: $4.8B · Entry: Q2 2028</div>
+        <div class="exp-b">Data center siting and industrial facility development face identical permitting and financial analysis challenges to residential land development. As AI infrastructure construction accelerates, this market is growing 30%+ annually.</div>
+      </div>
+
+    </div>
+
+    <div class="card" style="border-color:var(--brite);margin-top:20px">
+      <div style="display:flex;align-items:flex-start;gap:24px">
+        <div style="font-size:36px;flex-shrink:0;padding-top:4px">🌿</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:baseline;gap:16px;margin-bottom:10px;flex-wrap:wrap">
+            <div class="c-title" style="margin:0">Cannabis &amp; Licensed Facility Development</div>
+            <div class="exp-tam" style="margin:0">TAM: $14.6B · Entry: Q3 2027</div>
+          </div>
+          <div class="c-body">24 states adult-use legal, 40 states medical. Cannabis operators face the most jurisdiction-intensive real estate workflow in existence — buffer requirements, setback rules, municipal approvals, license-linked site compliance, and specialized zoning across every market. The constraint has shifted from licensing to real estate. Axiom's jurisdiction intelligence engine, permit tracker, and financial pro forma map directly onto dispensary, cultivation, and processing facility acquisition. A $47B industry in 2026 growing to $65B by 2035 with near-zero purpose-built technology at the site intelligence layer.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div class="card" style="border-color:var(--brite)">
+      <div class="c-title">The Intelligence-as-a-Service Layer</div>
+      <div class="c-body" style="margin-top:12px">
+        <strong style="color:var(--gold)">Jurisdiction Intelligence API</strong> — RESTful API exposing regulatory data, zoning intelligence, and entitlement pathway analysis by state + municipality. Billed per-query or by subscription. Applicable to any industry requiring regulatory intelligence.<br><br>
+        <strong style="color:var(--gold)">Agent Orchestration API</strong> — Multi-agent workflow engine as a service. Configure specialized AI agents with domain knowledge, chain them through workflow steps, receive structured outputs. Industry-agnostic infrastructure.<br><br>
+        <strong style="color:var(--gold)">Axiom Intelligence Network</strong> — Anonymized, aggregated data from across the user base creates a proprietary comparable dataset — available as a premium data product or API. Network effects that compound with every new user.
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>HORIZONTAL EXPANSION · Combined TAM: $66.4B</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     BETA EMAIL
+══════════════════════════════════════════ -->
+<div id="email" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Beta Communication</div>
+      <h2 class="sh-title">Welcome to the<br><em>Axiom Beta Program</em></h2>
+      <p class="sh-body">The official welcome email for beta participants. Reviewed, tightened, and NDA-confirmed — with no participant counts or cohort sizes.</p>
+    </div>
+
+    <div class="email-wrap" id="emailContent">
+      <div class="em-hdr">AXIOM OS · PRIVATE BETA · CONFIDENTIAL</div>
+      <div class="em-meta">
+        <strong style="color:var(--gold)">From:</strong> Alan Augustin &lt;support@buildaxiom.dev&gt;<br>
+        <strong style="color:var(--gold)">To:</strong> [Beta Participant]<br>
+        <strong style="color:var(--gold)">Subject:</strong> You're In — Welcome to the Axiom OS Private Beta<br>
+        <strong style="color:var(--gold)">Status:</strong> NDA-Protected · Private Beta Program
+      </div>
+      <div class="em-body">
+        <p>You're in.</p>
+        <p>Welcome to the Axiom OS private beta. Thank you for the trust that comes with being among the first to work inside what we've built. Your NDA is on file and I appreciate the discretion you've shown throughout this process.</p>
+        <p>Here's a clear picture of where the platform stands, what this beta is designed to accomplish, and what you can expect.</p>
+
+        <h3>What You're Getting Access To</h3>
+        <p>Axiom OS is an AI-native operating system built for land developers and acquisition managers — the first platform covering the complete deal lifecycle from raw land sourcing through entitlement, construction finance, risk management, and exit. Live now at <a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="color:var(--gold);font-weight:600;text-decoration:none">buildaxiom.dev</a>.</p>
+        <ul>
+          <li>12 specialized AI agents: acquisition, zoning, appraisal, construction estimating, environmental, permitting, financial underwriting, title, risk, absorption modeling, deal structuring, and closing coordination</li>
+          <li>Jurisdiction intelligence engine pre-loaded with FL regulatory context</li>
+          <li>Financial pro forma engine with IRR, NPV, cash flow, and sensitivity analysis</li>
+          <li>Deal pipeline with stage tracking, portfolio dashboard, and activity feed</li>
+          <li>Risk registry, permit tracker, site task management, and document vault</li>
+          <li>Full server-side backend — your data is secure and persistent across all devices</li>
+        </ul>
+
+        <h3>What the Beta Is Designed to Accomplish</h3>
+        <ul>
+          <li>Validate that the deal intelligence workflow maps to how you actually work</li>
+          <li>Test jurisdiction AI accuracy against FL deals you have firsthand knowledge of</li>
+          <li>Identify the features that would make Axiom OS irreplaceable in your workflow</li>
+          <li>Produce the feedback that drives the Q3 2026 development sprint</li>
+        </ul>
+
+        <h3>What I Need From You</h3>
+        <p>Your honest assessment. Run one real deal — or one you know well — through the platform. Use the agents. Build a pro forma. Enter your comps. Then tell me what's missing, what's wrong, and what surprised you. Your feedback <em>is</em> the product.</p>
+
+        <h3>Your Beta Benefits</h3>
+        <ul>
+          <li>Priority access to every feature released through Q4 2026</li>
+          <li>Pro access locked at $100/month (normally $100/mo) — held for 24 months post-launch</li>
+          <li>Direct access to the product roadmap and feature prioritization</li>
+          <li>1:1 session availability — my calendar is open for your questions</li>
+        </ul>
+
+        <p>The beta runs 90 days. I'll send a short structured survey at the 30 and 60 day marks. This is the highest-value use of my time right now — don't hesitate to reach out directly.</p>
+        <p>Thank you for being part of this. The industry has needed something like this for a long time.</p>
+
+        <div class="em-sig">
+          <strong>Alan Augustin</strong><br>
+          Founder, Axiom OS · Juniper Rose LLC<br>
+          <a href="mailto:support@buildaxiom.dev" style="color:var(--goldf);text-decoration:none">support@buildaxiom.dev</a> · <a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="color:var(--gold);text-decoration:none">buildaxiom.dev</a>
+          <div class="em-disc">This message and all associated materials are protected under the Non-Disclosure Agreement executed as a condition of beta program participation. Axiom OS is a private company in active development. All product details, roadmap items, and financial projections are confidential and may not be shared with third parties.</div>
+        </div>
+      </div>
+    </div>
+    <button class="copy-btn" onclick="copyEmail()">◆ Copy Email Text</button>
+
+    <div class="div"></div>
+    <div class="g3">
+      <div class="card">
+        <div class="c-icon">🔒</div>
+        <div class="c-title">NDA-Protected</div>
+        <div class="c-body">All beta participants have executed non-disclosure agreements prior to access. Platform details, roadmap, and financial projections are strictly confidential.</div>
+      </div>
+      <div class="card">
+        <div class="c-icon">📅</div>
+        <div class="c-title">90-Day Program</div>
+        <div class="c-body">Structured feedback at 30 and 60 days. Direct product roadmap influence. Priority access to all Q3 2026 feature releases before commercial launch.</div>
+      </div>
+      <div class="card">
+        <div class="c-icon">💰</div>
+        <div class="c-title">Locked Pricing</div>
+        <div class="c-body">Beta participants lock Pro access at $100/month — held for 24 months post commercial launch. Pro+ available at $200/month for teams and AI Copilot access.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>BETA WELCOME COMMUNICATION · 2026</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
+</div>
+</div>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    const n = document.getElementById('n-' + id);
+    if(n) n.classList.add('active');
+    window.scrollTo(0,0);
+    if(id === 'build' || id === 'market') animateAll();
+  }
+
+  function animateAll() {
+    // progress bars
+    document.querySelectorAll('.prg-f[data-w]').forEach(el => {
+      const w = el.getAttribute('data-w');
+      el.style.width = '0';
+      setTimeout(() => { el.style.width = w; }, 80);
+    });
+    // market bars
+    document.querySelectorAll('.mb-f[data-w]').forEach(el => {
+      const w = el.getAttribute('data-w');
+      el.style.width = '0';
+      setTimeout(() => { el.style.width = w; }, 80);
+    });
+  }
+
+  // animate hero bars on load
+  setTimeout(() => {
+    document.querySelectorAll('.mb-f[data-w]').forEach(el => {
+      const w = el.getAttribute('data-w');
+      el.style.width = '0';
+      setTimeout(() => { el.style.width = w; }, 200);
+    });
+  }, 400);
+
+  function copyEmail() {
+    const el = document.getElementById('emailContent');
+    navigator.clipboard.writeText(el.innerText).then(() => {
+      const btn = document.querySelector('.copy-btn');
+      btn.textContent = '✓ Copied';
+      setTimeout(() => { btn.textContent = '◆ Copy Email Text'; }, 2000);
+    });
+  }
+</script>
+</body>
+</html>
