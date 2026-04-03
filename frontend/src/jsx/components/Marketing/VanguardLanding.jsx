@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowRight, ChevronRight, Layers, Map as MapIcon, Zap, Smartphone, Download } from 'lucide-react';
+import { ArrowRight, ChevronRight, Layers, Map as MapIcon, Zap, Smartphone, Download, ShieldCheck } from 'lucide-react';
 import { C, S } from '../../constants';
 import { supabase } from '../../../lib/supabase';
 import ROICalculator from './ROICalculator';
@@ -141,6 +141,20 @@ export default function VanguardLanding() {
                 }
             `}</style>
 
+            {/* ─── URGENCY BANNER ─────────────────────────────────────────────────── */}
+            <div style={{
+                background: 'linear-gradient(90deg, #0A0A0A 0%, rgba(212,168,67,0.15) 50%, #0A0A0A 100%)',
+                textAlign: 'center',
+                padding: '10px 24px',
+                fontSize: 12,
+                fontWeight: 700,
+                letterSpacing: 2,
+                color: '#D4A843',
+                borderBottom: '1px solid rgba(212,168,67,0.2)',
+            }}>
+                ⬡ BETA ACCESS CLOSING — LIMITED INSTITUTIONAL SEATS REMAINING
+            </div>
+
             {/* ─── NAVIGATION ──────────────────────────────────────────────────────── */}
             <nav className="axiom-nav" style={{ padding: '24px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #222', position: 'sticky', top: 0, backgroundColor: 'rgba(10,10,10,0.8)', backdropFilter: 'blur(10px)', zIndex: 100 }}>
                 <div style={{ fontSize: 24, fontWeight: 700, letterSpacing: '2px', color: '#fff' }}>
@@ -231,12 +245,12 @@ export default function VanguardLanding() {
                     </a>
                 </div>
 
-                <div style={{ marginTop: 80, opacity: 0.4, display: 'flex', justifyContent: 'center', gap: 16, fontSize: 12, letterSpacing: 2, fontWeight: 600, position: 'relative', zIndex: 1 }}>
-                    <span>TRUSTED BY TOP 20 REPE FIRMS</span>
+                <div style={{ marginTop: 80, opacity: 0.4, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 16, fontSize: 12, letterSpacing: 2, fontWeight: 600, position: 'relative', zIndex: 1 }}>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><ShieldCheck size={14} color="#D4A843" /> TRUSTED BY TOP 20 REPE FIRMS</span>
                     <span style={{ color: '#D4A843' }}>◆</span>
-                    <span>SPATIAL FIRST DESIGN</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><ShieldCheck size={14} color="#D4A843" /> SPATIAL FIRST DESIGN</span>
                     <span style={{ color: '#D4A843' }}>◆</span>
-                    <span>AI-CORE ARCHITECTURE</span>
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 6 }}><ShieldCheck size={14} color="#D4A843" /> AI-CORE ARCHITECTURE</span>
                 </div>
             </section>
 
