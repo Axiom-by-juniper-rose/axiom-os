@@ -23,6 +23,9 @@ export function RiskRegistry({ projectId: _projectId }: { projectId: string }) {
         { id: 1, title: "Utility Connection Delay", impact: "High", probability: 65, owner: "Thompson", status: "Mitigating" },
         { id: 2, title: "Steel Tariff Price Hike", impact: "Medium", probability: 40, owner: "Procurement", status: "Monitoring" },
         { id: 3, title: "Nesting Bird Season", impact: "High", probability: 90, owner: "Environmental", status: "Action Required" },
+        { id: 4, title: "Permit Timeline Slip", impact: "Critical", probability: 80, owner: "Entitlements", status: "Action Required" },
+        { id: 5, title: "Interest Rate Hike", impact: "Low", probability: 25, owner: "Finance", status: "Monitoring" },
+        { id: 6, title: "Subcontractor Default", impact: "Medium", probability: 55, owner: "Procurement", status: "Identified" },
     ]);
 
     const [nr, setNr] = useState<Omit<Risk, "id">>({ title: "", impact: "Medium", probability: 50, owner: "Unassigned", status: "Identified" });

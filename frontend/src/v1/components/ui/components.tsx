@@ -4,12 +4,15 @@ import { importCSV, RC } from "../../lib/utils";
 export * from "./Dialer";
 export * from "./FileAttachment";
 
-export function Card({ title, children, action, className = "", style }: { title: React.ReactNode, children: React.ReactNode, action?: React.ReactNode, className?: string, style?: React.CSSProperties }) {
+export function Card({ title, children, action, className = "", style, onExport }: { title: React.ReactNode, children: React.ReactNode, action?: React.ReactNode, className?: string, style?: React.CSSProperties, onExport?: () => void }) {
     return (
         <div className={`axiom-card axiom-animate-slide-up ${className}`} style={style}>
             <div className="axiom-card-header">
                 <span>{title}</span>
                 {action}
+                {onExport && (
+                    <button onClick={onExport} title="Export CSV" style={{ background: "none", border: "1px solid var(--c-border)", color: "var(--c-dim)", cursor: "pointer", borderRadius: 3, padding: "2px 6px", fontSize: 11, marginLeft: 8 }}>↓ CSV</button>
+                )}
             </div>
             {children}
         </div>

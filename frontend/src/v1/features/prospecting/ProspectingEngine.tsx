@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, Button, Badge, AxiomTable } from "../../components/ui/components";
 
 export function ProspectingEngine() {
@@ -17,6 +17,8 @@ export function ProspectingEngine() {
             setSearching(false);
         }, 1500);
     };
+
+    useEffect(() => { runSearch(); }, []);
 
     return (
         <div className="axiom-stack-24">

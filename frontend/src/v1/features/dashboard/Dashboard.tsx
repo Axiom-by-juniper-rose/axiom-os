@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useLS } from "../../hooks/useLS";
 import { useProjectState } from "../../hooks/useProjectState";
 import { Card, KPI, Button, Badge } from "../../components/ui/components";
 import { useProject, type ProjectContextType } from "../../context/ProjectContext";
@@ -23,6 +24,19 @@ export function Dashboard({ projectId }: Props) {
     const { project, updateProject, syncError } = useProjectState(projectId);
     const { setChartSel } = useProject() as ProjectContextType;
     const [selectedSlice, setSelectedSlice] = useState<string | null>(null);
+    const [activityLog] = useLS("axiom_activity_log", [
+        { action: "Project created", detail: project.name || "New Development", timestamp: new Date(Date.now() - 3600000).toISOString() },
+        { action: "Financial model updated", detail: "Pro Forma recalculated", timestamp: new Date(Date.now() - 7200000).toISOString() },
+        { action: "Risk registered", detail: "Utility Connection Delay", timestamp: new Date(Date.now() - 86400000).toISOString() },
+    ]);
+    const relTime = (iso: string) => {
+        const diff = Date.now() - new Date(iso).getTime();
+        const mins = Math.floor(diff / 60000);
+        if (mins < 60) return mins + "m ago";
+        const hrs = Math.floor(mins / 60);
+        if (hrs < 24) return hrs + "h ago";
+        return Math.floor(hrs / 24) + "d ago";
+    };
 
     const fin = project.financials ?? DEFAULT_FIN;
     const risks = project.risks ?? DEFAULT_RISKS;
@@ -93,7 +107,7 @@ export function Dashboard({ projectId }: Props) {
             <div className="axiom-top-bar">
                 <div>
                     <div className="axiom-breadcrumb">Command Center</div>
-                    <div className="axiom-page-title">{project.name || "Unnamed Project"}</div>
+                    <div className="axiom-page-title">{project.name || "New Development"}</div>
                 </div>
                 <div className="axiom-flex-gap-12">
                     <Button label="Export Summary" variant="gold" onClick={() => {
@@ -314,6 +328,20 @@ export function Dashboard({ projectId }: Props) {
                             {["Not Started", "In Progress", "Submitted", "Approved"].map(o => <option key={o}>{o}</option>)}
                         </select>
                     </div>
+                </div>
+            </Card>
+
+            <Card title="Recent Activity">
+                <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                    {(activityLog as any[]).slice(0, 5).map((a: any, i: number) => (
+                        <div key={i} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--c-bg3)", borderRadius: 6, border: "1px solid var(--c-border)" }}>
+                            <div>
+                                <span style={{ color: "var(--c-sub)", fontSize: 13, fontWeight: 600 }}>{a.action}</span>
+                                <span style={{ color: "var(--c-dim)", fontSize: 12, marginLeft: 8 }}>{a.detail}</span>
+                            </div>
+                            <span style={{ fontFamily: "DM Mono, monospace", fontSize: 11, color: "var(--c-dim)", whiteSpace: "nowrap" }}>{relTime(a.timestamp)}</span>
+                        </div>
+                    ))}
                 </div>
             </Card>
 

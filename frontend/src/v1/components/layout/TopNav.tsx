@@ -99,6 +99,16 @@ export function TopNav({
 
     const [lightMode, setLightMode] = useLS("axiom_light_mode", false);
     const [isEditingMeta, setIsEditingMeta] = useState(false);
+    const [clockStr, setClockStr] = useState("");
+    useEffect(() => {
+        const tick = () => {
+            const now = new Date();
+            setClockStr(now.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) + " \u00b7 " + now.toLocaleTimeString("en-US", { hour12: false, hour: "2-digit", minute: "2-digit", second: "2-digit" }));
+        };
+        tick();
+        const id = setInterval(tick, 1000);
+        return () => clearInterval(id);
+    }, []);
 
     useEffect(() => {
         if (lightMode) {
@@ -225,7 +235,7 @@ export function TopNav({
                     <button
                         style={{ background: chatOpen ? "var(--c-bg4)" : "var(--c-bg3)", border: "1px solid var(--c-border)", color: chatOpen ? "var(--c-gold)" : "var(--c-dim)", colorScheme: "dark", width: 28, height: 28, borderRadius: 3, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, transition: "0.15s" }}
                         onClick={() => setChatOpen(!chatOpen)}
-                        title="Toggle Group Chat"
+                        title="Toggle Chat (⌘J)"
                     >
                         💬
                     </button>
@@ -248,6 +258,10 @@ export function TopNav({
                 >
                     {lightMode ? "🌙" : "☀️"}
                 </button>
+
+                <span style={{ fontFamily: "DM Mono, monospace", fontSize: 11, color: "var(--c-dim)", letterSpacing: 1, whiteSpace: "nowrap" }}>
+                    {clockStr}
+                </span>
 
                 {tier && tier.toUpperCase() !== "FREE" && (
                     <span style={{ fontSize: 9, color: "var(--c-gold)", background: "color-mix(in srgb, var(--c-gold) 12%, transparent)", padding: "4px 10px", borderRadius: 4, letterSpacing: 1, textTransform: "uppercase", fontWeight: 700 }}>
