@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Card, KPI, Badge, Progress, Button, Field, AxiomTable } from "../../components/ui/components";
 import { Tabs } from "../../components/ui/layout";
 import { useLS } from "../../hooks/useLS";
+import { ScatterChart, Scatter, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { CHART_TT, AXIS_TICK, GRID_STROKE } from "../../lib/chartTheme";
 
 interface Risk {
     id: number;
@@ -13,6 +15,8 @@ interface Risk {
 }
 
 const IMPACT_COLORS: Record<string, string> = { Critical: "var(--c-red)", High: "var(--c-amber)", Medium: "var(--c-blue)", Low: "var(--c-dim)" };
+const IMPACT_Y: Record<string, number> = { Low: 1, Medium: 2, High: 3, Critical: 4 };
+const IMPACT_DOT_COLORS: Record<string, string> = { Low: "#22c55e", Medium: "#f59e0b", High: "#ef4444", Critical: "#a855f7" };
 
 export function RiskRegistry({ projectId: _projectId }: { projectId: string }) {
     const [risks, setRisks] = useLS("axiom_risks", [
@@ -40,6 +44,22 @@ export function RiskRegistry({ projectId: _projectId }: { projectId: string }) {
                     <KPI label="Avg Probability" value={`${Math.round(avgProb)}%`} color="var(--c-amber)" />
                     <KPI label="Total Registered" value={risks.length} />
                 </div>
+
+                <Card title="Risk Heat Map">
+                    <ResponsiveContainer width="100%" height={250}>
+                        <ScatterChart margin={{ top: 10, right: 20, bottom: 10, left: 0 }}>
+                            <CartesianGrid stroke={GRID_STROKE} />
+                            <XAxis type="number" dataKey="x" name="Probability" domain={[0, 100]} tick={AXIS_TICK} label={{ value: "Probability %", position: "insideBottom", offset: -4, style: { fontSize: 10, fill: "#6B7280" } }} />
+                            <YAxis type="number" dataKey="y" name="Impact" domain={[0.5, 4.5]} ticks={[1, 2, 3, 4]} tick={AXIS_TICK} tickFormatter={(v: number) => ["", "Low", "Medium", "High", "Critical"][v] || ""} />
+                            <Tooltip {...CHART_TT} formatter={(_v: any, name: string, props: any) => name === "Probability" ? `${props.payload.x}%` : props.payload.impact} labelFormatter={() => ""} />
+                            <Scatter data={(risks as Risk[]).map(r => ({ x: r.probability, y: IMPACT_Y[r.impact] || 1, title: r.title, impact: r.impact }))} name="Risks">
+                                {(risks as Risk[]).map((r, i) => (
+                                    <Cell key={i} fill={IMPACT_DOT_COLORS[r.impact] || "#6B7280"} />
+                                ))}
+                            </Scatter>
+                        </ScatterChart>
+                    </ResponsiveContainer>
+                </Card>
 
                 <div className="axiom-grid-6-4 axiom-gap-20">
                     <Card title="Project Risk Registry" className="axiom-flex-1">
