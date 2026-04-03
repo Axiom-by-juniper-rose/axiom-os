@@ -120,6 +120,7 @@ export function SiteMap3D({ lat = 27.3364, lng = -82.5307, projectId, zoom = 1 }
       ctx.fillText(projectId, 16, 34);
     }
 
+    return () => { if (ctx) ctx.clearRect(0, 0, W, H); };
   }, [lat, lng, projectId, zoom]);
 
   return (

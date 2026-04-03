@@ -95,6 +95,10 @@ export function Contacts() {
 
     const addContact = () => {
         if (!nc.name) return;
+        if (nc.email && contacts.some(c => c.email === nc.email)) {
+            alert(`A contact with email "${nc.email}" already exists.`);
+            return;
+        }
         const newContact = { ...nc, id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), lastContact: new Date().toISOString().split("T")[0] };
         setContacts([...contacts, newContact]);
         syncContact(newContact);

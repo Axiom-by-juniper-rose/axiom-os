@@ -67,7 +67,7 @@ export function ProspectingEngine() {
                         <div className="axiom-text-12-gold-ls2-caps">Processing Satellite & Tax Records...</div>
                     </div>
                 ) : (
-                    <AxiomTable headers={["OWNER", "ADDRESS", "SIZE", "ZONING", "EST. VALUE", ""]}>
+                    <AxiomTable headers={["OWNER", "ADDRESS", "SIZE", "ZONING", "EST. VALUE", ""]} emptyMessage="No prospects yet — add a search radius or connect MLS to auto-discover parcels.">
                         {results.map(r => (
                             <tr key={r.id}>
                                 <td className="axiom-td axiom-text-gold">{r.owner}</td>

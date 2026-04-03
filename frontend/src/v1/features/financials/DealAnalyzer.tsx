@@ -5,6 +5,7 @@ import { Agent } from "../agents/Agent";
 import { fmt } from "../../lib/utils";
 import { CHART_TT } from "../../lib/chartTheme";
 import { supa } from "../../lib/supabase";
+import { calcFinancials } from "../../lib/finance";
 import {
     Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis,
     ResponsiveContainer, Tooltip
@@ -22,15 +23,8 @@ export function DealAnalyzer() {
     }, [project?.id]);
 
     const analysis = useMemo(() => {
-        const hard = fin.totalLots * fin.hardCostPerLot;
-        const soft = hard * (fin.softCostPct / 100);
-        const fees = fin.planningFees + (fin.permitFeePerLot + fin.schoolFee + fin.impactFeePerLot) * fin.totalLots;
-        const cont = (hard + soft) * (fin.contingencyPct / 100);
-        const totalCost = fin.landCost + fin.closingCosts + hard + soft + cont + fees;
-        const revenue = fin.totalLots * fin.salesPricePerLot;
-        const profit = revenue * 0.97 - totalCost; // Simplified profit after commission
-        const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
-        const roi = totalCost > 0 ? (profit / totalCost) * 100 : 0;
+        const fc = calcFinancials(fin);
+        const { totalProjectCost: totalCost, revenue, profit, margin, roi } = fc;
 
         // Base financial score to fallback on
         const scoreF = Math.min(100, Math.max(0, margin > 20 ? 95 : margin > 15 ? 80 : margin > 10 ? 65 : margin > 5 ? 50 : 30));

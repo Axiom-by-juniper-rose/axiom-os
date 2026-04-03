@@ -97,7 +97,7 @@ export function TopNav({
     const switchProject = projCtx?.switchProject;
     const createProject = projCtx?.createProject;
 
-    const [lightMode, setLightMode] = useState(false);
+    const [lightMode, setLightMode] = useLS("axiom_light_mode", false);
     const [isEditingMeta, setIsEditingMeta] = useState(false);
 
     useEffect(() => {

@@ -56,7 +56,7 @@ export function Invoices() {
                     </Card>
                 )}
                 <Card title="Invoice Management" action={<Button variant="gold" label="+ Ingest Invoice" onClick={() => setShowAdd(v => !v)} title="Add New Invoice" />}>
-                    <AxiomTable headers={["Vendor", "Category", "Amount", "Date", "Status", "Deal"]}>
+                    <AxiomTable headers={["Vendor", "Category", "Amount", "Date", "Status", "Deal"]} emptyMessage="No invoices recorded — add your first invoice to track project expenditures.">
                         {(invoices as any[]).map((i: any) => (
                             <tr key={i.id} className="premium-hover">
                                 <td className="axiom-td axiom-text-bold">{i.vendor}</td>

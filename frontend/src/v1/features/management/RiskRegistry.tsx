@@ -21,7 +21,7 @@ export function RiskRegistry({ projectId: _projectId }: { projectId: string }) {
         { id: 3, title: "Nesting Bird Season", impact: "High", probability: 90, owner: "Environmental", status: "Action Required" },
     ]);
 
-    const [nr, setNr] = useState<Omit<Risk, "id">>({ title: "", impact: "Medium", probability: 50, owner: "", status: "Identified" });
+    const [nr, setNr] = useState<Omit<Risk, "id">>({ title: "", impact: "Medium", probability: 50, owner: "Unassigned", status: "Identified" });
 
     const addRisk = () => {
         if (!nr.title) return;

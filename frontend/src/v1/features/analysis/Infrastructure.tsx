@@ -16,7 +16,7 @@ export function Infrastructure({ projectId }: Props) {
     const { project, updateProject } = useProjectState(projectId);
 
     const utilities: any[] = project.utilities?.length ? project.utilities : DEFAULT_UTILITIES;
-    const env: any = project.env ?? {};
+    const env: any = { floodZone: "Zone X", ...project.env };
 
     const upd = (i: number, k: string, v: string) => {
         const d = [...utilities];

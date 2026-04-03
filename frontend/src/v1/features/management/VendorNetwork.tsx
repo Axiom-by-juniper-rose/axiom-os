@@ -51,7 +51,7 @@ export function VendorNetwork() {
                         <option>All</option>{VENDOR_TYPES.map(t => <option key={t}>{t}</option>)}<option>Active</option><option>Inactive</option>
                     </select>
                 }>
-                    <AxiomTable headers={["Company", "Type", "Primary Contact", "MSA Signed", "COI Expiration", "Status", ""]}>
+                    <AxiomTable headers={["Company", "Type", "Primary Contact", "MSA Signed", "COI Expiration", "Status", ""]} emptyMessage="No vendors added yet — add your first GC, surveyor, or engineer to build your network.">
                         {filtered.map((v) => (
                             <tr key={v.id}>
                                 <td className="axiom-td axiom-text-gold axiom-font-500">{v.name}</td>

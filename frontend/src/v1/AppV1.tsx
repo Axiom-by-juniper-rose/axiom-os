@@ -4,6 +4,7 @@ import { ProjectProvider } from "./context/ProjectContext";
 // All feature modules are lazy-loaded — each becomes a separate chunk (~3-15 KB)
 // downloaded only when the user navigates to that module.
 import { lazy, Suspense, useState, useEffect, useRef } from "react";
+import { useLS } from "./hooks/useLS";
 
 const Dashboard = lazy(() => import("./features/dashboard/Dashboard").then(m => ({ default: m.Dashboard })));
 const Contacts = lazy(() => import("./features/crm/Contacts").then(m => ({ default: m.Contacts })));
@@ -322,7 +323,7 @@ function AppContent() {
     const [isSplit, setIsSplit] = useState(false);
     const [splitView, setSplitView] = useState("notes");
     const [floatingPanels, setFloatingPanels] = useState<string[]>([]);
-    const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+    const [sidebarCollapsed, setSidebarCollapsed] = useLS("axiom_sidebar_collapsed", false);
     const [cpOpen, setCpOpen] = useState(false);
     const [chatOpen, setChatOpen] = useState(false);
     const [meetingOpen, setMeetingOpen] = useState(false);

@@ -3,6 +3,7 @@ import { useProject, type ProjectContextType } from "../../context/ProjectContex
 import { Card, Badge, Button } from "../../components/ui/components";
 import { Tabs } from "../../components/ui/layout";
 import { fmt, downloadText, downloadCSV } from "../../lib/utils";
+import { calcFinancials } from "../../lib/finance";
 
 export function Reports() {
     const { project } = useProject() as ProjectContextType;
@@ -80,22 +81,16 @@ function ICMemoGenerator() {
     const [memoType, setMemoType] = useState("ic_memo");
     const keys = JSON.parse(localStorage.getItem("axiom_api_keys") || "{}");
 
-    const hard = (fin.totalLots || 0) * (fin.hardCostPerLot || 0);
-    const soft = hard * (fin.softCostPct || 0) / 100;
-    const fees = (fin.planningFees || 0) + ((fin.permitFeePerLot || 0) + (fin.schoolFee || 0) + (fin.impactFeePerLot || 0)) * (fin.totalLots || 0);
-    const cont = (hard + soft) * (fin.contingencyPct || 0) / 100;
-    const totalCost = (fin.landCost || 0) + (fin.closingCosts || 0) + hard + soft + cont + fees;
-    const revenue = (fin.totalLots || 0) * (fin.salesPricePerLot || 0);
-    const profit = revenue * 0.97 - totalCost * 1.05;
-    const margin = revenue > 0 ? profit / revenue * 100 : 0;
-    const roi = totalCost > 0 ? profit / totalCost * 100 : 0;
+    // Use shared financial calculations (single source of truth)
+    const fc = calcFinancials(fin);
+    const { totalProjectCost: totalCost, revenue, profit, margin, roi } = fc;
 
     const ctxStr = `
 Project Name: ${project?.name || 'Unnamed Project'}
 Address: ${project?.address || 'TBD'}, ${project?.municipality || 'TBD'}, ${project?.state || 'TBD'}
 Target Lots: ${fin.totalLots}
 Land Cost: $${fin.landCost?.toLocaleString()}
-Total Hard & Soft Costs: $${(hard + soft + cont + fees).toLocaleString()}
+Total Hard & Soft Costs: $${(fc.hardCosts + fc.softCosts + fc.contingency + fc.fees).toLocaleString()}
 Total Capital Required: $${totalCost.toLocaleString()}
 Projected Revenue: $${revenue.toLocaleString()}
 Target Margin: ${margin.toFixed(1)}%
