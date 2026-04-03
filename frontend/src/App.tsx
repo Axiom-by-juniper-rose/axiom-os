@@ -7,8 +7,9 @@ import { TermsOfService } from './pages/TermsOfService';
 import { RefundPolicy } from './pages/RefundPolicy';
 import { PricingPage } from './components/Billing/PricingPage';
 
-// Modular AxiomOS app (JSX architecture) — typed via src/types/jsx-modules.d.ts
-import AxiomModular from './jsx/AxiomApp';
+// V1 modular app — the full-featured architecture with accordion sidebar,
+// TopNav, split pane, chat panel, floating panels, command palette.
+import AppV1 from './v1/AppV1';
 
 // Marketing components
 import VanguardLanding from './jsx/components/Marketing/VanguardLanding';
@@ -46,9 +47,9 @@ export const App: React.FC = () => {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Auth-gated shell */}
+        {/* Auth-gated shell — AppV1 wraps its own providers internally */}
         <Route element={<AuthGate />}>
-          <Route path="/*" element={<AxiomModular />} />
+          <Route path="/*" element={<AppV1 />} />
         </Route>
 
         {/* Safety fallback — AuthGate already redirects to /login */}

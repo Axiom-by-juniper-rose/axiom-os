@@ -51,8 +51,15 @@ import { FloatingToolbar } from "./components/ui/FloatingToolbar";
 import { MeetingRecorder } from "./components/ui/MeetingRecorder";
 import { FloatingPanel } from "./components/ui/FloatingPanel";
 import { Dialer } from "./components/ui/components";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, lazy, Suspense } from "react";
 import "./components/ui/theme.css";
+
+// V5 feature sections — lazy-loaded to avoid bloating the main bundle
+const AgentPipelineSection = lazy(() => import("../v5/features/neural/AgentHandoff").then(m => ({ default: m.AgentHandoff })));
+const RiskCalibrationDashboard = lazy(() => import("../v5/features/neural/RiskCalibrationDashboard").then(m => ({ default: m.RiskCalibrationDashboard })));
+const TaxIntelPanel = lazy(() => import("../v5/features/tax/TaxIntelPanel").then(m => ({ default: m.TaxIntelPanel })));
+const PortfolioGovernance = lazy(() => import("../v5/features/governance/PortfolioGovernance").then(m => ({ default: m.PortfolioGovernance })));
+const SiteMap3D = lazy(() => import("../v5/features/gis/SiteMap3D").then(m => ({ default: m.SiteMap3D })));
 
 // ─── NAV STRUCTURE (matches V20 groups) ──────────────────────
 const NAV_GROUPS = [
@@ -88,6 +95,7 @@ const NAV_GROUPS = [
             { id: "infrastructure", label: "⬡ Infrastructure" },
             { id: "concept", label: "⬡ Concept Design" },
             { id: "sitemap", label: "⬡ Site Map" },
+            { id: "sitemap3d", label: "⬡ Site Map 3D" },
         ],
     },
     {
@@ -97,6 +105,7 @@ const NAV_GROUPS = [
             { id: "mls", label: "⬡ MLS & Listings" },
             { id: "dataintel", label: "⬡ Data Intelligence" },
             { id: "jurisdintel", label: "⬡ Jurisdiction Intel" },
+            { id: "taxintel", label: "⬡ Tax Intelligence" },
         ],
     },
     {
@@ -105,6 +114,7 @@ const NAV_GROUPS = [
             { id: "field", label: "⬡ Field Dashboard" },
             { id: "process", label: "⬡ Process Control" },
             { id: "risk", label: "⬡ Risk Command" },
+            { id: "riskcal", label: "⬡ Risk Calibration" },
             { id: "sitemgmt", label: "⬡ Site Management" },
             { id: "vendors", label: "⬡ Vendor Network" },
             { id: "network", label: "⬡ Professional Network" },
@@ -128,6 +138,8 @@ const NAV_GROUPS = [
             { id: "copilot", label: "⬡ Axiom Copilot" },
             { id: "neuralos", label: "⬡ Neural OS" },
             { id: "hub", label: "⬡ AI Agent Hub" },
+            { id: "agentpipe", label: "⬡ Agent Pipeline" },
+            { id: "governance", label: "⬡ Portfolio Governance" },
         ],
     },
     {
@@ -268,6 +280,12 @@ function renderView(view: string, activeProjectId: string) {
         case "audit": return <div className="axiom-p-0"><AuditLog /></div>;
         // ─── INTEL ───────────────────────────────────────
         case "jurisdintel": return <JurisdictionIntel />;
+        case "taxintel": return <Suspense fallback={<ComingSoon name="Tax Intelligence" />}><TaxIntelPanel /></Suspense>;
+        // ─── V5 ──────────────────────────────────────────
+        case "riskcal": return <Suspense fallback={<ComingSoon name="Risk Calibration" />}><RiskCalibrationDashboard supabase={supa} /></Suspense>;
+        case "sitemap3d": return <Suspense fallback={<ComingSoon name="Site Map 3D" />}><SiteMap3D /></Suspense>;
+        case "agentpipe": return <Suspense fallback={<ComingSoon name="Agent Pipeline" />}><AgentPipelineSection dealId="" /></Suspense>;
+        case "governance": return <Suspense fallback={<ComingSoon name="Portfolio Governance" />}><PortfolioGovernance orgId="" supabase={supa} /></Suspense>;
         // ─── WORKSPACE ───────────────────────────────────
         case "notes": return <Notes />;
         case "calendar": return <CalendarView />;
