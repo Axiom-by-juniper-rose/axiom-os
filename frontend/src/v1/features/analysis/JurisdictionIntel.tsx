@@ -162,7 +162,7 @@ const JURIS_DATA: Record<string, StateData> = {
 };
 
 const STATES = Object.keys(JURIS_DATA);
-const TABS = ["Overview", "Entitlement Timeline", "Fees & Costs", "Environmental", "Zoning", "External Resources", "AI Advisor"];
+const TABS = ["◈ Overview", "⏳ Entitlement Timeline", "◆ Fees & Costs", "🌿 Environmental", "◇ Zoning & Land Use", "↗ External Resources", "✦ AI Advisor"];
 
 export function JurisdictionIntel() {
     const [sel, setSel] = useState("CA");

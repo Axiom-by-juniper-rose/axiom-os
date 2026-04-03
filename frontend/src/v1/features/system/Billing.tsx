@@ -6,33 +6,49 @@ import { useLS } from "../../hooks/useLS";
 interface Tier {
     id: string;
     name: string;
-    price: number;
+    price: number | null;
+    priceLabel?: string;
     color: string;
     desc: string;
+    seats: string;
     features: string[];
     recommended?: boolean;
+    cta?: string;
+    ctaHref?: string;
 }
 
 const TIERS: Tier[] = [
     {
-        id: "free", name: "Free", price: 0, color: "var(--c-dim)",
+        id: "free", name: "Free", price: 0, color: "var(--c-dim)", seats: "1 user",
         desc: "Explore the platform. No credit card required.",
-        features: ["5 Active Deals", "3 AI Sessions/day", "Basic Calculators", "Public Data Access", "Deal Pipeline"],
+        features: ["3 Active Deals", "5 AI Sessions/day", "Basic Calculators", "Community Support"],
     },
     {
-        id: "pro", name: "Pro", price: 29, color: "var(--c-gold)", recommended: true,
+        id: "pro", name: "Pro", price: 100, color: "var(--c-gold)", recommended: true, seats: "1 user",
         desc: "For serious land acquisition managers.",
-        features: ["50 Active Deals", "25 AI Sessions/day", "All Calculators", "CSV/PDF Exports", "MLS Feeds", "IC Memo Generator", "Email Support"],
+        features: ["50 Deals", "25 AI Sessions/day", "All Calculators", "CSV/PDF Exports", "MLS Feeds", "Email Support"],
     },
     {
-        id: "pro_plus", name: "Pro+", price: 99, color: "var(--c-purple)",
+        id: "pro_plus", name: "Pro+", price: 200, color: "var(--c-purple)", seats: "3 users",
         desc: "For growing development firms with teams.",
-        features: ["Unlimited Deals", "Unlimited AI", "Team (5 seats)", "API Access", "White-Label Reports", "Jurisdiction Intel", "Priority Support"],
+        features: ["Unlimited Deals", "Unlimited AI", "Team (3 seats)", "Copilot", "Scenario Modeling", "Priority Support"],
     },
     {
-        id: "enterprise", name: "Enterprise", price: 499, color: "var(--c-teal)",
+        id: "boutique", name: "Boutique", price: 500, color: "var(--c-blue)", seats: "5 users",
+        desc: "For boutique firms scaling their pipeline.",
+        features: ["Agent Pipeline", "Neural Scoring", "Tax Intel", "Field Mode", "API Access"],
+    },
+    {
+        id: "enterprise", name: "Enterprise", price: 1500, color: "var(--c-teal)", seats: "10-25 users",
         desc: "For institutional-grade development platforms.",
-        features: ["Everything in Pro+", "Unlimited Seats", "Custom AI Training", "SLA 99.9% Uptime", "Dedicated Success Manager", "Custom Integrations", "On-Prem Option"],
+        features: ["Custom AI Models", "SLA 99.9% Uptime", "Dedicated Success Manager", "Custom Integrations"],
+    },
+    {
+        id: "enterprise_plus", name: "Enterprise+", price: null, priceLabel: "Custom", color: "var(--c-teal)", seats: "Unlimited",
+        desc: "White glove onboarding and dedicated infrastructure.",
+        features: ["White Glove Onboarding", "On-Prem Deployment", "Custom AI Training", "Dedicated Infrastructure"],
+        cta: "Contact Sales",
+        ctaHref: "mailto:enterprise@buildaxiom.dev",
     },
 ];
 
@@ -70,7 +86,7 @@ export function Billing() {
                 <div className="axiom-text-13-dim axiom-mt-4">Start small and scale as your portfolio grows. No hidden fees.</div>
             </div>
 
-            <div className="axiom-grid-4">
+            <div className="axiom-grid-3" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 16 }}>
                 {TIERS.map(t => {
                     const isCurrent = tier === t.id;
                     return (
@@ -80,18 +96,35 @@ export function Billing() {
 
                             <div className="axiom-text-16-text-bold">{t.name}</div>
                             <div className="axiom-mt-8">
-                                <span className="axiom-text-32-bold" style={{ color: t.color }}>${t.price}</span>
-                                <span className="axiom-text-12-dim">/mo</span>
+                                {t.price !== null ? (
+                                    <>
+                                        <span className="axiom-text-32-bold" style={{ color: t.color }}>${t.price.toLocaleString()}</span>
+                                        <span className="axiom-text-12-dim">/mo</span>
+                                    </>
+                                ) : (
+                                    <span className="axiom-text-32-bold" style={{ color: t.color }}>{t.priceLabel}</span>
+                                )}
                             </div>
+                            <div className="axiom-text-11-dim axiom-mt-4">{t.seats}</div>
                             <div className="axiom-text-12-dim axiom-mt-6">{t.desc}</div>
 
-                            <Button
-                                className="axiom-mt-14"
-                                variant={isCurrent ? "ghost" : "gold"}
-                                onClick={() => { if (!isCurrent && t.id !== "free" && startCheckout) startCheckout(t.id); }}
-                                disabled={isCurrent}
-                                label={isCurrent ? "Current Plan" : t.id === "free" ? "Free Forever" : `Upgrade to ${t.name}`}
-                            />
+                            {t.ctaHref ? (
+                                <a href={t.ctaHref} style={{ textDecoration: "none" }}>
+                                    <Button
+                                        className="axiom-mt-14"
+                                        variant="gold"
+                                        label={t.cta || "Contact Sales"}
+                                    />
+                                </a>
+                            ) : (
+                                <Button
+                                    className="axiom-mt-14"
+                                    variant={isCurrent ? "ghost" : "gold"}
+                                    onClick={() => { if (!isCurrent && t.id !== "free" && startCheckout) startCheckout(t.id); }}
+                                    disabled={isCurrent}
+                                    label={isCurrent ? "Current Plan" : t.id === "free" ? "Free Forever" : `Upgrade to ${t.name}`}
+                                />
+                            )}
 
                             <div className="axiom-mt-14 axiom-flex-1">
                                 {t.features.map((f, i) => (

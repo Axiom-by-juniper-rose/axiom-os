@@ -45,13 +45,36 @@ function applyFontSize(size: string) {
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
+const DEFAULT_POS = { x: window.innerWidth - 320, y: window.innerHeight - 160 };
+const LS_KEY = "axiom-toolbar-pos";
+
+function loadPos(): { x: number; y: number } {
+    try {
+        const raw = localStorage.getItem(LS_KEY);
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            if (typeof parsed.x === "number" && typeof parsed.y === "number") return parsed;
+        }
+    } catch { /* ignore */ }
+    return DEFAULT_POS;
+}
+
+function savePos(p: { x: number; y: number }) {
+    try { localStorage.setItem(LS_KEY, JSON.stringify(p)); } catch { /* ignore */ }
+}
+
 export function FloatingToolbar() {
     const [expanded, setExpanded] = useState(false);
-    const [pos, setPos] = useState({ x: window.innerWidth - 320, y: window.innerHeight - 160 });
+    const [pos, setPos] = useState(loadPos);
     const [dragging, setDragging] = useState(false);
     const [activeFontSize, setActiveFontSize] = useState("13");
     const dragOffset = useRef({ x: 0, y: 0 });
     const toolbarRef = useRef<HTMLDivElement>(null);
+
+    const snapHome = useCallback(() => {
+        setPos(DEFAULT_POS);
+        savePos(DEFAULT_POS);
+    }, []);
 
     // ─── Drag logic ───────────────────────────────────────────────────────
     const onMouseDown = useCallback((e: React.MouseEvent) => {
@@ -66,7 +89,9 @@ export function FloatingToolbar() {
         const move = (e: MouseEvent) => {
             const nx = Math.max(0, Math.min(window.innerWidth - 60, e.clientX - dragOffset.current.x));
             const ny = Math.max(0, Math.min(window.innerHeight - 60, e.clientY - dragOffset.current.y));
-            setPos({ x: nx, y: ny });
+            const newPos = { x: nx, y: ny };
+            setPos(newPos);
+            savePos(newPos);
         };
         const up = () => setDragging(false);
         window.addEventListener("mousemove", move);
@@ -80,6 +105,7 @@ export function FloatingToolbar() {
             className={`axiom-ft-container${expanded ? " axiom-ft-container--expanded" : ""}`}
             style={{ left: pos.x, top: pos.y, cursor: dragging ? "grabbing" : "grab" }}
             onMouseDown={onMouseDown}
+            onDoubleClick={snapHome}
         >
             {/* Collapsed toggle button */}
             <button
@@ -88,6 +114,16 @@ export function FloatingToolbar() {
                 title={expanded ? "Collapse toolbar" : "Formatting toolbar"}
             >
                 {expanded ? "✕" : "✏"}
+            </button>
+
+            {/* Home button — snaps toolbar to default position */}
+            <button
+                className="axiom-ft-toggle"
+                onClick={snapHome}
+                title="Snap to default position"
+                style={{ marginLeft: 2 }}
+            >
+                ⌂
             </button>
 
             {/* Expanded controls */}

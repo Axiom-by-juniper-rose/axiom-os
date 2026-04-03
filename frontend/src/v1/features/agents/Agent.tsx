@@ -78,7 +78,7 @@ export function Agent({ id, system, placeholder, context, title }: AgentProps) {
 
             <div className="axiom-flex-gap-8 axiom-mt-15 axiom-py-10 axiom-border-t-default">
                 <input
-                    className="axiom-flex-1 axiom-bg-main axiom-border-default axiom-text-main axiom-p-8-12 axiom-radius-4 axiom-text-13"
+                    className="axiom-flex-1 axiom-bg-main axiom-border-default axiom-text-main axiom-p-8-12 axiom-radius-4 axiom-text-13 axiom-ai-input"
                     value={inp}
                     onChange={e => setInp(e.target.value)}
                     onKeyDown={e => e.key === "Enter" && send()}

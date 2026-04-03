@@ -3404,3 +3404,39 @@ textarea::placeholder {
     color: var(--c-amber);
     border-color: var(--c-amber);
 }
+
+/* ── Module loading shimmer ────────────────────────────────── */
+@keyframes axiom-shimmer {
+    0% { opacity: 0.4; }
+    50% { opacity: 0.7; }
+    100% { opacity: 0.4; }
+}
+
+/* ── AI input styling — larger boxes, darker ghost text ───── */
+.axiom-ai-input,
+.axiom-chat-input {
+    min-height: 80px;
+    font-family: 'DM Mono', ui-monospace, monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    resize: vertical;
+    color: var(--c-text);
+    background: var(--c-bg);
+    border: 1px solid var(--c-border2);
+    border-radius: 4px;
+    padding: 10px 12px;
+    width: 100%;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.axiom-ai-input:focus,
+.axiom-chat-input:focus {
+    border-color: var(--c-gold);
+}
+.axiom-ai-input::placeholder,
+.axiom-chat-input::placeholder {
+    color: #3d4454;
+    font-style: italic;
+    opacity: 1;
+}

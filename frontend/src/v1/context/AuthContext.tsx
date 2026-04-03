@@ -120,15 +120,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 const TIER_CONFIG: Record<string, any> = {
     free: { level: 0, dealLimit: 5, aiDailyLimit: 3, teamLimit: 1, features: { basic_calcs: true, pipeline: true, contacts: true, market_data: true, exports: false, ai_agents: false, mls: false, team: false, api_access: false } },
     pro: { level: 1, dealLimit: 50, aiDailyLimit: 25, teamLimit: 1, features: { basic_calcs: true, pipeline: true, contacts: true, market_data: true, exports: true, ai_agents: true, mls: true, team: false, api_access: false } },
-    pro_plus: { level: 2, dealLimit: 999, aiDailyLimit: 999, teamLimit: 5, features: { basic_calcs: true, pipeline: true, contacts: true, market_data: true, exports: true, ai_agents: true, mls: true, team: true, api_access: true } },
+    pro_plus: { level: 2, dealLimit: 999, aiDailyLimit: 999, teamLimit: 3, features: { basic_calcs: true, pipeline: true, contacts: true, market_data: true, exports: true, ai_agents: true, mls: true, team: true, api_access: false } },
+    boutique: { level: 2.5, dealLimit: 999, aiDailyLimit: 999, teamLimit: 5, features: { basic_calcs: true, pipeline: true, contacts: true, market_data: true, exports: true, ai_agents: true, mls: true, team: true, api_access: true } },
     enterprise: { level: 3, dealLimit: 999, aiDailyLimit: 999, teamLimit: 999, features: { basic_calcs: true, pipeline: true, contacts: true, market_data: true, exports: true, ai_agents: true, mls: true, team: true, api_access: true } },
+    enterprise_plus: { level: 4, dealLimit: 999, aiDailyLimit: 999, teamLimit: 999, features: { basic_calcs: true, pipeline: true, contacts: true, market_data: true, exports: true, ai_agents: true, mls: true, team: true, api_access: true } },
 };
-const TIER_NAMES: Record<string, string> = { free: "Free", pro: "Pro", pro_plus: "Pro+", enterprise: "Enterprise" };
+const TIER_NAMES: Record<string, string> = { free: "Free", pro: "Pro", pro_plus: "Pro+", boutique: "Boutique", enterprise: "Enterprise", enterprise_plus: "Enterprise+" };
 // TIER_PRICES is not used in V1 yet
 const TIER_PRICE_IDS: Record<string, string> = {
     pro: (typeof import.meta !== "undefined" && import.meta.env?.VITE_STRIPE_PRO_PRICE_ID) || "price_PRO_REPLACE_ME",
     pro_plus: (typeof import.meta !== "undefined" && import.meta.env?.VITE_STRIPE_PRO_PLUS_PRICE_ID) || "price_PRO_PLUS_REPLACE_ME",
+    boutique: (typeof import.meta !== "undefined" && import.meta.env?.VITE_STRIPE_BOUTIQUE_PRICE_ID) || "price_BOUTIQUE_REPLACE_ME",
     enterprise: (typeof import.meta !== "undefined" && import.meta.env?.VITE_STRIPE_ENTERPRISE_PRICE_ID) || "price_ENTERPRISE_REPLACE_ME",
+    enterprise_plus: (typeof import.meta !== "undefined" && import.meta.env?.VITE_STRIPE_ENTERPRISE_PLUS_PRICE_ID) || "price_ENTERPRISE_PLUS_REPLACE_ME",
 };
 
 interface TierContextType {

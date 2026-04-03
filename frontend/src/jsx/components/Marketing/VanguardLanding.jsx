@@ -56,6 +56,7 @@ export default function VanguardLanding() {
                     .axiom-nav { padding: 16px 24px !important; }
                     .axiom-nav-links { display: none !important; }
                     .axiom-features-grid { grid-template-columns: 1fr !important; }
+                    .axiom-pricing-grid { grid-template-columns: 1fr !important; }
                     .axiom-ebook-grid { grid-template-columns: 1fr !important; }
                     .axiom-footer-links { flex-direction: column !important; gap: 32px !important; }
                     .axiom-footer-top { flex-direction: column !important; gap: 32px !important; }
@@ -69,6 +70,7 @@ export default function VanguardLanding() {
                 </div>
                 <div className="axiom-nav-links" style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
                     <a href="#features" className="nav-link" style={{ color: '#888', textDecoration: 'none', transition: '0.2s', fontSize: 14, fontWeight: 500 }}>Features</a>
+                    <a href="#pricing" className="nav-link" style={{ color: '#888', textDecoration: 'none', transition: '0.2s', fontSize: 14, fontWeight: 500 }}>Pricing</a>
                     <a href="#roi" className="nav-link" style={{ color: '#888', textDecoration: 'none', transition: '0.2s', fontSize: 14, fontWeight: 500 }}>ROI Calculator</a>
                     <a href="#ebook" className="nav-link" style={{ color: '#888', textDecoration: 'none', transition: '0.2s', fontSize: 14, fontWeight: 500 }}>E-Book</a>
                     <a href={`${APP_ORIGIN}/login`} style={{ color: '#888', textDecoration: 'none', fontSize: 14, fontWeight: 500 }}>Log In</a>
@@ -174,6 +176,159 @@ export default function VanguardLanding() {
                                 <p style={{ color: '#94A3B8', lineHeight: 1.7, fontSize: 16 }}>{f.desc}</p>
                             </div>
                         ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ─── PRICING ─────────────────────────────────────────────────────────── */}
+            <section id="pricing" style={{ padding: '120px 48px' }}>
+                <div style={{ maxWidth: 1200, margin: '0 auto' }}>
+                    <div style={{ textAlign: 'center', marginBottom: 64 }}>
+                        <h2 style={{ fontSize: 40, fontWeight: 800, marginBottom: 16, color: '#F0EDE6' }}>Transparent Pricing</h2>
+                        <p style={{ color: '#8A8578', fontSize: 18, maxWidth: 600, margin: '0 auto' }}>Start free. Scale as your portfolio grows. Cancel anytime.</p>
+                    </div>
+
+                    <div className="axiom-pricing-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 24 }}>
+                        {[
+                            {
+                                tier: 'Free',
+                                price: '$0',
+                                period: '/mo',
+                                description: 'For solo investors exploring their first deals.',
+                                badge: null,
+                                features: ['3 Active Deals', '5 AI Queries / Day', 'Basic Calculators', 'Community Access'],
+                                cta: 'Get Started',
+                                href: 'https://app.buildaxiom.dev/login',
+                                highlight: false,
+                            },
+                            {
+                                tier: 'Pro',
+                                price: '$100',
+                                period: '/mo',
+                                description: 'Full-stack underwriting for active dealmakers.',
+                                badge: 'Most Popular',
+                                features: ['50 Active Deals', 'All Calculators & Models', 'PDF / Excel Exports', 'MLS Integration', 'Priority Support'],
+                                cta: 'Start Free Trial',
+                                href: 'https://app.buildaxiom.dev/login',
+                                highlight: true,
+                            },
+                            {
+                                tier: 'Pro+',
+                                price: '$200',
+                                period: '/mo',
+                                description: 'For power users who need AI copilot and team access.',
+                                badge: 'Best Value',
+                                features: ['Unlimited Deals', 'Team Access (3 Seats)', 'AI Copilot Assistant', 'Advanced Analytics', 'API Access'],
+                                cta: 'Start Free Trial',
+                                href: 'https://app.buildaxiom.dev/login',
+                                highlight: false,
+                            },
+                            {
+                                tier: 'Boutique',
+                                price: '$500',
+                                period: '/mo',
+                                description: 'Small firms scaling deal flow with field intelligence.',
+                                badge: null,
+                                features: ['5 Team Seats', 'Agent Pipeline Automation', 'Tax Intelligence Suite', 'Field Mode (iPad)', 'Dedicated Onboarding'],
+                                cta: 'Start Free Trial',
+                                href: 'https://app.buildaxiom.dev/login',
+                                highlight: false,
+                            },
+                            {
+                                tier: 'Enterprise',
+                                price: '$1,500',
+                                period: '/mo',
+                                description: 'Institutional-grade infrastructure with SLA guarantees.',
+                                badge: null,
+                                features: ['10–25 Team Seats', 'Custom AI Model Tuning', '99.9% SLA Guarantee', 'Full API & Webhooks', 'Dedicated CSM'],
+                                cta: 'Start Free Trial',
+                                href: 'https://app.buildaxiom.dev/login',
+                                highlight: false,
+                            },
+                            {
+                                tier: 'Enterprise+',
+                                price: 'Custom',
+                                period: '',
+                                description: 'White-glove deployment for sovereign fund-scale operations.',
+                                badge: null,
+                                features: ['Unlimited Seats', 'On-Premise Deployment', 'White Glove Integration', 'Custom SLA & Compliance', 'Dedicated Engineering'],
+                                cta: 'Contact Sales',
+                                href: 'mailto:enterprise@buildaxiom.dev',
+                                highlight: false,
+                            },
+                        ].map((plan, i) => (
+                            <div key={i} style={{
+                                background: plan.highlight ? 'linear-gradient(180deg, rgba(212,168,67,0.08) 0%, #161616 100%)' : '#161616',
+                                padding: 36,
+                                borderRadius: 16,
+                                border: plan.highlight ? '1px solid rgba(212,168,67,0.4)' : '1px solid #222',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                position: 'relative',
+                            }}>
+                                {plan.badge && (
+                                    <div style={{
+                                        position: 'absolute',
+                                        top: -12,
+                                        right: 20,
+                                        background: '#D4A843',
+                                        color: '#0A0A0A',
+                                        fontSize: 11,
+                                        fontWeight: 700,
+                                        padding: '4px 12px',
+                                        borderRadius: 20,
+                                        letterSpacing: 1,
+                                        textTransform: 'uppercase',
+                                    }}>{plan.badge}</div>
+                                )}
+                                <h3 style={{ fontSize: 20, fontWeight: 700, color: '#F0EDE6', marginBottom: 8 }}>{plan.tier}</h3>
+                                <div style={{ marginBottom: 12 }}>
+                                    <span style={{ fontSize: 36, fontWeight: 800, color: plan.highlight ? '#D4A843' : '#F0EDE6' }}>{plan.price}</span>
+                                    {plan.period && <span style={{ fontSize: 16, color: '#8A8578', fontWeight: 500 }}>{plan.period}</span>}
+                                </div>
+                                <p style={{ fontSize: 14, color: '#8A8578', lineHeight: 1.5, marginBottom: 24 }}>{plan.description}</p>
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0, marginBottom: 28, flex: 1 }}>
+                                    {plan.features.map((feat, j) => (
+                                        <li key={j} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, fontSize: 14, color: '#F0EDE6' }}>
+                                            <ChevronRight size={14} color="#D4A843" style={{ flexShrink: 0 }} />
+                                            {feat}
+                                        </li>
+                                    ))}
+                                </ul>
+                                <a
+                                    href={plan.href}
+                                    className="gold-glow"
+                                    style={{
+                                        display: 'block',
+                                        textAlign: 'center',
+                                        padding: '14px 24px',
+                                        borderRadius: 8,
+                                        background: plan.highlight ? '#D4A843' : 'transparent',
+                                        color: plan.highlight ? '#0A0A0A' : '#D4A843',
+                                        border: plan.highlight ? 'none' : '1px solid rgba(212,168,67,0.4)',
+                                        fontSize: 14,
+                                        fontWeight: 700,
+                                        textDecoration: 'none',
+                                        transition: 'all 0.3s ease',
+                                    }}
+                                >{plan.cta}</a>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Legal compliance row */}
+                    <div style={{ marginTop: 48, textAlign: 'center', borderTop: '1px solid #222', paddingTop: 32 }}>
+                        <p style={{ color: '#8A8578', fontSize: 13, marginBottom: 12 }}>
+                            Cancel anytime. No long-term contracts.
+                        </p>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 24, marginBottom: 16 }}>
+                            <a href="/terms" style={{ color: '#D4A843', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>Terms of Service</a>
+                            <a href="/privacy" style={{ color: '#D4A843', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>Privacy Policy</a>
+                            <a href="/refund" style={{ color: '#D4A843', fontSize: 13, textDecoration: 'none', fontWeight: 500 }}>Refund Policy</a>
+                        </div>
+                        <p style={{ color: '#8A8578', fontSize: 12, maxWidth: 600, margin: '0 auto', lineHeight: 1.5 }}>
+                            Data marketplace (ATTOM / CoStar / Anthropic compute) billed at cost + 15% passthrough.
+                        </p>
                     </div>
                 </div>
             </section>

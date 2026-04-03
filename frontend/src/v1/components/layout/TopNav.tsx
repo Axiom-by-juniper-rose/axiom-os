@@ -85,10 +85,17 @@ export function TopNav({
     splitView?: string, setSplitView?: (v: string) => void,
     onDetach?: () => void
 }) {
-    const { user, logout } = useAuth() as any;
+    const authCtx = useAuth() as any;
+    const user = authCtx?.user;
+    const logout = authCtx?.logout;
     const tierCtx = useTier() as any;
     const tier = tierCtx?.tier || "FREE";
-    const { project, allProjects, activeProjectId, switchProject, createProject } = useProject() as any;
+    const projCtx = useProject() as any;
+    const project = projCtx?.project;
+    const allProjects = projCtx?.allProjects || [];
+    const activeProjectId = projCtx?.activeProjectId;
+    const switchProject = projCtx?.switchProject;
+    const createProject = projCtx?.createProject;
 
     const [lightMode, setLightMode] = useState(false);
     const [isEditingMeta, setIsEditingMeta] = useState(false);
