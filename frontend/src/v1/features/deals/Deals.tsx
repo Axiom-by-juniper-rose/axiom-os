@@ -59,6 +59,9 @@ export function Deals() {
     const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     // Load deals from Supabase on mount
+    // NOTE: The DB deal_stage enum includes 'dead' and 'sold' which are valid
+    // archive states but are NOT in the board STAGES array. We clamp any
+    // off-board stage to 'sourcing' so cards always appear in a column.
     useEffect(() => {
         if (loadedRef.current || !auth?.userProfile?.id || !supa.configured()) return;
         loadedRef.current = true;
@@ -66,21 +69,26 @@ export function Deals() {
             try {
                 const rows = await supa.select("deals", `user_id=eq.${auth.userProfile.id}&order=updated_at.desc`);
                 if (rows.length > 0) {
-                    const mapped: Deal[] = rows.map((r: any) => ({
-                        id: r.id,
-                        name: r.project_name || "Unnamed",
-                        address: r.location || "",
-                        stage: r.stage || "sourcing",
-                        value: Number(r.acquisition_price) + Number(r.renovation_cost) || 0,
-                        profit: Number(r.projected_profit) || 0,
-                        lots: 0, // Not in DB schema
-                        type: r.asset_type || "SFR Subdivision",
-                        assignee: "",
-                        updated: r.updated_at?.split("T")[0] || "",
-                        notes: r.notes || "",
-                        tags: r.tags || [],
-                        _supaId: r.id,
-                    }));
+                    const mapped: Deal[] = rows.map((r: any) => {
+                        // Normalize stage: clamp archive/unknown values to a board-visible stage
+                        const rawStage = r.stage || "sourcing";
+                        const normalizedStage = STAGES.includes(rawStage) ? rawStage : "sourcing";
+                        return {
+                            id: r.id,
+                            name: r.project_name || "Unnamed",
+                            address: r.location || "",
+                            stage: normalizedStage,
+                            value: Number(r.acquisition_price) + Number(r.renovation_cost) || 0,
+                            profit: Number(r.projected_profit) || 0,
+                            lots: 0, // Not in DB schema — tracked in financials
+                            type: r.asset_type || "SFR Subdivision",
+                            assignee: "",
+                            updated: r.updated_at?.split("T")[0] || "",
+                            notes: r.notes || "",
+                            tags: r.tags || [],
+                            _supaId: r.id,
+                        };
+                    });
                     setDeals(mapped);
                 }
             } catch (e) { console.warn("Failed to load deals:", e); }
@@ -135,18 +143,20 @@ export function Deals() {
         setDeals(deals.map((x: Deal) => x.id === id ? updated : x));
         syncDeal(updated);
     };
-    const totalValue = deals.reduce((s: number, d: Deal) => s + d.value, 0);
-    const totalProfit = deals.reduce((s: number, d: Deal) => s + d.profit, 0);
+    // Only count deals that are actively in a board column for the KPI
+    const activeDeals = deals.filter((d: Deal) => STAGES.includes(d.stage));
+    const totalValue = activeDeals.reduce((s: number, d: Deal) => s + d.value, 0);
+    const totalProfit = activeDeals.reduce((s: number, d: Deal) => s + d.profit, 0);
     const pipeData = STAGES.map(st => ({ name: SL[st], count: deals.filter((d: Deal) => d.stage === st).length, value: deals.filter((d: Deal) => d.stage === st).reduce((s: number, d: Deal) => s + d.value, 0) / 1e6 }));
     return (
         <Tabs tabs={["Board View", "List View", "Pipeline Analytics"]}>
             <div>
                 <div className="axiom-mb-24">
                     <div className="axiom-grid-4">
-                        <KPI label="Active Deals" value={deals.length} />
+                        <KPI label="Active Deals" value={activeDeals.length} />
                         <KPI label="Pipeline Value" value={fmt.M(totalValue)} color="var(--c-blue)" />
                         <KPI label="Est. Profit" value={fmt.M(totalProfit)} color="var(--c-green)" />
-                        <KPI label="Avg Deal Size" value={fmt.M(totalValue / (deals.length || 1))} color="var(--c-gold)" />
+                        <KPI label="Avg Deal Size" value={fmt.M(totalValue / (activeDeals.length || 1))} color="var(--c-gold)" />
                     </div>
                     {syncing && <div className="axiom-text-9-gold-mt8">syncing with cloud...</div>}
                 </div>

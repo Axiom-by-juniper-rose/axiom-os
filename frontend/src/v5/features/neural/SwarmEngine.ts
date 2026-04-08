@@ -32,6 +32,7 @@ export const AGENT_ORDER = Object.keys(AGENT_LABELS);
 export class SwarmEngine {
   private tasks = new Map<string, AgentTask>();
   private channel: RealtimeChannel | null = null;
+  private pollInterval: ReturnType<typeof setInterval> | null = null;
   private onUpdate: (tasks: AgentTask[]) => void;
   private supabase = createClient(
     import.meta.env.VITE_SUPABASE_URL as string,
@@ -54,6 +55,7 @@ export class SwarmEngine {
   }
 
   subscribe(dealId: string): void {
+    // 1. Websocket channel
     this.channel = this.supabase
       .channel(`v5-events-${dealId}`)
       .on('postgres_changes', {
@@ -65,11 +67,33 @@ export class SwarmEngine {
           this.markComplete(ev.payload.agent);
         }
       }).subscribe();
+
+    // 2. Dead-letter Polling Fallback (15s)
+    if (this.pollInterval) clearInterval(this.pollInterval);
+    this.pollInterval = setInterval(async () => {
+      try {
+        const { data, error } = await this.supabase
+          .from('v5_events')
+          .select('payload')
+          .eq('source_id', dealId)
+          .eq('event_type', 'agent_completed');
+        
+        if (!error && data) {
+           data.forEach((row: any) => {
+             if (row.payload?.agent) {
+               this.markComplete(row.payload.agent);
+             }
+           });
+        }
+      } catch (err) {
+        // silently ignore polling errors to avoid console spam
+      }
+    }, 15000);
   }
 
   markComplete(agentType: string): void {
     const task = this.tasks.get(agentType);
-    if (task) {
+    if (task && task.status !== 'completed') {
       task.status = 'completed';
       task.completed_at = new Date();
       this.tasks.set(agentType, task);
@@ -77,7 +101,12 @@ export class SwarmEngine {
     }
   }
 
-  unsubscribe(): void { this.channel?.unsubscribe(); this.channel = null; }
+  unsubscribe(): void { 
+    this.channel?.unsubscribe(); 
+    this.channel = null; 
+    if (this.pollInterval) clearInterval(this.pollInterval);
+    this.pollInterval = null;
+  }
   getTasks(): AgentTask[] { return AGENT_ORDER.map((id) => this.tasks.get(id)!).filter(Boolean); }
   private notify(): void { this.onUpdate(this.getTasks()); }
 }

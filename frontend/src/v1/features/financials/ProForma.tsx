@@ -21,8 +21,8 @@ export function ProForma() {
         const contingency = hardCosts * ((fin.contingencyPct || 10) / 100);
         const totalProjectCost = landCost + hardCosts + softCosts + contingency;
         const revenue = totalLots * salesPrice * (1 - (fin.salesCommission || 3) / 100);
-        const profit = revenue - totalProjectCost;
-        const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
+        const profit = (revenue || 0) - (totalProjectCost || 0);
+        const margin = (revenue && isFinite(revenue) && revenue > 0) ? (profit / revenue) * 100 : 0;
 
         const loanAmount = totalProjectCost * (loan.ltc / 100);
         const equityRequired = totalProjectCost - loanAmount;
@@ -104,7 +104,7 @@ export function ProForma() {
                 </div>
 
                 <KPI label="Total Revenue" value={fmt.usd(calculations.revenue)} sub="Net of Commission" />
-                <KPI label="Project Profit" value={fmt.usd(calculations.profit)} sub={`${calculations.margin.toFixed(1)}% Margin`} trend={calculations.margin > 15 ? "+2.4%" : "-1.2%"} color={calculations.margin > 15 ? "var(--c-green)" : "var(--c-red)"} />
+                <KPI label="Project Profit" value={fmt.usd(calculations.profit)} sub={`${(calculations.margin || 0).toFixed(1)}% Margin`} trend={(calculations.margin || 0) > 15 ? "+2.4%" : "-1.2%"} color={(calculations.margin || 0) > 15 ? "var(--c-green)" : "var(--c-red)"} />
             </div>
 
             <div className="axiom-grid-3">
@@ -142,18 +142,18 @@ export function ProForma() {
                         <div className="axiom-scenario-grid">
                             <div className="axiom-scenario-card axiom-p-12 axiom-bg-2 axiom-radius-6">
                                 <div className="axiom-label">BEAR CASE</div>
-                                <div className="axiom-text-14-bold">{fmt.usd(calculations.profit * 0.6)}</div>
-                                <div className="axiom-text-10-dim">{(calculations.margin * 0.7).toFixed(1)}% Margin</div>
+                                <div className="axiom-text-14-bold">{fmt.usd((calculations.profit || 0) * 0.6)}</div>
+                                <div className="axiom-text-10-dim">{((calculations.margin || 0) * 0.7).toFixed(1)}% Margin</div>
                             </div>
                             <div className="axiom-scenario-card axiom-p-12 axiom-bg-gold-sub axiom-radius-6 axiom-border-gold">
                                 <div className="axiom-label axiom-text-gold">BASE CASE</div>
-                                <div className="axiom-text-14-bold">{fmt.usd(calculations.profit)}</div>
-                                <div className="axiom-text-10-dim">{calculations.margin.toFixed(1)}% Margin</div>
+                                <div className="axiom-text-14-bold">{fmt.usd(calculations.profit || 0)}</div>
+                                <div className="axiom-text-10-dim">{(calculations.margin || 0).toFixed(1)}% Margin</div>
                             </div>
                             <div className="axiom-scenario-card axiom-p-12 axiom-bg-2 axiom-radius-6">
                                 <div className="axiom-label">BULL CASE</div>
-                                <div className="axiom-text-14-bold">{fmt.usd(calculations.profit * 1.3)}</div>
-                                <div className="axiom-text-10-dim">{(calculations.margin * 1.25).toFixed(1)}% Margin</div>
+                                <div className="axiom-text-14-bold">{fmt.usd((calculations.profit || 0) * 1.3)}</div>
+                                <div className="axiom-text-10-dim">{((calculations.margin || 0) * 1.25).toFixed(1)}% Margin</div>
                             </div>
                         </div>
                     </Card>
@@ -204,7 +204,7 @@ export function ProForma() {
                                         const val = calcSensitivity(x, y);
                                         return (
                                             <td key={x} className={`axiom-sensitivity-td ${x === 0 && y === 0 ? 'axiom-sensitivity-td-base' : ''} ${val > 20 ? 'axiom-text-green' : val > 10 ? 'axiom-text-gold' : 'axiom-text-red'}`}>
-                                                {val.toFixed(1)}%
+                                                {(val || 0).toFixed(1)}%
                                             </td>
                                         );
                                     })}

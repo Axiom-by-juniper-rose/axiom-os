@@ -3440,3 +3440,14 @@ textarea::placeholder {
     font-style: italic;
     opacity: 1;
 }
+/* Floating Toolbar CSS */
+.axiom-ft-container { position: fixed; z-index: 9999; background: var(--c-bg3); border: 1px solid var(--c-border); border-radius: 6px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); padding: 4px; display: flex; align-items: center; }
+.axiom-ft-container--expanded { padding: 8px 12px; }
+.axiom-ft-toggle { background: transparent; border: none; color: var(--c-gold); cursor: pointer; font-size: 16px; padding: 4px 8px; }
+.axiom-ft-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.axiom-ft-row { display: flex; align-items: center; gap: 4px; }
+.axiom-ft-divider { width: 1px; height: 20px; background: var(--c-border); margin: 0 8px; }
+.axiom-ft-btn { background: transparent; border: 1px solid var(--c-border); color: var(--c-text); padding: 4px 8px; border-radius: 4px; cursor: pointer; }
+.axiom-ft-btn:hover { background: var(--c-bg4); border-color: var(--c-gold); }
+.axiom-ft-select { background: var(--c-bg); border: 1px solid var(--c-border); color: var(--c-text); padding: 2px 4px; border-radius: 4px; }
+.axiom-ft-swatch { width: 16px; height: 16px; border-radius: 50%; border: none; cursor: pointer; }
