@@ -386,6 +386,7 @@
     <li><a onclick="show('financial')" id="n-financial">Financials</a></li>
     <li><a onclick="show('horizontal')" id="n-horizontal">Expansion</a></li>
     <li><a onclick="show('email')" id="n-email">Beta Email</a></li>
+    <li><a onclick="show('changelog')" id="n-changelog">Changelog</a></li>
   </ul>
   <div class="nav-pill">BETA 2026 · NDA</div>
 </nav>
@@ -1411,6 +1412,83 @@
     <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
   </div>
 </div>
+</div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     CHANGELOG
+══════════════════════════════════════════ -->
+<div id="changelog" class="section">
+  <div class="pw">
+    <div class="sh">
+      <div class="sh-eye">Live Release Notes</div>
+      <h2 class="sh-title">Changelog<br><em>v1.3.1</em></h2>
+      <p class="sh-body">Stability fixes, UX bug patches, and infrastructure hardening following the private beta audit. Deployed to production April 8, 2026.</p>
+    </div>
+
+    <div class="sh-eye" style="margin-bottom:14px">All Changes — v1.3.1</div>
+    <div style="overflow-x:auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Fix</th>
+            <th>Type</th>
+            <th>File</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:var(--faint)">01</td><td>FloatingToolbar positional instability</td><td><span class="tag tr">Bug</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:10px">theme.css</td><td><span class="live"><span class="dot"></span>LIVE</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:var(--faint)">02</td><td>Financial NaN% display in empty states</td><td><span class="tag tr">Bug</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:10px">finance.ts</td><td><span class="live"><span class="dot"></span>LIVE</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:var(--faint)">03</td><td>SwarmEngine dead-letter polling fallback</td><td><span class="tag tb">Hardening</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:10px">SwarmEngine.ts</td><td><span class="live"><span class="dot"></span>LIVE</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:var(--faint)">04</td><td>Mapbox token documented in .env.example</td><td><span class="tag tg">Docs</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:10px">.env.example</td><td><span class="live"><span class="dot"></span>LIVE</span></td></tr>
+          <tr><td style="font-family:'JetBrains Mono',monospace;color:var(--faint)">05</td><td>Deal Pipeline "0 cards" rendering bug</td><td><span class="tag tr">Bug</span></td><td style="font-family:'JetBrains Mono',monospace;font-size:10px">Deals.tsx</td><td><span class="live"><span class="dot"></span>LIVE</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="div"></div>
+    <div class="sh-eye" style="margin-bottom:14px">Deployment Timeline</div>
+    <div class="tline">
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--green);border-color:var(--black)"></div>
+        <div class="tl-q" style="color:var(--green)">Apr 8, 2026 · 00:14 UTC</div>
+        <div class="tl-t">v1.3.1 implementation started</div>
+        <div class="tl-b">FloatingToolbar CSS, financial NaN patches authored</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--green);border-color:var(--black)"></div>
+        <div class="tl-q" style="color:var(--green)">Apr 8, 2026 · 00:22 UTC</div>
+        <div class="tl-t">Deal Pipeline bug diagnosed & patched</div>
+        <div class="tl-b">Stage enum mismatch identified; normalization + KPI fix applied</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-dot" style="background:var(--gold);border-color:var(--black)"></div>
+        <div class="tl-q" style="color:var(--gold)">Apr 8, 2026 · 00:32 UTC</div>
+        <div class="tl-t">✓ Vercel deployment completed — LIVE</div>
+        <div class="tl-b"><a href="https://app.buildaxiom.dev" target="_blank" style="color:var(--goldf)">app.buildaxiom.dev</a> · axiom-os-production.up.railway.app</div>
+      </div>
+    </div>
+
+    <div class="div"></div>
+    <div class="sh-eye" style="margin-bottom:14px">Known Issues Carried Forward</div>
+    <div class="g2">
+      <div class="card">
+        <div class="c-title" style="font-size:16px">12 GitHub Dependabot Vulnerabilities <span class="tag tr" style="margin-left:8px">High</span></div>
+        <div class="c-body">Flagged on the default branch. Recommend scheduling a dependency audit sprint before v1.4.0 general availability.</div>
+      </div>
+      <div class="card">
+        <div class="c-title" style="font-size:16px">Mapbox 3D SiteMap — Pending Token <span class="tag ty" style="margin-left:8px">Action Required</span></div>
+        <div class="c-body">The GIS layer renders "Engine Standby" on production until VITE_MAPBOX_TOKEN is provisioned in Vercel Environment Variables.</div>
+      </div>
+    </div>
+  </div>
+  <div class="footer">
+    <a href="https://buildaxiom.dev" target="_blank" rel="noopener" class="f-logo" style="text-decoration:none">AXIOM OS</a>
+    <div>CHANGELOG · RELEASE NOTES</div>
+    <div style="display:flex;align-items:center;gap:14px"><a href="https://buildaxiom.dev" target="_blank" rel="noopener" style="text-decoration:none"><span class="live"><span class="dot"></span>buildaxiom.dev LIVE</span></a><span style="color:rgba(242,239,232,.48);font-size:9px;letter-spacing:.8px">© 2026 Juniper Rose LLC</span></div>
+  </div>
 </div>
 
 <script>
