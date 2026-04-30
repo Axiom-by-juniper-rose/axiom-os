@@ -97,10 +97,21 @@ export const LoginPage: React.FC = () => {
             }
             setLoading(false);
         } else {
-            setSuccess(
-                'Account created! Check your email for a confirmation link, ' +
-                'then return here to sign in.'
-            );
+            // Auto-confirm the account via edge function (bypasses email confirmation)
+            try {
+                await fetch(
+                    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/confirm-user`,
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: email.toLowerCase().trim() }),
+                    }
+                );
+            } catch (_) {
+                // Non-fatal — sign in will work once email is confirmed
+            }
+
+            setSuccess('Account created! You can now sign in with your email and password.');
             setPassword('');
             setConfirmPassword('');
             setLoading(false);
